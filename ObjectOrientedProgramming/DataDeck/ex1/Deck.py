@@ -4,6 +4,7 @@ from .SpellCard import SpellCard
 from typing import Dict, List
 from random import shuffle as shuf
 
+
 class Deck:
     def __init__(self, deck_name: str):
         self.name = deck_name
@@ -34,16 +35,16 @@ class Deck:
         cost: float = 0
         for card in self.deck:
             if isinstance(card, CreatureCard):
-                count[0]+=1
+                count[0] += 1
             elif isinstance(card, SpellCard):
-                count[1]+=1
+                count[1] += 1
             elif isinstance(card, ArtifactCard):
-                count[2]+=1
+                count[2] += 1
             cost += card.cost
         return {
                 "total_cards": len(self.deck),
-            "creatures": count[0],
-            "spells": count[1],
-            "artifacts": count[2],
-            "avg_cost": cost/len(self.deck)
+                "creatures": count[0],
+                "spells": count[1],
+                "artifacts": count[2],
+                "avg_cost": (cost/len(self.deck)//0.01)/100
         }
