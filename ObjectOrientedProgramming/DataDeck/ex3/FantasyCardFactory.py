@@ -1,7 +1,7 @@
 from .CardFactory import CardFactory
 from ex0 import Card, CreatureCard
 from ex1 import SpellCard, ArtifactCard
-from typing import Dict
+from typing import Dict, Any
 import random
 
 
@@ -104,7 +104,39 @@ class FantasyCardFactory(CardFactory):
         return card
 
     def create_themed_deck(self, size: int) -> Dict:
-        return {}
+        elements_crea = ["Fire", "Ice", "Storm", None]
+        enemies = ["Dragon", "Goblin", "Kobold"]
+        classes = ["Warrior", "Rogue"]
+        elems = ["Fire Ball", "Ice Shards", "Lightning Strike"]
+        colors = ["Crimson", "Cyan", "Golden", "Silver", "Purple"]
+        artifacts = ["Ring", "Staff", "Crystal"]
+        functions = [
+                    self.create_artifact,
+                    self.create_creature,
+                    self.create_spell
+                    ]
+        name: Any = ""
+        deck = dict()
+        for i in range(size):
+            elem = random.randrange(0, 3)
+            if elem == 0:
+                name = random.choice(colors) + " " + random.choice(artifacts)
+            elif elem == 1:
+                name = random.choice(elements_crea)
+                if name is None:
+                    name = random.choice(enemies)
+                    name += " " + random.choice(classes)
+                else:
+                    name += " " + random.choice(enemies)
+            elif elem == 2:
+                name = random.choice(elems)
+            card = functions[elem](name)
+            deck.update({f"Card {i + 1}": card})
+        return deck
 
     def get_supported_types(self) -> Dict:
-        return self.card
+        return {"Supported types": [
+                                    "SpellCard",
+                                    "ArtifactCard",
+                                    "CreatureCard"
+                                    ]}
