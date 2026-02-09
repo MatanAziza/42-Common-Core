@@ -19,7 +19,7 @@ class ArtifactCard(Card):
         action_result = {
                         "card_played": self.name,
                         "mana_used": 0,
-                        "effect": "Unsiufficient mana. This card has no effect"
+                        "effect": "Unsufficient mana. This card has no effect"
                         }
         if game_state.get("available_mana") >= self.cost:
             action_result.update({
@@ -28,5 +28,10 @@ class ArtifactCard(Card):
                                 })
         return action_result
 
+    def get_card_info(self) -> Dict:
+        dict_1 = super().get_card_info()
+        dict_1.update({"durability": self.durability, "effect": self.effect})
+        return dict_1
+
     def activate_ability(self) -> Dict:
-        return {}
+        return {"state": "Card active."}

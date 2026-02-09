@@ -64,3 +64,8 @@ class SpellCard(Card):
                     "effect": "This card has no effect"
                                       })
         return action_result
+
+    def get_card_info(self) -> Dict:
+        dict_1 = super().get_card_info()
+        dict_1.update({"effect": self.effect_type})
+        return dict_1

@@ -2,6 +2,7 @@ from .CardFactory import CardFactory
 from ex0 import Card, CreatureCard
 from ex1 import SpellCard, ArtifactCard
 from typing import Dict
+import random
 
 
 class FantasyCardFactory(CardFactory):
@@ -51,10 +52,56 @@ class FantasyCardFactory(CardFactory):
         return card
 
     def create_spell(self, name_or_power: str | int | None = None) -> Card:
-        return SpellCard(name_or_power, 5, "e", "e")
+        elements = {"Fire": 4, "Ice": 2, "Lightning": 3}
+        elem_rar = {
+                        "Fire": "Epic",
+                        "Ice": "Common",
+                        "Lightning": "Rare"
+                        }
+        cost = 0
+        elements = {"Fire": 4, "Ice": 2, "Lightning": 3}
+        for value in elements.keys():
+            if value in name_or_power:
+                cost += elements.get(value)
+        rarity: str = ""
+        effect: str = ""
+        for value in elem_rar.keys():
+            if value in name_or_power:
+                rarity = elem_rar.get(value)
+                effect = str(value) + " damage"
+        card = SpellCard(
+                            name_or_power,
+                            cost,
+                            rarity,
+                            effect
+                            )
+        return card
 
     def create_artifact(self, name_or_power: str | int | None = None) -> Card:
-        return ArtifactCard(name_or_power, 5, "e", 5, "e")
+        rarity = [
+                "Common",
+                "Rare",
+                "Epic",
+                "Legendary"
+                ]
+        cost = random.randrange(1, 5)
+        elem_effect = {
+                        "Ring": f"+{2 * cost - 1} damage while active",
+                        "Staff": f"+{2 * cost - 1} defense while active",
+                        "Crystal": f"+{2 * cost - 1} mana per turn"
+                        }
+        effect: str = ""
+        for value in elem_effect.keys():
+            if value in name_or_power:
+                effect = elem_effect.get(value)
+        card = ArtifactCard(
+                            name_or_power,
+                            cost,
+                            rarity[cost - 1],
+                            cost * 3 - 2,
+                            effect
+        )
+        return card
 
     def create_themed_deck(self, size: int) -> Dict:
         return {}
