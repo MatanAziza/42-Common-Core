@@ -32,7 +32,9 @@ class GameEngine:
         print(f"Hand: [{', '.join(list_cards)}]\n")
         print("Turn execution:")
         print(f"Strategy: {type(self.strategy).__name__}")
-        result = self.strategy.execute_turn(list_hand, [])
+        result = self.strategy.execute_turn(
+            list_hand,
+            [self.factory.create_creature("Fire Dragon")])
         played = result.get("cards_played")
         print(f"Actions: {result}")
         list_remove = []

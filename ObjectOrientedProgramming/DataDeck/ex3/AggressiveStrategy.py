@@ -5,7 +5,10 @@ from typing import List, Dict
 
 class AggressiveStrategy(GameStrategy):
     def execute_turn(self, hand: List, battlefield: List) -> Dict:
-        e = [enemy for enemy in battlefield if isinstance(enemy, CreatureCard)]
+        e = []
+        for enemy in battlefield:
+            if isinstance(enemy, CreatureCard):
+                e.append(enemy.get_card_info().get("name"))
         s = self.prioritize_targets(hand)[:2]
         actions = dict()
         actions.update(
