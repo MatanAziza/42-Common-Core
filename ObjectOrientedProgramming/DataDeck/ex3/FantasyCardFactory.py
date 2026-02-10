@@ -140,7 +140,7 @@ class FantasyCardFactory(CardFactory):
             if not can_add:
                 deck.update({f"Card {i + 1}": card})
             else:
-                i-=1
+                i -= 1
             i += 1
         return deck
 
