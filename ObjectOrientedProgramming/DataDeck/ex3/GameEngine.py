@@ -4,11 +4,7 @@ from typing import Dict
 
 
 class GameEngine:
-    def configure_engine(
-                        self,
-                        factory: CardFactory,
-                        strategy: GameStrategy
-                        ) -> None:
+    def configure_engine(self, factory: CardFactory, strategy: GameStrategy) -> None:
         self.factory = factory
         self.strategy = strategy
         self.player_1 = factory.create_themed_deck(3)
@@ -18,11 +14,12 @@ class GameEngine:
         list_hand = []
         list_cards = []
         for _, card in self.player_1.items():
+            list_hand.append(card)
             card_info = card.get_card_info()
-            list_hand.append(card_info)
-            list_cards.append(f"{card_info.get("name")} ({card_info.get("cost")})")
-        self.strategy.execute_turn(list_hand, [])
-        print(f"Hand: [{", ".join(list_cards)}]")
+            list_cards.append(f"{card_info.get('name')} ({card_info.get('cost')})")
+        print(f"Hand: [{', '.join(list_cards)}]")
+        result = self.strategy.execute_turn(list_hand, [])
+        print(result)
 
     def get_engine_status(self) -> Dict:
         return {}
