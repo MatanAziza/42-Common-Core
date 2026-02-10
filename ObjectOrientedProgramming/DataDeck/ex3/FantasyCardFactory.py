@@ -117,7 +117,8 @@ class FantasyCardFactory(CardFactory):
                     ]
         name: Any = ""
         deck = dict()
-        for i in range(size):
+        i = 0
+        while i < size:
             elem = random.randrange(0, 3)
             if elem == 0:
                 name = random.choice(colors) + " " + random.choice(artifacts)
@@ -131,7 +132,16 @@ class FantasyCardFactory(CardFactory):
             elif elem == 2:
                 name = random.choice(elems)
             card = functions[elem](name)
-            deck.update({f"Card {i + 1}": card})
+            can_add = False
+            for _, cards in deck.items():
+                infos = cards.get_card_info()
+                if infos.get("name") == card.get_card_info().get("name"):
+                    can_add = True
+            if not can_add:
+                deck.update({f"Card {i + 1}": card})
+            else:
+                i-=1
+            i += 1
         return deck
 
     def get_supported_types(self) -> Dict:
