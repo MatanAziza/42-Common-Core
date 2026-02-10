@@ -4,18 +4,27 @@ from .FantasyCardFactory import FantasyCardFactory
 
 
 if __name__ == "__main__":
+    print("=== DataDeck Game Engine ===\n")
+    print("Configuring Fantasy Card Game...")
     factory = FantasyCardFactory()
     strategy = AggressiveStrategy()
-    # card = factory.create_creature("Fire Dragon")
-    # print(card.get_card_info())
-    # card_2 = factory.create_spell("Lightning Strike")
-    # print(card_2.get_card_info())
-    # card_3 = factory.create_artifact("Crimson Ring")
-    # print(card_3.get_card_info())
-    # deck = factory.create_themed_deck(10)
-    # for key, value in deck.items():
-    #    print(key, value.get_card_info())
-    # print(factory.get_supported_types())
     game_engine = GameEngine()
     game_engine.configure_engine(factory, strategy)
-    game_engine.simulate_turn()
+    print("Factory: FantasyCardFactory")
+    print("Strategy: AggressiveStrategy")
+    creatures = ["dragon", "goblin", "kobold"]
+    spells = ["fireball", "ice shards", "lightning"]
+    artifacts = ["crystal", "staff", "ring"]
+    print(
+        f"Available types: creatures: {creatures}, spells:"
+        f" {spells}, artifacts: {artifacts}\n"
+            )
+    for i in range(1):
+        game_engine.simulate_turn()
+    print()
+    print("Game report:")
+    print(game_engine.get_engine_status())
+    print(
+        "\nAbstract Factory + Strategy Pattern:"
+        " Maximum flexibility achieved!"
+            )
