@@ -1,6 +1,6 @@
 from .CardFactory import CardFactory
-from ex0 import Card, CreatureCard
-from ex1 import SpellCard, ArtifactCard
+from DataDeck.ex0 import Card, CreatureCard
+from DataDeck.ex1 import SpellCard, ArtifactCard
 from typing import Dict, Any
 import random
 
@@ -116,7 +116,7 @@ class FantasyCardFactory(CardFactory):
                     self.create_spell
                     ]
         name: Any = ""
-        deck = dict()
+        deck: Dict[str, Card] = dict()
         i = 0
         while i < size:
             elem = random.randrange(0, 3)

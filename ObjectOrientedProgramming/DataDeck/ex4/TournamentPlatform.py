@@ -62,9 +62,10 @@ class TournamentPlatform:
         return clean_lb
 
     def generate_tournament_report(self) -> Dict:
+        sum_score = sum([card.rating for card in self.leaderboard])
         return {
             "total_cards": len(self.registered),
             "matches_played": self.match_played,
-            "avg_rating": sum([card.rating for card in self.leaderboard]),
+            "avg_rating": sum_score/len(self.leaderboard),
             "platform_status": "active"
                 }

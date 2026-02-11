@@ -1,6 +1,6 @@
 from .CardFactory import CardFactory
 from .GameStrategy import GameStrategy
-from ex0 import Card
+from DataDeck.ex0 import Card
 from typing import Dict
 
 
@@ -12,7 +12,7 @@ class GameEngine:
                             ) -> None:
         self.factory = factory
         self.strategy = strategy
-        self.player_1 = factory.create_themed_deck(10)
+        self.player_1: Dict[str, Card] = factory.create_themed_deck(10)
         self.turns = 0
         self.damage_dealt = 0
 
