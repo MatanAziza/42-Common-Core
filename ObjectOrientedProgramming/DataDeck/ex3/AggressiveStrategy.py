@@ -1,5 +1,5 @@
 from .GameStrategy import GameStrategy
-from DataDeck.ex0 import Card, CreatureCard
+from ex0 import Card, CreatureCard
 from typing import List, Dict
 
 

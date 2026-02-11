@@ -1,6 +1,6 @@
 from .CardFactory import CardFactory
-from DataDeck.ex0 import Card, CreatureCard
-from DataDeck.ex1 import SpellCard, ArtifactCard
+from ex0 import Card, CreatureCard
+from ex1 import SpellCard, ArtifactCard
 from typing import Dict, Any
 import random
 

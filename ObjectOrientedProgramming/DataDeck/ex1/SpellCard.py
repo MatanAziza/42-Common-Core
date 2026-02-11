@@ -1,4 +1,4 @@
-from DataDeck.ex0.Card import Card
+from ex0.Card import Card
 from typing import Dict, List
 from enum import Enum
 

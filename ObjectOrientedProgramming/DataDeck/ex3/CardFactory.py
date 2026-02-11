@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict
-from DataDeck.ex0 import Card
+from ex0 import Card
 
 
 class CardFactory(ABC):

@@ -1,5 +1,5 @@
-from DataDeck.ex0 import Card
-from DataDeck.ex2 import Combatable
+from ex0 import Card
+from ex2 import Combatable
 from .Rankable import Rankable
 from typing import Dict, List
 from random import randrange

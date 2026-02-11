@@ -1,6 +1,6 @@
 from .CardFactory import CardFactory
 from .GameStrategy import GameStrategy
-from DataDeck.ex0 import Card
+from ex0 import Card
 from typing import Dict
 
 

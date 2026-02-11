@@ -1,4 +1,4 @@
-from DataDeck.ex0 import Card, CreatureCard
+from ex0 import Card, CreatureCard
 from .ArtifactCard import ArtifactCard
 from .SpellCard import SpellCard
 from typing import Dict, List
