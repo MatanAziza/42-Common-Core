@@ -1,7 +1,7 @@
 import sys
 import json
 from datetime import datetime
-from typing import Self, List
+from typing import Self, List, Any, Dict
 from enum import Enum
 try:
     in_venv = sys.prefix != sys.base_prefix
@@ -132,7 +132,7 @@ def data_tester() -> None:
 
 
 def incorrect_data_tester() -> None:
-    dict1 = {
+    dict1: Dict[str, Any] = {
         "mission_id": "M2024_EUROPA",
         "mission_name": "Saturn Rings Research Mission",
         "destination": "Saturn Rings",
