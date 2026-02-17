@@ -4,6 +4,10 @@ import os
 
 if __name__ == "__main__":
     in_venv = sys.base_prefix != sys.prefix
+    # To detect if we are in a virtual environment, we use sys.prefix, which
+    # change based on the python/environment we're using, and sys.base_prefix,
+    # which always leads to /usr. Following this: if the prefixes are different
+    # it means we are not in the basic environment, hence in a virtual one.
     if not in_venv:
         os.system("python3 -m venv construct")
         print(
