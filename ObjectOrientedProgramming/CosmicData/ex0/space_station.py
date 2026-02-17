@@ -3,6 +3,17 @@ import json
 from datetime import datetime
 from typing import Optional, Self, List
 try:
+    in_venv = sys.prefix != sys.base_prefix
+    if not in_venv:
+        print(
+            "Not in a virtual environment!\n"
+            "Run:\n"
+            "python -m venv space_env\n"
+            "source space_env/bin/activate\n"
+            "pip install pydantic\n"
+            "Then re-run this program."
+                )
+        sys.exit(1)
     from pydantic import BaseModel, Field, model_validator, ValidationError
 except ImportError:
     print("Pydantic not imported.\nRun:\npip install pydantic\nThen rerun")
@@ -103,19 +114,19 @@ class SpaceStation(BaseModel):
 
 
 def data_tester() -> None:
-    list_stations: List[SpaceStation] = list()
+    list_contacts: List[SpaceStation] = list()
     file_to_open = "../data_generator/generated_data/space_stations.json"
     with open(file_to_open) as file:
         data = json.load(file)
         for station in data:
             try:
-                list_stations.append(SpaceStation(**station))
+                list_contacts.append(SpaceStation(**station))
             except ValidationError as e:
                 s = e.errors()[0]
                 if s["loc"]:
                     print(f"{str(s["loc"])[2:-3].upper()}: ", end='')
                 print(f"{s["msg"]}")
-        for station in list_stations:
+        for station in list_contacts:
             print(station.get_infos())
 
 
@@ -142,15 +153,4 @@ def main():
 
 
 if __name__ == '__main__':
-    in_venv = sys.prefix != sys.base_prefix
-    if not in_venv:
-        print(
-            "Not in a virtual envorinment!\n"
-            "Run:\n"
-            "python -m venv space_env\n"
-            "source space_env/bin/activate\n"
-            "pip install pydantic\n"
-            "Then re-run this program."
-                )
-    else:
-        main()
+    main()
