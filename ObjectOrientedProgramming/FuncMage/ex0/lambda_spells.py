@@ -1,14 +1,17 @@
 def artifact_sorter(artifacts: list[dict]) -> list[dict]:
-    res = sorted(artifacts, key=lambda x : x["power"], reverse=True)
+    res = sorted(artifacts, key=lambda x: x["power"], reverse=True)
     return res
+
 
 def power_filter(mages: list[dict], min_power: int) -> list[dict]:
     res = filter(lambda x: x["power"] > min_power, mages)
     return list(res)
 
+
 def spell_tranformer(spells: list[str]) -> list[str]:
     res = map(lambda s: f"*{s}*", spells)
     return list(res)
+
 
 def mage_stats(mages: list[dict]) -> dict:
     max_power = max(mages, key=lambda x: x["power"])["power"]
@@ -20,6 +23,7 @@ def mage_stats(mages: list[dict]) -> dict:
         "min_power": min_power,
         "avg_power": float(f"{avg_power:.2f}")
     }
+
 
 if __name__ == "__main__":
     mages = [
@@ -34,11 +38,13 @@ if __name__ == "__main__":
         "Ice Shards",
         "Lightning Bolt"
                 ]
+
     def stats(mages: list[dict]) -> None:
         for mage in mages:
             print(
                 f"- Mage: {mage["name"]}, Power: {mage["power"]}"
                     )
+
     print("Mages:")
     stats(mages)
     print("\nSorted mages:")
@@ -52,4 +58,4 @@ if __name__ == "__main__":
     print("\nMages stats:")
     stat = mage_stats(mages)
     for value in stat.keys():
-        print(f"- {value}: {stat[value]}" )
+        print(f"- {value}: {stat[value]}")
