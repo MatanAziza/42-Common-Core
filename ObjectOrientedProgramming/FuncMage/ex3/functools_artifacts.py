@@ -13,7 +13,7 @@ def spell_reducer(spells: list[int], operation: str) -> int:
 
 
 def partial_enchanter(base_enchantment: Callable) -> dict[str, Callable]:
-    spells = {
+    spells: dict[str, Callable] = {
         "fire_enchant": partial(base_enchantment, 50, "Fire"),
         "ice_enchant": partial(base_enchantment, 50, "Ice"),
         "lightning_enchant": partial(base_enchantment, 50, "Lightning")
