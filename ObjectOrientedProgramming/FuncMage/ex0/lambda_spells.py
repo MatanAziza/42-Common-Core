@@ -34,7 +34,22 @@ if __name__ == "__main__":
         "Ice Shards",
         "Lightning Bolt"
                 ]
-    print(artifact_sorter(mages))
-    print(power_filter(mages, 1000))
-    print(spell_tranformer(spells))
-    print(mage_stats(mages))
+    def stats(mages: list[dict]) -> None:
+        for mage in mages:
+            print(
+                f"- Mage: {mage["name"]}, Power: {mage["power"]}"
+                    )
+    print("Mages:")
+    stats(mages)
+    print("\nSorted mages:")
+    stats(artifact_sorter(mages))
+    print("\nFiltered mages :")
+    stats(power_filter(mages, 1000))
+    print("\nOriginal spells:")
+    print(f"{", ".join(spells)}")
+    print("Transformed spells:")
+    print(f"{", ".join(spell_tranformer(spells))}")
+    print("\nMages stats:")
+    stat = mage_stats(mages)
+    for value in stat.keys():
+        print(f"- {value}: {stat[value]}" )
