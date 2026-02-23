@@ -1,3 +1,6 @@
+import random
+
+
 def check_neighbors(cell: tuple[int, int], maze: list[list[list[int]]], visited_cell: list[tuple[int, int]]) -> bool:
     x, y = cell
     height = len(maze)
@@ -23,17 +26,13 @@ def generate_maze(width: int, height: int) -> list[list[list[int]]]:
     return maze
 
 
-def generate_path(width: int, height: int, maze: list[list[list[int]]], str_seed: str) -> list[list[list[int]]]:
+def generate_path(width: int, height: int, maze: list[list[list[int]]], seed: list[int]) -> list[list[list[int]]]:
     x, y = 0, 0
     visited_cell : list[tuple[int, int]] = []
     visited_cell.append((x, y))
 
     direction : list[int] = []
     seed_index = 0
-    seed : list[int] = []
-    for nb in str_seed:
-        seed.append(int(nb))
-
     modif = 0
     while len(visited_cell) < width * height:
         if seed[seed_index] % 4 == 0:
@@ -43,7 +42,7 @@ def generate_path(width: int, height: int, maze: list[list[list[int]]], str_seed
                 maze[y + 1][x][2] = 0
                 visited_cell.append((x, y + 1))
                 y += 1
-                direction.append(0)
+                direction.append(seed[seed_index])
                 modif = 0
 
         elif seed[seed_index] % 4 == 1:
@@ -53,7 +52,7 @@ def generate_path(width: int, height: int, maze: list[list[list[int]]], str_seed
                 maze[y][x + 1][3] = 0
                 visited_cell.append((x + 1, y))
                 x += 1
-                direction.append(1)
+                direction.append(seed[seed_index])
                 modif = 0
 
         elif seed[seed_index] % 4 == 2:
@@ -63,7 +62,7 @@ def generate_path(width: int, height: int, maze: list[list[list[int]]], str_seed
                 maze[y - 1][x][0] = 0
                 visited_cell.append((x, y - 1))
                 y -= 1
-                direction.append(2)
+                direction.append(seed[seed_index])
                 modif = 0
 
         elif seed[seed_index] % 4 == 3:
@@ -73,7 +72,7 @@ def generate_path(width: int, height: int, maze: list[list[list[int]]], str_seed
                 maze[y][x - 1][1] = 0
                 visited_cell.append((x - 1, y))
                 x -= 1
-                direction.append(3)
+                direction.append(seed[seed_index])
                 modif = 0
 
         if modif > 3:
@@ -86,6 +85,7 @@ def generate_path(width: int, height: int, maze: list[list[list[int]]], str_seed
 
         seed_index += 1
         if seed_index > len(seed) - 1:
+            print(seed_index)
             seed_index = 0
 
     return maze
@@ -108,6 +108,9 @@ def convert_to_hexa(maze: list[list[list[int]]]) -> str:
     return "\n".join(rows)
 
 x, y = 20, 20
-maze = generate_path(x, y, generate_maze(x, y), "2310")
+lst = [x for x in range(8)]
+random.shuffle(lst)
+print(lst)
+maze = generate_path(x, y, generate_maze(x, y), lst)
 print(convert_to_hexa(maze))
 
