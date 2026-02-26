@@ -1,7 +1,7 @@
 from typing import Any
 
 
-def get_config() -> dict[str, Any]:
+def get_config(file: str) -> dict[str, Any]:
     width = 0
     height = 0
     entry_maze = (-1, -1)
@@ -10,9 +10,9 @@ def get_config() -> dict[str, Any]:
     perfect = False
     seed = []
 
-    with open('config.txt', 'r') as f:
+    with open(file, 'r') as f:
         for line in f:
-            key, value = line.split('=')
+            _, value = line.split('=')
             if line.startswith('WIDTH'):
                 width = int(value)
             elif line.startswith('HEIGHT'):
@@ -30,6 +30,8 @@ def get_config() -> dict[str, Any]:
             elif line.startswith('PERFECT'):
                 if value == "True\n":
                     perfect = True
+                else:
+                    perfect = False
             elif line.startswith('SEED'):
                 for character in value:
                     seed.append(character)

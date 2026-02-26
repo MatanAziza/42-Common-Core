@@ -1,4 +1,4 @@
-from random import choice as ch, randint, seed as seeding
+from random import choice as ch, randint
 from os import system
 
 
@@ -70,6 +70,7 @@ def generate_maze(width: int, height: int) -> list[list[list[int]]]:
         maze = add_42(maze, width, height)
     return maze
 
+
 def loading_screen(percentage: int, str_wait: str) -> str:
     system('clear')
     new_str = str_wait[:str_wait.index('\n') + 1] + percentage * '#'
@@ -78,10 +79,10 @@ def loading_screen(percentage: int, str_wait: str) -> str:
     return str_wait
 
 
-
 def generate_path(width: int,
                   height: int,
                   maze: list[list[list[int]]],
+                  perfect: bool
                   ) -> list[list[list[int]]]:
     x, y = 0, 0
     visited_cell: list[tuple[int, int]] = [(x, y)]
@@ -104,12 +105,10 @@ def generate_path(width: int,
         x_check = 0 <= x_next < width
         y_check = 0 <= y_next < height
         is_new = (x_next, y_next) not in visited_cell
-        if y_check and x_check and is_new and maze[y_next][x_next][4] is False:
+        if y_check and x_check and is_new and not maze[y_next][x_next][4]:
             maze[y][x][where_to] = 0
             maze[y_next][x_next][(where_to+2) % 4] = 0
             visited_cell.append((x_next, y_next))
-            if maze[y][x][:4] == [0, 0, 0, 0]:
-                visited_cell.remove((x, y))
             x, y = x_next, y_next
             tried.clear()
             steps_taken += 1
@@ -118,7 +117,8 @@ def generate_path(width: int,
         # If stuck for too long trying impossible directions, backtrack
         all_ways = 1 in tried and 2 in tried and 3 in tried and 0 in tried
         if all_ways or steps_taken >= random_backtrack:
-            maze = edit_next_cells((x, y), maze, visited_cell)
+            if not perfect:
+                maze = edit_next_cells((x, y), maze, visited_cell)
             steps_taken = 0
             tried.clear()
             i = 0
@@ -141,12 +141,23 @@ def generate_path(width: int,
                     maze[b][a] = [1, 1, 1, 0, False]
                     maze[b][a - 1] = [1, 0, 1, 0, False]
                 break
+    system('clear')
     return maze
 
 
-def display(maze: list[list[list[int]]], width: int, height: int) -> str:
-    base2 = '┼┬┤┐┴─┘╴├┌│╷└╶╵ '
-    base = ' █'
+def display(maze: list[list[list[int]]],
+            width: int,
+            height: int,
+            start: tuple[int, int],
+            path: list[int]) -> str:
+    # base2 = '┼┬┤┐┴─┘╴├┌│╷└╶╵ '
+    base = '█████'
+    color = [
+        '\033[1;37m',
+        '\033[1;30m',
+        '\033[0;32m',
+        '\033[0;36m',
+        '\033[0;31m']
     x_axis = [0, 1, 0, -1]
     y_axis = [1, 0, -1, 0]
     new_maze: list[list[int]] = []
@@ -160,39 +171,22 @@ def display(maze: list[list[list[int]]], width: int, height: int) -> str:
         for x in range(len(maze[y])):
             for d in range(4):
                 new_maze[y*2+1 + y_axis[d]][x*2+1 + x_axis[d]] = maze[y][x][d]
-    new_maze.reverse()
     for y in range(1, len(new_maze) - 2):
         for x in range(1, len(new_maze[y]) - 2):
-            if new_maze[y][x - 1] == 0 and new_maze[y][x + 1] == 0 and new_maze[y - 1][x] == 0 and new_maze[y + 1][x] == 0:
+            if (new_maze[y][x - 1] == 0 and new_maze[y][x + 1] == 0
+                    and new_maze[y - 1][x] == 0 and new_maze[y + 1][x] == 0):
                 new_maze[y][x] = 0
+    x_path, y_path = start
+    for i in range(len(path)):
+        new_maze[2 * y_path + 1][2 * x_path + 1] = 2
+        a, b = x_axis[path[i]], y_axis[path[i]]
+        new_maze[2*y_path+1+b][2*x_path+1+a] = 2
+        x_path += x_axis[path[i]]
+        y_path += y_axis[path[i]]
+    new_maze[2 * y_path + 1][2 * x_path + 1] = 4
+    new_maze[2 * start[1] + 1][2 * start[0] + 1] = 3
+    new_maze.reverse()
+    maze_str = ""
     for line in new_maze:
-        print("".join([base[x] for x in line]))
-    # maze_str = []
-    # for row in maze:
-    #     for cell in row:
-    #         value = 0
-    #         for i in range(len(cell) - 1):
-    #             value += cell[i] * 2**i
-    #         if cell == [1, 1, 1, 1, False]:
-    #             maze_str.append('O')
-    #         elif cell[4]:
-    #             maze_str.append("X")
-    #         else:
-    #             maze_str.append(base2[value])
-    #             # maze_str.append(" ")
-    #     maze_str.append('\n')
-    # str_m = "".join(maze_str)[:-1]
-    # rows = str_m.split('\n')
-    # rows.reverse()
-    # return "\n".join(rows)
-
-if __name__ == "__main__":
-    x, y = 60, 40
-    seed: int = randint(10, 99)
-    seeding(seed)
-    maze = generate_path(x, y, generate_maze(x, y))
-    system('clear')
-    print('Maze Generated !')
-    print(display(maze, x, y))
-    # seed_str = "".join([str(x) for x in seed])
-    print(f'Seed: {seed}')
+        maze_str += "".join([color[x]+base[x] for x in line]) + '\n'
+    return maze_str
