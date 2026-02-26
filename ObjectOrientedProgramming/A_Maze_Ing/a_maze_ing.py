@@ -4,17 +4,21 @@ from create_output_file import generate_output
 from djikstra import shortest_path
 from checker import checker
 import sys
+from random import seed as seeding, randint
 
 
 if __name__ == "__main__":
     file = sys.argv[1]
     config = get_config(file)
 
-    width = config['width']
-    height = config['height']
-    maze_entry = config['entry']
-    maze_exit = config['exit']
-    perfect = config['perfect']
+    width = config["width"]
+    height = config["height"]
+    maze_entry = config["entry"]
+    maze_exit = config["exit"]
+    perfect = config["perfect"]
+    seed = randint(10, 99)
+    seed = "".join(config["seed"][:-1])
+    seeding(int(seed))
 
     old_maze = generate_maze(width, height)
     maze = generate_path(width, height, old_maze, perfect)
@@ -23,5 +27,5 @@ if __name__ == "__main__":
     path = shortest_path(maze, maze_entry, maze_exit)
     dis = display(maze, width, height, maze_entry, path)
     print(dis)
-
+    print(f"\033[1;37mSeed: {seed}")
     generate_output(maze, file)

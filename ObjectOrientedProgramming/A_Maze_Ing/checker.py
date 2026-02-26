@@ -2,10 +2,8 @@ import sys
 
 
 def checker(
-        maze: list[list[list[int]]],
-        maze_entry: tuple[int, int],
-        maze_exit: tuple[int, int]
-            ) -> None:
+    maze: list[list[list[int]]], maze_entry: tuple[int, int], maze_exit: tuple[int, int]
+) -> None:
     height = len(maze)
     width = len(maze[0])
     x_entry, y_entry = maze_entry
@@ -27,4 +25,16 @@ def checker(
             raise Exception
     except Exception:
         print("Maze exit out of bounds")
+        sys.exit(0)
+    try:
+        if maze[y_entry][x_entry][4]:
+            raise Exception
+    except Exception:
+        print("Maze entry cannot be in the 42 logo")
+        sys.exit(0)
+    try:
+        if maze[y_exit][x_exit][4]:
+            raise Exception
+    except Exception:
+        print("Maze exit cannot be in the 42 logo")
         sys.exit(0)

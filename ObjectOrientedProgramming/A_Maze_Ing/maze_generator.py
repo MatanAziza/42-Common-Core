@@ -155,8 +155,6 @@ def display(
     start: tuple[int, int],
     path: list[int],
 ) -> str:
-    # base2 = '┼┬┤┐┴─┘╴├┌│╷└╶╵ '
-    base = "█████"
     color = ["\033[1;37m", "\033[1;30m", "\033[0;32m", "\033[0;36m", "\033[0;31m"]
     x_axis = [0, 1, 0, -1]
     y_axis = [1, 0, -1, 0]
@@ -192,5 +190,5 @@ def display(
     new_maze.reverse()
     maze_str = ""
     for line in new_maze:
-        maze_str += "".join([color[x] + base[x] for x in line]) + "\n"
+        maze_str += "".join([color[x] + "█" for x in line]) + "\n"
     return maze_str
