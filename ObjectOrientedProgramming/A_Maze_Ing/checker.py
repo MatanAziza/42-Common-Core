@@ -2,8 +2,10 @@ import sys
 
 
 def checker(
-    maze: list[list[list[int]]], maze_entry: tuple[int, int], maze_exit: tuple[int, int]
-) -> None:
+    maze: list[list[list[int]]],
+    maze_entry: tuple[int, int],
+    maze_exit: tuple[int, int]
+            ) -> None:
     height = len(maze)
     width = len(maze[0])
     x_entry, y_entry = maze_entry

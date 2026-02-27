@@ -1,5 +1,5 @@
-from random import choice as ch, randint
-from os import system
+from random import randint
+from display import loading_screen
 
 
 def check_neighbors(
@@ -25,20 +25,29 @@ def edit_next_cells(
     cell: tuple[int, int],
     maze: list[list[list[int]]],
     visited_cell: list[tuple[int, int]],
-) -> list[list[list[int]]]:
+                    ) -> list[list[list[int]]]:
     x, y = cell
+    x_axis, y_axis = [0, 1, 0, -1], [1, 0, -1, 0]
+    x_prev: int = x
+    y_prev: int = y
+    for i in range(len(maze[y][x])):
+        if maze[y][x][i]:
+            x_prev -= x_axis[i]
+            y_prev -= y_axis[i]
+    print(x, y, x_prev, y_prev)
+    x_diff, y_diff = x - x_prev, y - y_prev
     height = len(maze)
     width = len(maze[0])
-    if y + 1 < height and (x, y + 1) in visited_cell and maze[y][x][0]:
+    if y_diff == 1 and y + 1 < height and (x, y+1) in visited_cell:
         maze[y + 1][x][2] = 0 if not maze[y + 1][x][4] else 1
         maze[y][x][0] = 0
-    elif x + 1 < width and (x + 1, y) in visited_cell and maze[y][x][1]:
+    elif x_diff == 1 and x + 1 < width and (x+1, y) in visited_cell:
         maze[y][x + 1][3] = 0 if not maze[y][x + 1][4] else 1
         maze[y][x][1] = 0
-    elif y - 1 >= 0 and (x, y - 1) in visited_cell and maze[y][x][2]:
+    elif y_diff == -1 and y - 1 >= 0 and (x, y-1) in visited_cell:
         maze[y - 1][x][0] = 0 if not maze[y - 1][x][4] else 1
         maze[y][x][2] = 0
-    elif x - 1 >= 0 and (x - 1, y) in visited_cell and maze[y][x][3]:
+    elif x_diff == -1 and x - 1 >= 0 and (x-1, y) in visited_cell:
         maze[y][x - 1][1] = 0 if not maze[y][x - 1][4] else 1
         maze[y][x][3] = 0
     return maze
@@ -74,14 +83,6 @@ def generate_maze(width: int, height: int) -> list[list[list[int]]]:
     return maze
 
 
-def loading_screen(percentage: int, str_wait: str) -> str:
-    system("clear")
-    new_str = str_wait[: str_wait.index("\n") + 1] + percentage * "#"
-    str_wait = new_str + f" {percentage - 1}%"
-    print(str_wait)
-    return str_wait
-
-
 def generate_path(
     width: int, height: int, maze: list[list[list[int]]], perfect: bool
 ) -> list[list[list[int]]]:
@@ -92,7 +93,7 @@ def generate_path(
     missing_cells = 18 if width > 8 and height > 4 else 0
     str_wait = "Loading Maze, please be patient !\n  0%"
     percentage = 1
-    random_backtrack = randint((width * height) // 20, (width * height) // 2 + 1)
+    random_backtrack = randint((width * height)//20, (width * height)//2 + 1)
     steps_taken = 0
     while len(visited_cell) < width * height - missing_cells:
         if len(visited_cell) * 100 / (width * height) >= percentage:
@@ -144,51 +145,4 @@ def generate_path(
                     maze[b][a] = [1, 1, 1, 0, False]
                     maze[b][a - 1] = [1, 0, 1, 0, False]
                 break
-    system("clear")
     return maze
-
-
-def display(
-    maze: list[list[list[int]]],
-    width: int,
-    height: int,
-    start: tuple[int, int],
-    path: list[int],
-) -> str:
-    color = ["\033[1;37m", "\033[1;30m", "\033[0;32m", "\033[0;36m", "\033[0;31m"]
-    x_axis = [0, 1, 0, -1]
-    y_axis = [1, 0, -1, 0]
-    new_maze: list[list[int]] = []
-    for y in range(0, height * 2 + 1):
-        row: list[int] = []
-        for x in range(0, width * 2 + 1):
-            index = y % 2 + x % 2
-            row.append(0 if index == 2 else 1)
-        new_maze.append(row)
-    for y in range(len(maze)):
-        for x in range(len(maze[y])):
-            for d in range(4):
-                new_maze[y * 2 + 1 + y_axis[d]][x * 2 + 1 + x_axis[d]] = maze[y][x][d]
-    for y in range(1, len(new_maze) - 2):
-        for x in range(1, len(new_maze[y]) - 2):
-            if (
-                new_maze[y][x - 1] == 0
-                and new_maze[y][x + 1] == 0
-                and new_maze[y - 1][x] == 0
-                and new_maze[y + 1][x] == 0
-            ):
-                new_maze[y][x] = 0
-    x_path, y_path = start
-    for i in range(len(path)):
-        new_maze[2 * y_path + 1][2 * x_path + 1] = 2
-        a, b = x_axis[path[i]], y_axis[path[i]]
-        new_maze[2 * y_path + 1 + b][2 * x_path + 1 + a] = 2
-        x_path += x_axis[path[i]]
-        y_path += y_axis[path[i]]
-    new_maze[2 * y_path + 1][2 * x_path + 1] = 4
-    new_maze[2 * start[1] + 1][2 * start[0] + 1] = 3
-    new_maze.reverse()
-    maze_str = ""
-    for line in new_maze:
-        maze_str += "".join([color[x] + "█" for x in line]) + "\n"
-    return maze_str
