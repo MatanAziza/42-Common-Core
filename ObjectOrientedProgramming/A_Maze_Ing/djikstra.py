@@ -2,7 +2,9 @@ from heapq import heapify, heappop, heappush
 
 
 class Graph:
-    def __init__(self, graph: dict[tuple[int, int], dict[str, int]]) -> None:
+    def __init__(self,
+                 graph: dict[tuple[int, int], dict[tuple[int, int], int]]
+                 ) -> None:
         self.graph = graph
     # Cree un lien entre un noeud (coordonnees) et un autre
 
@@ -16,7 +18,9 @@ class Graph:
 
     def shortest_distances(self,
                            source: tuple[int, int]
-                           ) -> dict[tuple[int, int], int]:
+                           ) -> (tuple[dict[tuple[int, int], float],
+                                 dict[tuple[int, int],
+                                 tuple[int, int]]]):
         # Met toutes les distances a l'infini et la distance
         # au noeud de depart a 0
         distances = {node: float('inf') for node in self.graph}
@@ -43,7 +47,7 @@ class Graph:
                     # distance est plus courte
         # On refait le chemin a partir de la fin et on cherche
         # a chaque fois la distance la plus courte
-        predecessors = {node: None for node in self.graph}
+        predecessors: dict[tuple[int, int], tuple[int, int]] = {}
         for node, distance in distances.items():
             for neighbor, weight in self.graph[node].items():
                 if distances[neighbor] == distance + weight:
@@ -58,7 +62,7 @@ def shortest_path(maze: list[list[list[int]]],
     # Cree le graphe
     # Les cellules sont ajoutees comme voisines que s'il n'y a pas
     # de mur entre elles
-    graph: dict[tuple[int, int], dict[str, int]] = {}
+    graph: dict[tuple[int, int], dict[tuple[int, int], int]] = {}
     G = Graph(graph)
     for y, row in enumerate(maze):
         for x, cell in enumerate(row):
@@ -82,7 +86,8 @@ def shortest_path(maze: list[list[list[int]]],
     # On inverse la liste pour avoir le chemin a l'endroit
     path.reverse()
 
-    # On transforme la liste en liste de directions ('N', 'E', 'S' et 'W')
+    # On transforme la liste en liste de directions
+    # ('N', 'E', 'S', 'W') = (0, 1, 2, 3)
     path_str: list[int] = []
     i = 0
     while i < len(path) - 1:
@@ -106,5 +111,5 @@ def shortest_path(maze: list[list[list[int]]],
 # maze = generate_maze(width, height)
 # maze = generate_path(width, height, maze)
 # path = shortest_path(maze, entry_maze, exit_maze)
-# dis = display(maze, width, height, entry_maze, path)
+# final_maze= display(maze, width, height, entry_maze, path)
 # print(dis)

@@ -7,8 +7,8 @@ def get_config(file: str) -> dict[str, Any]:
     entry_maze = (-1, -1)
     exit_maze = (-1, -1)
     output_file = None
-    perfect = False
-    seed = []
+    perfect = None
+    seed = None
 
     with open(file, 'r') as f:
         for line in f:
@@ -33,8 +33,7 @@ def get_config(file: str) -> dict[str, Any]:
                 else:
                     perfect = False
             elif line.startswith('SEED'):
-                for character in value:
-                    seed.append(character)
+                seed = value
 
     return {'width': width,
             'height': height,

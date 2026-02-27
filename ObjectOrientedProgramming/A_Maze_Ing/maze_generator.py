@@ -63,8 +63,8 @@ def add_42(
         [True, False, False, False, False, False, True],
         [True, False, False, False, True, True, True],
     ]
-    x_start = int((width / 2) - 3)
-    y_start = int((height / 2) - 2)
+    x_start = int((width // 2) - 3)
+    y_start = int((height // 2) - 2)
     for y in range(5):
         for x in range(7):
             maze[y + y_start][x + x_start][4] = forty_two[y][x]

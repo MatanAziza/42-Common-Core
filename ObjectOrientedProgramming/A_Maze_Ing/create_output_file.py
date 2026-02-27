@@ -46,6 +46,7 @@ def generate_output(maze: list[list[list[int]]], file: str) -> None:
         f.write(y_exit)
         f.write('\n')
         for nb in path:
+            char = ''
             if nb == 0:
                 char = 'N'
             elif nb == 1:

@@ -1,4 +1,5 @@
 from os import system
+from typing import Any
 
 
 def loading_screen(percentage: int, str_wait: str) -> str:
@@ -11,18 +12,23 @@ def loading_screen(percentage: int, str_wait: str) -> str:
 
 def display(
     maze: list[list[list[int]]],
-    width: int,
-    height: int,
-    start: tuple[int, int],
+    config: dict[str, Any],
     path: list[int],
 ) -> str:
     system("clear")
+    width = config['width']
+    height = config['height']
+    start = config['entry']
+    end = config['exit']
+    show_shortest = config['show']
     color = [
-        "\033[1;37m",
-        "\033[1;30m",
+        "\033[0;37m",
+        config['wall'],
         "\033[0;32m",
         "\033[0;36m",
-        "\033[0;31m"]
+        "\033[0;31m",
+        "\033[0;35m",
+        "\033[0;34m"]
     x_axis = [0, 1, 0, -1]
     y_axis = [1, 0, -1, 0]
     new_maze: list[list[int]] = []
@@ -46,14 +52,19 @@ def display(
             ):
                 new_maze[y][x] = 0
     x_path, y_path = start
-    for i in range(len(path)):
-        new_maze[2 * y_path + 1][2 * x_path + 1] = 2
-        a, b = x_axis[path[i]], y_axis[path[i]]
-        new_maze[2 * y_path + 1 + b][2 * x_path + 1 + a] = 2
-        x_path += x_axis[path[i]]
-        y_path += y_axis[path[i]]
-    new_maze[2 * y_path + 1][2 * x_path + 1] = 4
+    if show_shortest is True:
+        for i in range(len(path)):
+            new_maze[2 * y_path + 1][2 * x_path + 1] = 2
+            a, b = x_axis[path[i]], y_axis[path[i]]
+            new_maze[2 * y_path + 1 + b][2 * x_path + 1 + a] = 2
+            x_path += x_axis[path[i]]
+            y_path += y_axis[path[i]]
+    new_maze[2 * end[1] + 1][2 * end[0] + 1] = 4
     new_maze[2 * start[1] + 1][2 * start[0] + 1] = 3
+    for y in range(len(maze)):
+        for x in range(len(maze[y])):
+            if maze[y][x][4]:
+                new_maze[2*y+1][x*2+1] = 5 if color[1] != '\033[0;35m' else 6
     new_maze.reverse()
     maze_str = ""
     for line in new_maze:
