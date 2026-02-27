@@ -65,8 +65,9 @@ if __name__ == "__main__":
         print("4. Change maze walls colors")
         print("5. Change maze dimensions")
         print("6. Change maze entry/exit")
-        print("7. Quit")
-        x = input("Choice? (1-7): ")
+        print("7. Change 'Perfect' maze status")
+        print("8. Quit")
+        x = input("Choice? (1-8): ")
         if x == "1" or x == "2":
             if x == "1":
                 seeding()
@@ -123,7 +124,8 @@ if __name__ == "__main__":
             extremity = input(
                 "Which extremity would you like to change ? (entry/exit): ")
             while extremity != "entry" and extremity != "exit":
-                extremity = input("Wrong extremity provided. Please try again")
+                extremity = input(
+                    "Wrong extremity provided. Please try again: ")
             while True:
                 try:
                     x_coord: int = int(input(
@@ -141,7 +143,6 @@ if __name__ == "__main__":
                         y_coord = int(input(
                             f"Provide {extremity} y coordinate: "))
                     config[extremity] = (x_coord, y_coord)
-                    seeding()
                     seeding(seed)
                     final_maze, _ = a_maze_ing(config)
                     print(final_maze)
@@ -152,8 +153,13 @@ if __name__ == "__main__":
                         "Coordinates can't be strings. Please provide"
                         " integer values.\n"
                     )
-
-        elif x == "7":
+        elif x == '7':
+            config['perfect'] = not config['perfect']
+            seeding(seed)
+            final_maze, _ = a_maze_ing(config)
+            print(final_maze)
+            print(f"\033[1;37mSeed: {seed}")
+        elif x == "8":
             sys.exit(0)
         else:
             print("Invalid Command")
