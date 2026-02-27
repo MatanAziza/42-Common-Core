@@ -72,7 +72,7 @@ class MazeGenerator:
                 maze[y + y_start][x + x_start][4] = forty_two[y][x]
         return maze
 
-    def generate_maze(self, width: int, height: int) -> list[list[list[int]]]:
+    def blank_maze(self, width: int, height: int) -> list[list[list[int]]]:
         maze: list[list[list[int]]] = []
         for _ in range(0, height):
             row: list[list[int]] = []
@@ -83,7 +83,7 @@ class MazeGenerator:
             maze = self.add_42(maze, width, height)
         return maze
 
-    def generate_path(
+    def generate_maze(
         self,
         width: int,
         height: int,
