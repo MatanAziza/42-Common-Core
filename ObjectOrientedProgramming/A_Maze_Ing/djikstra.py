@@ -6,7 +6,7 @@ class Graph:
                  graph: dict[tuple[int, int], dict[tuple[int, int], int]]
                  ) -> None:
         self.graph = graph
-    # Cree un lien entre un noeud (coordonnees) et un autre
+        # Cree un lien entre un noeud (coordonnees) et un autre
 
     def add_edge(self,
                  node1: tuple[int, int],
@@ -83,9 +83,8 @@ def shortest_path(maze: list[list[list[int]]],
     while predecessor != entry_maze:
         predecessor = predecessors[predecessor]
         path.append(predecessor)
-    # On inverse la liste pour avoir le chemin a l'endroit
+        # On inverse la liste pour avoir le chemin a l'endroit
     path.reverse()
-
     # On transforme la liste en liste de directions
     # ('N', 'E', 'S', 'W') = (0, 1, 2, 3)
     path_str: list[int] = []
@@ -103,13 +102,3 @@ def shortest_path(maze: list[list[list[int]]],
             path_str.append(3)
         i += 1
     return path_str
-
-# width = 40
-# height = 20
-# entry_maze = (19, 5)
-# exit_maze = (2, 19)
-# maze = generate_maze(width, height)
-# maze = generate_path(width, height, maze)
-# path = shortest_path(maze, entry_maze, exit_maze)
-# final_maze= display(maze, width, height, entry_maze, path)
-# print(dis)

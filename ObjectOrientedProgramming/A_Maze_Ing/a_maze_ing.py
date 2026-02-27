@@ -1,5 +1,5 @@
 from get_config import get_config
-from maze_generator import generate_maze, generate_path
+from maze_generator import MazeGenerator
 from create_output_file import generate_output
 from djikstra import shortest_path
 from checker import checker
@@ -15,8 +15,8 @@ def a_maze_ing(config: dict[str, Any]) -> tuple[str, list]:
     maze_entry = config["entry"]
     maze_exit = config["exit"]
     perfect = config["perfect"]
-    old_maze = generate_maze(width, height)
-    maze = generate_path(width, height, old_maze, perfect)
+    old_maze = MazeGenerator().generate_maze(width, height)
+    maze = MazeGenerator().generate_path(width, height, old_maze, perfect)
     checker(maze, config)
     path = shortest_path(maze, maze_entry, maze_exit)
     final_maze = display(maze, config, path)
