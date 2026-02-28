@@ -7,10 +7,11 @@ from display import display
 import sys
 from random import seed as seeding, randint, choice
 from typing import Any
+from os import system
 
 
 def a_maze_ing(config: dict[str, Any], seed: str
-               ) -> tuple[str, list[list[list[int]]]]:
+               ) -> tuple[str, str, list[list[list[int]]]]:
     width = config["width"]
     height = config["height"]
     maze_entry = config["entry"]
@@ -20,7 +21,9 @@ def a_maze_ing(config: dict[str, Any], seed: str
     checker(maze, config)
     path = shortest_path(maze, maze_entry, maze_exit)
     final_maze = display(maze, config, path)
-    return final_maze, maze
+    config['show'] = not config['show']
+    final_maze_2 = display(maze, config, path)
+    return final_maze, final_maze_2, maze
 
 
 def user_interface() -> str:
@@ -66,33 +69,46 @@ if __name__ == "__main__":
     config["show"] = False
     config["wall"] = "\033[1;30m"
     x: str | None = ""
+    final_maze: str = ""
+    final_maze_2: str = ""
+    maze: list[list[list[int]]] = [[[0]]]
     while True:
         if x is not None:
-            final_maze, maze = a_maze_ing(config, seed)
-            print(final_maze)
-            print(
-                f"\033[1;37mSeed: {seed}\n"
-                f"Maze dimensions: {config['width']} by {config['height']}\n"
-                "Maze entry (blue) and exit (red):"
-                f"{config['entry']}, {config['exit']}\n"
-                    )
+            final_maze, final_maze_2, maze = a_maze_ing(config, seed)
             generate_output(maze, config)
+        print(final_maze)
+        print(
+            f"\033[1;37mSeed: {seed}\n"
+            f"Maze dimensions: {config['width']} by {config['height']}\n"
+            "Maze entry (blue) and exit (red):"
+            f"{config['entry']}, {config['exit']}\n"
+                )
         x = user_interface()
         if x == "1" or x == "2":
             if x == "1":
                 seeding()
                 seed = str(randint(10, 99))
-                config['show'] = False
             else:
                 seed = input("What seed would you like to try: ")
+            config['show'] = False
         elif x == "3":
-            seeding(seed)
-            config["show"] = not config["show"]
+            temp = final_maze_2
+            final_maze_2 = final_maze
+            final_maze = temp
+            config['show'] = not config['show']
+            x = None
+            system('clear')
         elif x == "4":
             seeding()
             colors = ["0;30", "0;33", "0;34", "0;35"]
             config["wall"] = f"\033[{choice(colors)}m"
             seeding(seed)
+            path = shortest_path(maze, config['entry'], config['exit'])
+            final_maze = display(maze, config, path)
+            config['show'] = not config['show']
+            final_maze = display(maze, config, path)
+            config['show'] = not config['show']
+            x = None
         elif x == "5":
             while True:
                 try:
@@ -160,6 +176,7 @@ if __name__ == "__main__":
                         "Please try again")
         elif x == '7':
             config['perfect'] = not config['perfect']
+            config['show'] = not config['show']
         elif x == "8":
             sys.exit(0)
         else:
