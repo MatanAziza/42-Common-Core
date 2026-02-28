@@ -23,6 +23,7 @@ def a_maze_ing(config: dict[str, Any], seed: str
     final_maze = display(maze, config, path)
     config['show'] = not config['show']
     final_maze_2 = display(maze, config, path)
+    config['show'] = not config['show']
     return final_maze, final_maze_2, maze
 
 
@@ -106,7 +107,7 @@ if __name__ == "__main__":
             path = shortest_path(maze, config['entry'], config['exit'])
             final_maze = display(maze, config, path)
             config['show'] = not config['show']
-            final_maze = display(maze, config, path)
+            final_maze_2 = display(maze, config, path)
             config['show'] = not config['show']
             x = None
         elif x == "5":
