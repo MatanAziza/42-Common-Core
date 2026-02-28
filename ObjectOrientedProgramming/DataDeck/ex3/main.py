@@ -19,7 +19,7 @@ if __name__ == "__main__":
         f"Available types: creatures: {creatures}, spells:"
         f" {spells}, artifacts: {artifacts}\n"
             )
-    for i in range(1):
+    for i in range(5):
         game_engine.simulate_turn()
     print()
     print("Game report:")

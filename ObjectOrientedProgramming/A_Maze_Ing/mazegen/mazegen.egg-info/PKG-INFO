@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: mazegen
+Version: 1.0.0
+Summary: A simple maze generator module
+Author-email: Matan Aziza <matan.aziza@learner.42.tech>, Florian Valota <florian.valota@learner.42.tech>
+License: MIT
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+
+# Mazegen
+
+Mazegen is a simple Python maze generator module.
+
+## Installation
+
+```bash
+pip install mazegen

@@ -1,5 +1,5 @@
 from get_config import get_config
-from maze_generator import MazeGenerator
+from mazegen.mazegen.maze_generator import MazeGenerator
 from create_output_file import generate_output
 from djikstra import shortest_path
 from checker import checker
@@ -65,16 +65,18 @@ if __name__ == "__main__":
         seed = config["seed"][:-1]
     config["show"] = False
     config["wall"] = "\033[1;30m"
+    x: str | None = ""
     while True:
-        final_maze, maze = a_maze_ing(config, seed)
-        print(final_maze)
-        print(
-            f"\033[1;37mSeed: {seed}\n"
-            f"Maze dimensions: {config['width']} by {config['height']}\n"
-            "Maze entry (blue) and exit (red):"
-            f"{config['entry']}, {config['exit']}\n"
-                )
-        generate_output(maze, config)
+        if x is not None:
+            final_maze, maze = a_maze_ing(config, seed)
+            print(final_maze)
+            print(
+                f"\033[1;37mSeed: {seed}\n"
+                f"Maze dimensions: {config['width']} by {config['height']}\n"
+                "Maze entry (blue) and exit (red):"
+                f"{config['entry']}, {config['exit']}\n"
+                    )
+            generate_output(maze, config)
         x = user_interface()
         if x == "1" or x == "2":
             if x == "1":
@@ -95,11 +97,15 @@ if __name__ == "__main__":
                 try:
                     width: int = int(input("Provide maze width: "))
                     height: int = int(input("Provide maze height: "))
-                    while width < 0:
-                        print("Width can't be negative")
+                    while width <= 0:
+                        print("Width can't be negative or zero")
                         width = int(input("Provide maze width: "))
-                    while height < 0:
-                        print("Height can't be negative")
+                    while height <= 0:
+                        print("Height can't be negative or zero")
+                        height = int(input("Provide maze height: "))
+                    while height == width and width == 1:
+                        print("Maze can'y be 1 by 1, it is already solved")
+                        width = int(input("Provide maze width: "))
                         height = int(input("Provide maze height: "))
                     config["width"] = width
                     config["height"] = height
@@ -115,10 +121,12 @@ if __name__ == "__main__":
                     )
         elif x == "6":
             extremity = input(
-                "Which extremity would you like to change ? (entry/exit): ")
-            while extremity != "entry" and extremity != "exit":
+                "Which extremity would you like to change ?"
+                "\nEntry: 1, Exit: 2: ")
+            while extremity != "1" and extremity != "2":
                 extremity = input(
                     "Wrong extremity provided. Please try again: ")
+            extremity = 'entry' if extremity == '1' else 'exit'
             while True:
                 try:
                     x_coord: int = int(input(
@@ -135,6 +143,8 @@ if __name__ == "__main__":
                             "Y Coordinate can't be outside of the maze height")
                         y_coord = int(input(
                             f"Provide {extremity} y coordinate: "))
+                    if maze[y_coord][x_coord][4]:
+                        raise ConnectionError
                     config[extremity] = (x_coord, y_coord)
                     break
                 except ValueError:
@@ -142,9 +152,14 @@ if __name__ == "__main__":
                         "Coordinates can't be strings. Please provide"
                         " integer values.\n"
                     )
+                except ConnectionError:
+                    print(
+                        f"Maze {extremity} can't be in the 42 logo."
+                        "Please try again")
         elif x == '7':
             config['perfect'] = not config['perfect']
         elif x == "8":
             sys.exit(0)
         else:
             print("Invalid Command")
+            x = None
