@@ -4,3 +4,4 @@ ENTRY=0, 0
 EXIT=14, 14
 OUPUT_FILE=output.txt
 PERFECT=True
+SEED=42

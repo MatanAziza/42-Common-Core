@@ -82,6 +82,7 @@ if __name__ == "__main__":
             if x == "1":
                 seeding()
                 seed = str(randint(10, 99))
+                config['show'] = False
             else:
                 seed = input("What seed would you like to try: ")
         elif x == "3":
@@ -111,6 +112,7 @@ if __name__ == "__main__":
                     config["height"] = height
                     config['entry'] = (0, 0)
                     config['exit'] = (width - 1, height - 1)
+                    config['show'] = False
                     seeding()
                     seed = str(randint(10, 99))
                     break
