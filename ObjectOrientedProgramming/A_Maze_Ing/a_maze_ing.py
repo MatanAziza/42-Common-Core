@@ -79,7 +79,7 @@ if __name__ == "__main__":
             generate_output(maze, config)
         print(final_maze)
         print(
-            f"\033[1;37mSeed: {seed}\n"
+            f"\033[1;37mSeed: {seed}, Perfect state: {config['perfect']}\n"
             f"Maze dimensions: {config['width']} by {config['height']}\n"
             "Maze entry (blue) and exit (red):"
             f"{config['entry']}, {config['exit']}\n"
@@ -101,8 +101,9 @@ if __name__ == "__main__":
             system('clear')
         elif x == "4":
             seeding()
-            colors = ["0;30", "0;33", "0;34", "0;35"]
-            config["wall"] = f"\033[{choice(colors)}m"
+            colors = ["0;30", "0;33", "0;34", "0;35", "1;30"]
+            rest = [c for c in colors if c not in config['wall']]
+            config["wall"] = f"\033[{choice(rest)}m"
             seeding(seed)
             path = shortest_path(maze, config['entry'], config['exit'])
             final_maze = display(maze, config, path)
@@ -122,7 +123,7 @@ if __name__ == "__main__":
                         print("Height can't be negative or zero")
                         height = int(input("Provide maze height: "))
                     while height == width and width == 1:
-                        print("Maze can'y be 1 by 1, it is already solved")
+                        print("Maze can't be 1 by 1, it is already solved")
                         width = int(input("Provide maze width: "))
                         height = int(input("Provide maze height: "))
                     config["width"] = width
@@ -177,7 +178,7 @@ if __name__ == "__main__":
                         "Please try again")
         elif x == '7':
             config['perfect'] = not config['perfect']
-            config['show'] = not config['show']
+            config['show'] = False
         elif x == "8":
             sys.exit(0)
         else:
