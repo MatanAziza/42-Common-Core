@@ -1,8 +1,41 @@
-from random import randint
+from random import randint, seed as seeding
 from display import loading_screen
+from typing import Any
 
 
 class MazeGenerator:
+    """
+    MazeGenerator class:
+    Methodes:
+    - generate_maze (main function)
+    - blank_maze
+    - check_neighbors
+    - edit_next_cells
+    - add_42
+
+    Pour générer un labyrinthe de dimensions largeur/hauteur, vous devez
+    utiliser 'blank_maze' puis 'generate_maze' avec les paramètres suivants:
+    BLANK_MAZE : width et height, toutes deux int. Génère un labyrinthe de
+    dimensions width*height rempli de murs.
+    GENERATE_MAZE :
+    - maze : list[list[list[int]]] ou colonnes[lignes[cellule[directions]]]
+      Cet argument est le blank_maze généré
+      └> les cellules sont une liste de 4 int et un booleen qui indiquent:
+        - de index 0 à 3 inclus, un bit 0 ou 1 qui indiquent si une direction
+          est ouverte (0) ou fermée (1), selon le barème [N, E, S, W]
+        - la dernière case (4) concernent l'etat de la cellule si elle est une
+          cellule prevue pour le logo 42. Elle est remplie automatiquement
+          par la fonction add_42 si necessaire (voir suite)
+    - config: dict[str, Any]
+      └> le dictionnaire config doit contenir les clés/valeurs suivantes:
+        - 'width': int
+          'height': int
+          'perfect': bool
+    - seed: str
+      └> la seed a fournir pour generer un labyrinthe particulier. Par défaut
+         est set à None (fonctionne comme seed, donx ne rien fournir
+         générera plusieurs fois sortira le meme labyrinthe
+    """
     def check_neighbors(
         self,
         cell: tuple[int, int],
@@ -36,7 +69,6 @@ class MazeGenerator:
             if maze[y][x][i]:
                 x_prev -= x_axis[i]
                 y_prev -= y_axis[i]
-        print(x, y, x_prev, y_prev)
         x_diff, y_diff = x - x_prev, y - y_prev
         height = len(maze)
         width = len(maze[0])
@@ -85,16 +117,20 @@ class MazeGenerator:
 
     def generate_maze(
         self,
-        width: int,
-        height: int,
         maze: list[list[list[int]]],
-        perfect: bool
+        config: dict[str, Any],
+        seed: str | Any = None
                         ) -> list[list[list[int]]]:
         x, y = 0, 0
+        seed = str(seed)
+        width = config['width']
+        height = config['height']
+        perfect = config['perfect']
+        seeding(seed)
         visited_cell: list[tuple[int, int]] = [(x, y)]
         x_axis, y_axis = [0, 1, 0, -1], [1, 0, -1, 0]
         tried: set[int] = set()
-        missing_cells = 18 if width > 8 and height > 4 else 0
+        missing_cells = 18 if width > 8 and height > 6 else 0
         str_wait = "Loading Maze, please be patient !\n  0%"
         percentage = 1
         random_backtrack = randint((width*height)//20, (width*height)//2 + 1)

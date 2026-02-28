@@ -1,5 +1,5 @@
-from get_config import get_config
 from djikstra import shortest_path
+from typing import Any
 
 
 def convert_to_hexa(maze: list[list[list[int]]]) -> str:
@@ -21,8 +21,8 @@ def convert_to_hexa(maze: list[list[list[int]]]) -> str:
     return "\n".join(rows)
 
 
-def generate_output(maze: list[list[list[int]]], file: str) -> None:
-    config = get_config(file)
+def generate_output(maze: list[list[list[int]]],
+                    config: dict[str, Any]) -> None:
     output_name = config['output_file']
     hexa = convert_to_hexa(maze)
     x_entry, y_entry = config['entry']

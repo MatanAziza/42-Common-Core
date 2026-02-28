@@ -9,18 +9,31 @@ from random import seed as seeding, randint, choice
 from typing import Any
 
 
-def a_maze_ing(config: dict[str, Any]) -> tuple[str, list]:
+def a_maze_ing(config: dict[str, Any], seed: str
+               ) -> tuple[str, list[list[list[int]]]]:
     width = config["width"]
     height = config["height"]
     maze_entry = config["entry"]
     maze_exit = config["exit"]
-    perfect = config["perfect"]
     old_maze = MazeGenerator().blank_maze(width, height)
-    maze = MazeGenerator().generate_maze(width, height, old_maze, perfect)
+    maze = MazeGenerator().generate_maze(old_maze, config, seed)
     checker(maze, config)
     path = shortest_path(maze, maze_entry, maze_exit)
     final_maze = display(maze, config, path)
     return final_maze, maze
+
+
+def user_interface() -> str:
+    print("=== A_MAZE_ING ===")
+    print("1. Re-generate a new maze")
+    print("2. Regenerate a new maze with user-inputed seed")
+    print("3. Show/Hide path from entry to exit")
+    print("4. Change maze walls colors")
+    print("5. Change maze dimensions")
+    print("6. Change maze entry/exit")
+    print("7. Change 'Perfect' maze status")
+    print("8. Quit")
+    return input("Choice? (1-8): ")
 
 
 if __name__ == "__main__":
@@ -50,51 +63,33 @@ if __name__ == "__main__":
         seed = str(randint(10, 99))
     else:
         seed = config["seed"][:-1]
-    seeding(seed)
     config["show"] = False
     config["wall"] = "\033[1;30m"
-    final_maze, maze = a_maze_ing(config)
-    print(final_maze)
-    print(f"\033[1;37mSeed: {seed}")
     while True:
-        generate_output(maze, file)
-        print("=== A_MAZE_ING ===")
-        print("1. Re-generate a new maze")
-        print("2. Regenerate a new maze with user-inputed seed")
-        print("3. Show/Hide path from entry to exit")
-        print("4. Change maze walls colors")
-        print("5. Change maze dimensions")
-        print("6. Change maze entry/exit")
-        print("7. Change 'Perfect' maze status")
-        print("8. Quit")
-        x = input("Choice? (1-8): ")
+        final_maze, maze = a_maze_ing(config, seed)
+        print(final_maze)
+        print(
+            f"\033[1;37mSeed: {seed}\n"
+            f"Maze dimensions: {config['width']} by {config['height']}\n"
+            "Maze entry (blue) and exit (red):"
+            f"{config['entry']}, {config['exit']}\n"
+                )
+        generate_output(maze, config)
+        x = user_interface()
         if x == "1" or x == "2":
             if x == "1":
                 seeding()
                 seed = str(randint(10, 99))
             else:
                 seed = input("What seed would you like to try: ")
-            seeding(seed)
-            final_maze, _ = a_maze_ing(config)
-            print(final_maze)
-            print(f"\033[1;37mSeed: {seed}")
         elif x == "3":
             seeding(seed)
-            if config["show"] is False:
-                config["show"] = True
-            else:
-                config["show"] = False
-            final_maze, _ = a_maze_ing(config)
-            print(final_maze)
-            print(f"\033[1;37mSeed: {seed}")
+            config["show"] = not config["show"]
         elif x == "4":
             seeding()
             colors = ["0;30", "0;33", "0;34", "0;35"]
             config["wall"] = f"\033[{choice(colors)}m"
             seeding(seed)
-            final_maze, maze = a_maze_ing(config)
-            print(final_maze)
-            print(f"\033[1;37mSeed: {seed}")
         elif x == "5":
             while True:
                 try:
@@ -108,12 +103,10 @@ if __name__ == "__main__":
                         height = int(input("Provide maze height: "))
                     config["width"] = width
                     config["height"] = height
+                    config['entry'] = (0, 0)
+                    config['exit'] = (width - 1, height - 1)
                     seeding()
                     seed = str(randint(10, 99))
-                    seeding(seed)
-                    final_maze, _ = a_maze_ing(config)
-                    print(final_maze)
-                    print(f"\033[1;37mSeed: {seed}")
                     break
                 except ValueError:
                     print(
@@ -143,10 +136,6 @@ if __name__ == "__main__":
                         y_coord = int(input(
                             f"Provide {extremity} y coordinate: "))
                     config[extremity] = (x_coord, y_coord)
-                    seeding(seed)
-                    final_maze, _ = a_maze_ing(config)
-                    print(final_maze)
-                    print(f"\033[1;37mSeed: {seed}")
                     break
                 except ValueError:
                     print(
@@ -155,10 +144,6 @@ if __name__ == "__main__":
                     )
         elif x == '7':
             config['perfect'] = not config['perfect']
-            seeding(seed)
-            final_maze, _ = a_maze_ing(config)
-            print(final_maze)
-            print(f"\033[1;37mSeed: {seed}")
         elif x == "8":
             sys.exit(0)
         else:

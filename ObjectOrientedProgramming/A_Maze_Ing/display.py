@@ -4,7 +4,7 @@ from typing import Any
 
 def loading_screen(percentage: int, str_wait: str) -> str:
     system("clear")
-    new_str = str_wait[: str_wait.index("\n") + 1] + percentage * "    "
+    new_str = str_wait[: str_wait.index("\n") + 1] + percentage * "#"
     str_wait = new_str + f" {percentage - 1}%"
     print(str_wait)
     return str_wait
