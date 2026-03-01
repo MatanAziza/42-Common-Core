@@ -1,9 +1,9 @@
-from os import system
+from os import system, name
 from typing import Any
 
 
 def loading_screen(percentage: int, str_wait: str) -> str:
-    system("clear")
+    system("clear" if name != 'nt' else 'cls')
     new_str = str_wait[: str_wait.index("\n") + 1] + percentage * "#"
     str_wait = new_str + f" {percentage - 1}%"
     print(str_wait)
@@ -15,7 +15,7 @@ def display(
     config: dict[str, Any],
     path: list[int],
 ) -> str:
-    system("clear")
+    system("clear" if name != 'nt' else 'cls')
     width = config['width']
     height = config['height']
     start = config['entry']

@@ -7,7 +7,7 @@ from display import display
 import sys
 from random import seed as seeding, randint, choice
 from typing import Any
-from os import system
+from os import system, name
 
 
 def a_maze_ing(config: dict[str, Any], seed: str
@@ -98,7 +98,7 @@ if __name__ == "__main__":
             final_maze = temp
             config['show'] = not config['show']
             x = None
-            system('clear')
+            system('clear' if name != 'nt' else 'cls')
         elif x == "4":
             seeding()
             colors = ["0;30", "0;33", "0;34", "0;35", "1;30"]
@@ -111,6 +111,7 @@ if __name__ == "__main__":
             final_maze_2 = display(maze, config, path)
             config['show'] = not config['show']
             x = None
+            system('clear' if name != 'nt' else 'cls')
         elif x == "5":
             while True:
                 try:
