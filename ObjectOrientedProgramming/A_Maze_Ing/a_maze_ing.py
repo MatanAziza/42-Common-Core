@@ -183,5 +183,6 @@ if __name__ == "__main__":
         elif x == "8":
             sys.exit(0)
         else:
-            print("Invalid Command")
+            system('clear' if name != 'nt' else 'cls')
+            print("Invalid Command\n")
             x = None
