@@ -4,4 +4,4 @@ Defaults logfile="/var/log/sudo/sudo_config"
 Defaults log_input, log_output
 Defaults iolog_dir="/var/log/sudo"
 Defaults requiretty
-Defaults secure_path="/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/bin:/sbin"
+Defaults secure_path="/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/bin:/sbin:/snap/bin"
