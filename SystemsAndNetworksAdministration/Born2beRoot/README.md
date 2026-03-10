@@ -10,6 +10,12 @@ To do so, the learner has to emulate OS through a Virtual Machine software such 
 
 As mentionned in the subject, I used the Debian OS because of its beginner-friendly approach is setup and apt/package manager fields.
 
+Following the usage of Debian, AppArmor was used as mentionned in the subject since it's closely linked to Debian, but also because of its ability to restrict/manage what softwares the users can use.
+
+Same goes for UFW, used by default for Debian as prescribed.
+
+Finally, the use of Oracle VirtualBox was purely computer based since the machine I work on is Linux-based, opposed to UTM, which is made for macOS computers.
+
 # Instructions
 
 To open the Virtual Machine setup by the learner, one must open it through the VM creator the learner used.
