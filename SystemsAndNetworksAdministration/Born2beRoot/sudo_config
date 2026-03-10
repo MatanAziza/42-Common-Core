@@ -1,0 +1,7 @@
+Defaults passwd_tries=3
+Defaults badpass_message="Incorrect password after 3 attempts. Please contact an admin."
+Defaults logfile="/var/log/sudo/sudo_config"
+Defaults log_input, log_output
+Defaults iolog_dir="/var/log/sudo"
+Defaults requiretty
+Defaults secure_path="/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/bin:/sbin:/snap/bin"
