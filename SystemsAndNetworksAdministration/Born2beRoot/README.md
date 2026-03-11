@@ -8,13 +8,13 @@ To do so, I had to emulate OS through a Virtual Machine software such as Oracle 
 
 ## Project Description
 
-As mentionned in the subject, I used the Debian OS because of its beginner-friendly approach is setup and apt/package manager fields.
+As mentioned in the subject, I chose to work with Debian as the operating system, mainly because of its simplicity in setup and its beginner-friendly package management through apt. It also provides strong community support, great stability, and a well-documented environment. On the other hand, Rocky Linux is more enterprise-oriented and better suited for long-term stability in production environments, but slightly heavier and less intuitive for testing or learning setups.
 
-Following the usage of Debian, AppArmor was used as mentionned in the subject since it's closely linked to Debian, but also because of its ability to restrict/manage what softwares the users can use.
+Following the use of Debian, AppArmor was selected as the mandatory access control system. It integrates naturally with Debian and offers an easier configuration process compared to SELinux, which is more complex but known for its deeper control and stricter policies.
 
-The same goes for UFW, used by default for Debian as prescribed.
+For firewall configuration, UFW (Uncomplicated Firewall) was used, since it’s the default option on Debian. It provides a straightforward command syntax and is ideal for quick setup. In comparison, firewalld, used mainly on Red Hat–based distributions like Rocky Linux, offers a more layered and dynamic approach but adds unnecessary overhead for this project.
 
-Finally, the use of Oracle VirtualBox was purely computer based since the machine I work on is Linux-based, opposed to UTM, which is made for macOS computers.
+Finally, Oracle VirtualBox was chosen for virtualization, as the development machine is Linux-based. UTM, while a good alternative, is primarily designed for macOS environments, which made VirtualBox a more logical choice.
 
 # Instructions
 
