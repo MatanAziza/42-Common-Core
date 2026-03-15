@@ -6,19 +6,18 @@ from mazegenerator.mazegenerator import MazeGenerator
 from manip_json import get_highscores, read_config, register_highscore
 # 6, 8/, 10, 11, 12, 15, 16//, 20, 22, 24/, 25/, 30, 33, 44: 660 divisible by these
 config = read_config('config.json')
-maze_width=20
-maze_height=maze_width
-gen = MazeGenerator(size=(maze_width, maze_height),seed=42)
-maze = gen.maze
+maze_side=12
 pygame.init()
+gen = MazeGenerator(size=(maze_side, maze_side),seed=42)
+maze = gen.maze
 window_w, window_h = 660, 990
 screen = pygame.display.set_mode((window_w, window_h))
 clock = pygame.time.Clock()
 running, main_title, pause, game_over = True, True, False, False
 dt = 1
-radius = 480/len(maze)
-tile_size = 660/len(maze)
-player_pos = Vector2(32 * len(maze) - 32, 32 * len(maze[0]) - 32)
+radius = 480/maze_side
+tile_size = 660/maze_side
+player_pos = Vector2((maze_side//2)*tile_size, (maze_side//2)*tile_size + 180)
 tick = 60
 walls_name = [
     'no_walls',
@@ -80,32 +79,59 @@ class Sprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 class Pacman(Sprite):
-    def __init__(self, color: str, radius: int, pos: Vector2):
+    def __init__(self, color: str, radius: int, pos: Vector2, cell: tuple[int, int]):
         super().__init__(color, radius)
         self.color = color
+        self.pos = cell
         self.rect.x = pos.x
         self.rect.y = pos.y
         self.can_change = True
         self.distance = 0
+        self.direction=0
+        self.next_direction = 0
 
     def player_move(self, radius: int, keys: list[bool]):
-        if self.distance == 64:
+        x_axis = [0, 1, 0, -1]
+        y_axis = [-1, 0, 1, 0]
+        if self.distance == tile_size and not self.can_change:
             self.distance = 0
-            self.can_change
+            self.can_change = True
+            self.pos = (self.pos[0]+x_axis[self.direction], self.pos[1]+y_axis[self.direction])
         if self.can_change:
-            up, down, left, right = False, False, False, False
-            string = dec_to_bin(maze[int(self.rect.y//64)][int(self.rect.x//64)])
+            string = dec_to_bin(maze[self.pos[1]][self.pos[0]])
             walls = [int(x) for x in string]
             walls.reverse()
             self.cell = walls
+            moved = 0
             if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and self.rect.x < window_w - radius and self.cell[1] == 0:
-                self.rect.x += dt
+                self.direction = 1
+                moved = 1
             elif (keys[pygame.K_a] or keys[pygame.K_LEFT]) and self.rect.x > 0 and self.cell[3] == 0:
-                self.rect.x -= dt
+                self.direction = 3
+                moved = 1
             elif (keys[pygame.K_w] or keys[pygame.K_UP]) and self.rect.y > 0 and self.cell[0] == 0:
-                self.rect.y -= dt
+                self.direction = 0
+                moved = 1
             elif (keys[pygame.K_s] or keys[pygame.K_DOWN]) and self.rect.y < window_h - radius - 128 and self.cell[2] == 0:
-                self.rect.y += dt
+                self.direction = 2
+                moved = 1
+            if self.cell[self.next_direction] == 0:
+                moved = 1
+                self.direction = self.next_direction
+            if moved == 1 or not self.cell[self.direction]:
+                self.can_change = False
+        if not self.can_change and self.direction >= 0 and not self.cell[self.direction]:
+            self.rect.x += dt*x_axis[self.direction] if not self.cell[self.direction] else 0
+            self.rect.y += dt*y_axis[self.direction] if not self.cell[self.direction] else 0
+            self.distance += dt
+        if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and self.rect.x < window_w - radius:
+            self.next_direction = 1
+        elif (keys[pygame.K_a] or keys[pygame.K_LEFT]) and self.rect.x > 0:
+            self.next_direction = 3
+        elif (keys[pygame.K_w] or keys[pygame.K_UP]) and self.rect.y > 0:
+            self.next_direction = 0
+        elif (keys[pygame.K_s] or keys[pygame.K_DOWN]) and self.rect.y < window_h - radius - 128:
+            self.next_direction = 2
         return Vector2(self.rect.x, self.rect.y)
 
 class Ghost(Sprite):
@@ -160,43 +186,44 @@ def quit(state: bool, running: bool) -> tuple[bool, bool]:
     return (state, running)
 
 def back_to_title() -> tuple[bool, bool]:
-    player_pos.x = 32*len(maze) - 32
-    player_pos.y = 32*len(maze[0]) - 32
-    red_g.rect.x = 0
-    red_g.rect.y = 0
-    red_g.distance = 0
-    blue_g.rect.x = window_w - radius
-    blue_g.rect.y = 0
-    blue_g.distance = 0
-    orange_g.rect.x = 0
-    orange_g.rect.y = window_h - radius - 128
-    orange_g.distance = 0
-    pink_g.rect.x = window_w - radius
-    pink_g.rect.y = window_h - radius - 128
-    pink_g.distance = 0
+    pacman.__init__('yellow', radius, player_pos, (int(maze_side//2), int(maze_side//2)))
+    red_g.__init__('red', radius, Vector2(0, 180), (0, 0))
+    blue_g.__init__('blue', radius, Vector2(window_w - tile_size , 180), (maze_side-1, 0))
+    orange_g.__init__('orange', radius, Vector2(0, 180+(maze_side-1)*tile_size), (0, maze_side-1))
+    pink_g.__init__('pink', radius, Vector2(window_w - tile_size, 180+(maze_side-1)*tile_size), (maze_side-1, maze_side-1))
+    # red_g.rect.x, red_g.rect.y = 0, 180
+    # red_g.distance, red_g.pos = 0, (0, 0)
+    # blue_g.__init__('blue', radius, Vector2(window_w - tile_size, 180), (0, 0))
+    # blue_g.rect.x, blue_g.rect.y = window_w - tile_size , 180
+    # blue_g.distance, blue_g.pos = 0, (maze_side-1, 0)
+    # orange_g.rect.x, orange_g.rect.y = 0, 180+(maze_side-1)*tile_size
+    # orange_g.distance, orange_g.pos = 0, (0, maze_side-1)
+    # pink_g.rect.x = window_w - tile_size
+    # pink_g.rect.y = 180+(maze_side-1)*tile_size
+    # pink_g.distance, pink_g.pos = 0, (maze_side-1, maze_side-1)
 
     return (False, True)
 
 def reset() -> None:
-    player_pos.x = 32*len(maze) - 32
-    player_pos.y = 32*len(maze[0]) - 32
-    red_g.rect.x = 0
-    red_g.rect.y = 0
-    red_g.distance = 0
-    blue_g.rect.x = window_w - radius
-    blue_g.rect.y = 0
-    blue_g.distance = 0
-    orange_g.rect.x = 0
-    orange_g.rect.y = window_h - radius - 128
-    orange_g.distance = 0
-    pink_g.rect.x = window_w - radius
-    pink_g.rect.y = window_h - radius - 128
-    pink_g.distance = 0
+    pacman.__init__('yellow', radius, player_pos, (int(maze_side//2), int(maze_side//2)))
+    red_g.__init__('red', radius, Vector2(0, 180), (0, 0))
+    blue_g.__init__('blue', radius, Vector2(window_w - tile_size , 180), (maze_side-1, 0))
+    orange_g.__init__('orange', radius, Vector2(0, 180+(maze_side-1)*tile_size), (0, maze_side-1))
+    pink_g.__init__('pink', radius, Vector2(window_w - tile_size, 180+(maze_side-1)*tile_size), (maze_side-1, maze_side-1))
+    # red_g.rect.x, red_g.rect.y = 0, 180
+    # red_g.distance, red_g.pos = 0, (0, 0)
+    # blue_g.rect.x, blue_g.rect.y = window_w - tile_size , 180
+    # blue_g.distance, blue_g.pos = 0, (maze_side-1, 0)
+    # orange_g.rect.x, orange_g.rect.y = 0, 180+(maze_side-1)*tile_size
+    # orange_g.distance, orange_g.pos = 0, (0, maze_side-1)
+    # pink_g.rect.x = window_w - tile_size
+    # pink_g.rect.y = 180+(maze_side-1)*tile_size
+    # pink_g.distance, pink_g.pos = 0, (maze_side-1, maze_side-1)
 
 def maze_gen(maze: list[list[int]], walls_name: list[str]) -> list[Walls]:
     walls: list[Walls] = []
-    for y in range(len(maze)):
-        for x in range(len(maze[0])):
+    for y in range(maze_side):
+        for x in range(maze_side):
             cell = Walls(walls_name[maze[y][x]])
             cell.rect.x = x * (tile_size)
             cell.rect.y = y * (tile_size) + 180
@@ -205,10 +232,11 @@ def maze_gen(maze: list[list[int]], walls_name: list[str]) -> list[Walls]:
 
 
 walls = maze_gen(maze, walls_name)
+pacman = Pacman('yellow', radius, player_pos, (int(maze_side//2), int(maze_side//2)))
 red_g = Ghost('red', radius, Vector2(0, 180), (0, 0))
-blue_g = Ghost('blue', radius, Vector2(window_w - tile_size , 180), (len(maze)-1, 0))
-orange_g = Ghost('orange', radius, Vector2(0, 180+(len(maze)-1)*tile_size), (0, len(maze)-1))
-pink_g = Ghost('pink', radius, Vector2(window_w - tile_size, 180+(len(maze)-1)*tile_size), (len(maze)-1, len(maze)-1))
+blue_g = Ghost('blue', radius, Vector2(window_w - tile_size , 180), (maze_side-1, 0))
+orange_g = Ghost('orange', radius, Vector2(0, 180+(maze_side-1)*tile_size), (0, maze_side-1))
+pink_g = Ghost('pink', radius, Vector2(window_w - tile_size, 180+(maze_side-1)*tile_size), (maze_side-1, maze_side-1))
 
 main_font = pygame.font.SysFont('Comic Sans MS', 100)
 reduced_font = pygame.font.SysFont('Comic Sans MS', 50)
@@ -348,9 +376,6 @@ while running:
         sprites_list.add(cell)
     sprites_list.update()
     # Player
-    pacman = Pacman('yellow', radius, player_pos)
-    pacman.rect.x = player_pos.x
-    pacman.rect.y = player_pos.y
     sprites_list.add(pacman)
     # Ghosts
     sprites_list.add(red_g)
@@ -363,24 +388,16 @@ while running:
 
     sprites_list.draw(screen)
 
-    hud_bar = pygame.draw.rect(screen, 'black', ((0, maze_height * 64), (maze_width * 64, 128)))
+    hud_bar = pygame.draw.rect(screen, 'black', ((0, maze_side * 64), (maze_side * 64, 128)))
     score_text = main_font.render('Score: ' + str(score), False, (255, 255, 255))
     lives_text = main_font.render('Lives: ' + str(lives), False, (255, 255, 255))
     timer_text = main_font.render('Timer: ' + str(config['level_max_time'] - int(actual_timer - start_timer)), False, (255, 255, 255))
-    screen.blit(score_text, (20, maze_height * 64 + 40))
-    screen.blit(lives_text, (maze_width * 64 - 280, maze_height * 64 + 40))
-    screen.blit(timer_text, (330, maze_height * 64 + 40))
+    screen.blit(score_text, (20, maze_side * 64 + 40))
+    screen.blit(lives_text, (maze_side * 64 - 280, maze_side * 64 + 40))
+    screen.blit(timer_text, (330, maze_side * 64 + 40))
 
     keys = pygame.key.get_pressed()
-    player_pos = pacman.player_move(radius, keys)
-    # if (keys[pygame.K_w] or keys[pygame.K_UP]) and player_pos.y > 0:
-    #     player_pos.y -= dt * 2
-    # elif (keys[pygame.K_s] or keys[pygame.K_DOWN]) and player_pos.y < window_h - radius - 128:
-    #     player_pos.y += dt * 2
-    # elif (keys[pygame.K_a] or keys[pygame.K_LEFT]) and player_pos.x > 0:
-    #     player_pos.x -= dt * 2
-    # elif (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and player_pos.x < window_w - radius:
-    #     player_pos.x += dt * 2
+    pacman.player_move(radius, keys)
     if keys[pygame.K_p]:
         pause = True
     if keys[pygame.K_KP_PLUS]:
