@@ -8,8 +8,7 @@ from manip_json import get_highscores, read_config, register_highscore
 config = read_config('config.json')
 maze_side=12
 pygame.init()
-gen = MazeGenerator(size=(maze_side, maze_side),seed=42)
-maze = gen.maze
+maze: list[list[int]] = [[0]*maze_side]*maze_side
 window_w, window_h = 660, 990
 screen = pygame.display.set_mode((window_w, window_h))
 clock = pygame.time.Clock()
@@ -54,20 +53,21 @@ class Walls(pygame.sprite.Sprite):
         # self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
         self.image = pygame.Surface((int(tile_size), int(tile_size)))
         if 'north' in sprite:
-            pygame.draw.line(self.image, 'white', (0, 0), (tile_size-2, 0), 2)
+            pygame.draw.line(self.image, 'navy', (0, 0), (tile_size-2, 0), 4)
         if 'south' in sprite:
-            pygame.draw.line(self.image, 'white', (0, tile_size-2), (tile_size-2, tile_size-2), 2)
+            pygame.draw.line(self.image, 'navy', (0, tile_size-2), (tile_size-2, tile_size-2), 4)
         if 'east' in sprite:
-            pygame.draw.line(self.image, 'white', (tile_size-2, 0), (tile_size-2, tile_size-2), 2)
+            pygame.draw.line(self.image, 'navy', (tile_size-2, 0), (tile_size-2, tile_size-2), 4)
         if 'west' in sprite:
-            pygame.draw.line(self.image, 'white', (0, 0), (0, tile_size), 2)
-        pygame.draw.circle(self.image, 'white', (0, 0), 2)
-        pygame.draw.circle(self.image, 'white', (0, tile_size), 2)
-        pygame.draw.circle(self.image, 'white', (tile_size, 0), 2)
-        pygame.draw.circle(self.image, 'white', (tile_size, tile_size), 2)
+            pygame.draw.line(self.image, 'navy', (0, 0), (0, tile_size), 4)
+        pygame.draw.circle(self.image, 'navy', (0, 0), 3)
+        pygame.draw.circle(self.image, 'navy', (0, tile_size), 3)
+        pygame.draw.circle(self.image, 'navy', (tile_size, 0), 3)
+        pygame.draw.circle(self.image, 'navy', (tile_size, tile_size), 3)
         self.image.set_colorkey('purple')
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
+
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, color, radius):
@@ -152,6 +152,10 @@ class Ghost(Sprite):
     def ghosts(cls):
         return cls._ghosts
 
+    @classmethod
+    def clear_ghosts(cls):
+        cls._ghosts.clear()
+
     def ghost_move(self, radius: int):
         if self.distance == tile_size:
             self.distance = 0
@@ -186,6 +190,7 @@ def quit(state: bool, running: bool) -> tuple[bool, bool]:
     return (state, running)
 
 def back_to_title() -> tuple[bool, bool]:
+    Ghost.clear_ghosts()
     pacman.__init__('yellow', radius, player_pos, (int(maze_side//2), int(maze_side//2)))
     red_g.__init__('red', radius, Vector2(0, 180), (0, 0))
     blue_g.__init__('blue', radius, Vector2(window_w - tile_size , 180), (maze_side-1, 0))
@@ -205,11 +210,13 @@ def back_to_title() -> tuple[bool, bool]:
     return (False, True)
 
 def reset() -> None:
+    Ghost.clear_ghosts()
     pacman.__init__('yellow', radius, player_pos, (int(maze_side//2), int(maze_side//2)))
     red_g.__init__('red', radius, Vector2(0, 180), (0, 0))
     blue_g.__init__('blue', radius, Vector2(window_w - tile_size , 180), (maze_side-1, 0))
     orange_g.__init__('orange', radius, Vector2(0, 180+(maze_side-1)*tile_size), (0, maze_side-1))
     pink_g.__init__('pink', radius, Vector2(window_w - tile_size, 180+(maze_side-1)*tile_size), (maze_side-1, maze_side-1))
+    print(len(Ghost.ghosts()))
     # red_g.rect.x, red_g.rect.y = 0, 180
     # red_g.distance, red_g.pos = 0, (0, 0)
     # blue_g.rect.x, blue_g.rect.y = window_w - tile_size , 180
@@ -231,7 +238,6 @@ def maze_gen(maze: list[list[int]], walls_name: list[str]) -> list[Walls]:
     return walls
 
 
-walls = maze_gen(maze, walls_name)
 pacman = Pacman('yellow', radius, player_pos, (int(maze_side//2), int(maze_side//2)))
 red_g = Ghost('red', radius, Vector2(0, 180), (0, 0))
 blue_g = Ghost('blue', radius, Vector2(window_w - tile_size , 180), (maze_side-1, 0))
@@ -258,6 +264,9 @@ start_time = time.time()
 while running:
 
     if main_title:
+        gen = MazeGenerator(size=(maze_side, maze_side),seed=42)
+        maze = gen.maze
+        walls = maze_gen(maze, walls_name)
 
         score = 0
         lives = config['lives']
@@ -384,17 +393,17 @@ while running:
     sprites_list.add(pink_g)
 
 
-    screen.fill('purple')
+    screen.fill('black')
 
     sprites_list.draw(screen)
 
-    hud_bar = pygame.draw.rect(screen, 'black', ((0, maze_side * 64), (maze_side * 64, 128)))
-    score_text = main_font.render('Score: ' + str(score), False, (255, 255, 255))
-    lives_text = main_font.render('Lives: ' + str(lives), False, (255, 255, 255))
-    timer_text = main_font.render('Timer: ' + str(config['level_max_time'] - int(actual_timer - start_timer)), False, (255, 255, 255))
-    screen.blit(score_text, (20, maze_side * 64 + 40))
-    screen.blit(lives_text, (maze_side * 64 - 280, maze_side * 64 + 40))
-    screen.blit(timer_text, (330, maze_side * 64 + 40))
+    # hud_bar = pygame.draw.rect(screen, 'black', ((0, maze_side * 64), (maze_side * 64, 128)))
+    # score_text = main_font.render('Score: ' + str(score), False, (255, 255, 255))
+    # lives_text = main_font.render('Lives: ' + str(lives), False, (255, 255, 255))
+    # timer_text = main_font.render('Timer: ' + str(config['level_max_time'] - int(actual_timer - start_timer)), False, (255, 255, 255))
+    # screen.blit(score_text, (20, maze_side * 64 + 40))
+    # screen.blit(lives_text, (maze_side * 64 - 280, maze_side * 64 + 40))
+    # screen.blit(timer_text, (330, maze_side * 64 + 40))
 
     keys = pygame.key.get_pressed()
     pacman.player_move(radius, keys)
