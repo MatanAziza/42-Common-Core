@@ -28,7 +28,6 @@ def register_highscore(filename: str , player_name: str, score: int) -> None:
             min_name = name
     highscores.pop(min_name)
     highscores = {key: value for key, value in sorted(highscores.items(), key=lambda item: item[1], reverse=True)}
-    print(highscores)
     highscores = dumps(highscores)
     with open(filename, "w") as f:
         f.write(highscores)
