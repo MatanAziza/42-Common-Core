@@ -9,8 +9,6 @@ window_h, window_w = 1280, 660
 class Walls(pygame.sprite.Sprite):
     def __init__(self, sprite):
         super().__init__()
-        # self.image = pygame.image.load(f'sprites/{sprite}.png')
-        # self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
         self.image = pygame.Surface((int(tile_size), int(tile_size)))
         if 'north' in sprite:
             pygame.draw.line(self.image, 'navy', (0, 0), (tile_size-2, 0), 4)
@@ -125,12 +123,10 @@ class Ghost(Sprite):
             string = dec_to_bin(maze[self.pos[1]][self.pos[0]])
             walls = [int(x) for x in string]
             walls.reverse()
-            print(walls, self.pos[0], self.pos[1]) if self.color == 'red' else 0
             self.cell = walls
             self.direction = randint(0, 3)
             while (walls[self.direction] == 1):
                 self.direction = randint(0, 3)
-            print(self.direction) if self.color == 'red' else 0
             x_axis = [0, 1, 0, -1]
             y_axis = [-1, 0, 1, 0]
             self.pos = (self.pos[0]+x_axis[self.direction], self.pos[1]+y_axis[self.direction])
