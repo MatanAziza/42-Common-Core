@@ -19,7 +19,6 @@ class Blinky(Ghost):
         new_pos = pacman.player_pos()
         if not pacman.can_change and 0 < new_pos[0] <= len(old_maze):
             new_pos = pacman.player_target()
-        else:
         if new_pos != self.target or not self.path:
             self.target = (new_pos[0]-1, new_pos[1]-1)
             if new_pos[0] <= 0:
