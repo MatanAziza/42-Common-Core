@@ -256,7 +256,7 @@ class Ghost(Sprite):
             self.distance = 0
             self.can_change = True
         if self.can_change:
-            string = dec_to_bin(maze[self.pos[1]][self.pos[0]])
+            string = dec_to_bin(old_maze[self.pos[1]-1][self.pos[0]-1])
             walls = [int(x) for x in string]
             walls.reverse()
             self.cell = walls

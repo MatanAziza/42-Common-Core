@@ -17,11 +17,12 @@ class Blinky(Ghost):
                     old_maze: list[list[int]],
                     walls: list[int]) -> None:
         new_pos = pacman.player_pos()
-        print('player pos', new_pos)
         if not pacman.can_change and 0 < new_pos[0] <= len(old_maze):
+            print('travel')
             new_pos = pacman.player_target()
+        else:
+            print('still')
         if new_pos != self.target or not self.path:
-            print(self.target)
             self.target = (new_pos[0]-1, new_pos[1]-1)
             if new_pos[0] <= 0:
                 self.target = (self.target[0]+1, self.target[1])
@@ -30,9 +31,11 @@ class Blinky(Ghost):
             self.path = shortest_path(old_maze,
                                         (self.pos[0]-1, self.pos[1]-1),
                                         self.target)
-        print('check', self.target)
-        if not self.path and (self.target[0] in [0, 1, len(old_maze)-1, len(old_maze)]):
-            self.path.append(self.last_dir%4)
+        if not self.path:
+            if self.target[0] in [0, 1, len(old_maze)-1, len(old_maze)]:
+                self.path.append(self.last_dir%4)
+            elif self.target == (self.pos[0]-1, self.pos[1]-1):
+                self.path.append((self.last_dir+2)%4)
         self.direction = self.path[0]
         self.last_dir = self.path[0]+2
         self.path.pop(0)
