@@ -1,6 +1,7 @@
 from typing import Any
 from json import loads, dumps
 
+
 def read_config(filename: str) -> dict[str, Any]:
     with open(filename, "r") as f:
         stats = f.read()
@@ -15,7 +16,7 @@ def get_highscores(filename: str) -> dict[str, int]:
     return highscores
 
 
-def register_highscore(filename: str , player_name: str, score: int) -> None:
+def register_highscore(filename: str, player_name: str, score: int) -> None:
     with open(filename, "r") as f:
         highscores = f.read()
     highscores = loads(highscores)
@@ -27,7 +28,9 @@ def register_highscore(filename: str , player_name: str, score: int) -> None:
             min_score = score
             min_name = name
     highscores.pop(min_name)
-    highscores = {key: value for key, value in sorted(highscores.items(), key=lambda item: item[1], reverse=True)}
+    highscores = {key: value for key, value in sorted(highscores.items(),
+                                                      key=lambda item: item[1],
+                                                      reverse=True)}
     highscores = dumps(highscores)
     with open(filename, "w") as f:
         f.write(highscores)
