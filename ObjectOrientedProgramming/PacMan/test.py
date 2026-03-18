@@ -1,5 +1,6 @@
 import pygame
-from pygame import Event, Vector2
+from pygame import Vector2
+from pygame.event import Event
 import time
 from ghosts import Blinky, Pinky, Clyde
 from mazegenerator.mazegenerator import MazeGenerator  # type: ignore

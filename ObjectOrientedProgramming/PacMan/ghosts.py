@@ -56,8 +56,8 @@ class Clyde(Ghost):
         new_pos = pacman.player_pos()
         if not pacman.can_change and 0 < new_pos[0] <= len(old_maze):
             new_pos = pacman.player_target()
-        elif ((self.pos[0]-new_pos[0])**2 < 4 or
-              (self.pos[1]-new_pos[1])**2 < 4):
+        elif (-2 <= self.pos[0]-new_pos[0] <= 2 and
+              -2 <= self.pos[1]-new_pos[1] <= 2):
             new_pos = (1, len(old_maze)-1)
         if new_pos != self.target or not self.path:
             self.target = (new_pos[0]-1, new_pos[1]-1)
@@ -101,11 +101,12 @@ class Pinky(Ghost):
                    p_pos[1]+y_axis[p_dir]*radius)
         while radius >= 0:
             if (0 < new_pos[0] <= len(old_maze) and
-               0 < new_pos[1] < len(old_maze)):
+               0 < new_pos[1] <= len(old_maze)):
                 break
             radius -= 1
-            new_pos = (p_pos[0]-x_axis[p_dir], p_pos[1]+y_axis[p_dir])
-        if new_pos != self.target or not self.path:
+            new_pos = (new_pos[0]-x_axis[p_dir], new_pos[1]-y_axis[p_dir])
+        print(p_pos, new_pos, self.target)
+        if (new_pos[0]-1, new_pos[1]-1) != self.target or not self.path:
             self.target = (new_pos[0]-1, new_pos[1]-1)
             if new_pos[0] <= 0:
                 self.target = (self.target[0]+1, self.target[1])
