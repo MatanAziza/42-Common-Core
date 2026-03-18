@@ -20,6 +20,9 @@ class Sprite(pygame.sprite.Sprite, ABC):
         pygame.draw.circle(self.image, color,
                            (tile_size/2+1, tile_size/2+1), radius/2)
         self.rect = self.image.get_rect()
+        self.eatable: bool = False
+        self.dt: int = 2
+        self.path_changed: bool = False
 
     @abstractmethod
     def ghost_move(self, radius: int,
@@ -62,6 +65,7 @@ class Pacman(Sprite):
         self.radius = radius/2
         self.color = color
         self.pos = cell
+        assert self.rect is not None
         self.rect.x = int(pos.x)
         self.rect.y = int(pos.y)
         self.can_change = True
@@ -72,13 +76,14 @@ class Pacman(Sprite):
         self.target = cell
 
     def init(self,
-                 color: str,
-                 radius: float,
-                 pos: Vector2,
-                 cell: tuple[int, int], dt: int = 2) -> None:
+             color: str,
+             radius: float,
+             pos: Vector2,
+             cell: tuple[int, int], dt: int = 2) -> None:
         self.radius = radius/2
         self.color = color
         self.pos = cell
+        assert self.rect is not None
         self.rect.x = int(pos.x)
         self.rect.y = int(pos.y)
         self.can_change = True
@@ -98,17 +103,18 @@ class Pacman(Sprite):
                    pacman: Any) -> None:
         pass
 
-    def player_target(self):
+    def player_target(self) -> tuple[int, int]:
         x_axis = [0, 1, 0, -1]
         y_axis = [-1, 0, 1, 0]
         return (self.pos[0]+x_axis[self.direction],
-                        self.pos[1]+y_axis[self.direction])
+                self.pos[1]+y_axis[self.direction])
 
     def player_move(self,
                     radius: int,
                     keys: ScancodeWrapper, maze: list[list[int]]) -> None:
         x_axis = [0, 1, 0, -1]
         y_axis = [-1, 0, 1, 0]
+        assert self.rect is not None
         if self.distance >= tile_size and not self.can_change:
             self.distance = 0
             self.can_change = True
@@ -119,6 +125,7 @@ class Pacman(Sprite):
                 self.pos = (0, self.pos[1])
             else:
                 self.pos = (maze_side+1, self.pos[1])
+            assert self.rect is not None
             self.rect.x = 0 if self.pos[0] == 0 else int(window_w - tile_size)
             self.image = pygame.Surface([tile_size, tile_size])
             self.image.set_colorkey('black')
@@ -179,6 +186,7 @@ class Pacman(Sprite):
         self.is_tping = True
 
     def tp_rtl(self, radius: float) -> None:
+        assert self.rect is not None
         self.image = pygame.Surface([tile_size+window_w, tile_size])
         self.image.set_colorkey('black')
         self.image.convert_alpha()
@@ -201,12 +209,14 @@ class Ghost(Sprite):
                  target: tuple[int, int],
                  dt: int = 2) -> None:
         super().__init__(color, radius)
+        assert self.rect is not None
         self.radius = radius/2
         self.color = color
         self.rect.x = int(pos.x)
         self.rect.y = int(pos.y)
         self.pos = cell
         self.direction = -1
+        assert self.image is not None
         self.mask = pygame.mask.from_threshold(self.image,
                                                pygame.Color('yellow'),
                                                (1, 1, 1, 255))
@@ -215,18 +225,19 @@ class Ghost(Sprite):
         self.dt = dt
         self.target = (target[0]-1, target[1]-1)
         self.current_target = self.target
-        self.path = []
+        self.path: list[int] = []
         self.eatable = False
         self.path_changed = False
         Ghost._ghosts.append(self)
 
     def init(self,
-                 color: str,
-                 radius: float,
-                 pos: Vector2,
-                 cell: tuple[int, int],
-                 target: tuple[int, int],
-                 dt: int = 2) -> None:
+             color: str,
+             radius: float,
+             pos: Vector2,
+             cell: tuple[int, int],
+             target: tuple[int, int],
+             dt: int = 2) -> None:
+        assert self.rect is not None
         self.radius = radius/2
         self.color = color
         self.rect.x = int(pos.x)
@@ -234,6 +245,7 @@ class Ghost(Sprite):
         self.pos = cell
         Ghost._ghosts.append(self)
         self.direction = -1
+        assert self.image is not None
         self.mask = pygame.mask.from_threshold(self.image,
                                                pygame.Color('yellow'),
                                                (1, 1, 1, 255))
@@ -256,6 +268,7 @@ class Ghost(Sprite):
                    maze: list[list[int]],
                    old_maze: list[list[int]],
                    pacman: Pacman) -> None:
+        assert self.rect is not None
         if self.distance >= tile_size:
             self.distance = 0
             self.can_change = True
@@ -267,7 +280,7 @@ class Ghost(Sprite):
             walls.reverse()
             self.cell = walls
             if self.eatable:
-                self.flee(old_maze, walls)
+                self.flee(old_maze)
             else:
                 self.where_to_go(pacman, old_maze, walls)
             x_axis = [0, 1, 0, -1]
@@ -292,19 +305,19 @@ class Ghost(Sprite):
     def where_to_go(self, pacman: Pacman,
                     old_maze: list[list[int]],
                     walls: list[int]) -> None:
+        assert self.rect is not None
         self.direction = randint(0, 3)
         while (walls[self.direction] == 1):
             self.direction = randint(0, 3)
 
-    def flee(self, maze: list[list[int]],
-             walls: list[int]) -> None:
+    def flee(self, maze: list[list[int]]) -> None:
         scatter = {'red': (0, 1),
-                'blue': (len(maze)-1, 1),
-                'orange': (0, len(maze)-2),
-                'pink': (len(maze)-1, len(maze)-2)}
+                   'blue': (len(maze)-1, 1),
+                   'orange': (0, len(maze)-2),
+                   'pink': (len(maze)-1, len(maze)-2)}
         if self.eatable and not self.path_changed:
             self.path = shortest_path(maze, (self.pos[0]-1, self.pos[1]-1),
-                                    scatter[self.color])
+                                      scatter[self.color])
             self.path_changed = True
         self.direction = self.path[0] if self.path else -1
         self.path.pop(0) if self.path else 0

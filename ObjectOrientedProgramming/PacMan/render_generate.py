@@ -1,10 +1,12 @@
 import pygame
-# from manip_json import read_config, get_highscores
+from pygame import Event
 from typing import Any
-import pygame_textinput as py_text
+import pygame_textinput as py_text  # type: ignore[import-untyped]
 
 
-def create_fonts() -> tuple[pygame.font, pygame.font, pygame.font]:
+def create_fonts() -> tuple[pygame.font.Font,
+                            pygame.font.Font,
+                            pygame.font.Font]:
     main_font = pygame.font.SysFont('Nimbus Mono PS', 70)
     reduced_font = pygame.font.SysFont('Nimbus Mono PS', 30)
     hs_font = pygame.font.SysFont('Nimbus Mono PS', 20)
@@ -126,7 +128,8 @@ def l_s_render() -> pygame.surface.Surface:
     return loading_text
 
 
-def l_s_generate(screen: pygame.surface.Surface, loading_text: pygame.surface.Surface) -> None:
+def l_s_generate(screen: pygame.surface.Surface,
+                 loading_text: pygame.surface.Surface) -> None:
     screen.fill('black')
     screen.blit(loading_text, (180, 500))
 
@@ -167,15 +170,15 @@ def g_o_render(score: int) -> tuple[pygame.surface.Surface,
                                     pygame.surface.Surface,
                                     pygame.surface.Surface,
                                     pygame.surface.Surface,
-                                    pygame.surface.Surface]:
+                                    py_text.TextInputVisualizer]:
     main_font, reduced_font, _ = create_fonts()
 
     g_o_text = main_font.render('Game Over', False, (255, 0, 0))
     g_o_score_text = main_font.render('Score', False, (255, 0, 0))
     g_o_score = main_font.render(str(score), False, (255, 0, 0))
-    g_o_name = reduced_font.render('Enter your name (max 10 characters)', False,
+    g_o_name = reduced_font.render('Enter your name (max 10 characters)',
+                                   False,
                                    (255, 0, 0))
-    
     text_input = py_text.TextInputVisualizer()
     return (g_o_text, g_o_score_text, g_o_score, g_o_name, text_input)
 
@@ -186,7 +189,7 @@ def g_o_generate(screen: pygame.surface.Surface,
                  g_o_score: pygame.surface.Surface,
                  g_o_name: pygame.surface.Surface,
                  g_o_text_input: py_text.pygame_textinput.TextInputVisualizer,
-                 events: list) -> None:
+                 events: Event | list[Event]) -> None:
 
     screen.fill('black')
 
@@ -196,7 +199,7 @@ def g_o_generate(screen: pygame.surface.Surface,
     screen.blit(g_o_name, (20, 600))
 
     g_o_text_input.update(events)
-    g_o_text_input.font_color = (255, 0 , 0)
+    g_o_text_input.font_color = (255, 0, 0)
     g_o_text_input.cursor_color = 'red'
     screen.blit(g_o_text_input.surface, (250, 650))
 
