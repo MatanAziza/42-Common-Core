@@ -2,6 +2,7 @@ from pygame import Vector2
 from sprites import Ghost, Pacman
 from djikstra import shortest_path
 
+
 class Blinky(Ghost):
     def __init__(self,
                  color: str,
@@ -26,13 +27,13 @@ class Blinky(Ghost):
             if new_pos[0] > len(old_maze):
                 self.target = (self.target[0]-1, self.target[1])
             self.path = shortest_path(old_maze,
-                                        (self.pos[0]-1, self.pos[1]-1),
-                                        self.target)
+                                      (self.pos[0]-1, self.pos[1]-1),
+                                      self.target)
         if not self.path:
             if self.target[0] in [0, 1, len(old_maze)-1, len(old_maze)]:
-                self.path.append(self.last_dir%4)
+                self.path.append(self.last_dir % 4)
             elif self.target == (self.pos[0]-1, self.pos[1]-1):
-                self.path.append((self.last_dir+2)%4)
+                self.path.append((self.last_dir+2) % 4)
         self.direction = self.path[0]
         self.last_dir = self.path[0]+2
         self.path.pop(0)
