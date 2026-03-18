@@ -1,7 +1,7 @@
 import pygame
 from pygame import Event, Vector2
 import time
-from ghosts import Blinky, Pinky
+from ghosts import Blinky, Pinky, Clyde
 from mazegenerator.mazegenerator import MazeGenerator  # type: ignore
 from sprites import Pacman, Ghost, Walls, maze_side
 from manip_json import get_highscores, read_config, register_highscore
@@ -182,10 +182,10 @@ if __name__ == "__main__":
                                 Vector2(window_w - 2 * tile_size,
                                         top_offset + 2*tile_size),
                                 (maze_side, 2), player_coord)
-                orange_g = Blinky('orange', radius,
-                                  Vector2(tile_size,
-                                          top_offset+(maze_side-1)*tile_size),
-                                  (1, maze_side-1), player_coord)
+                orange_g = Clyde('orange', radius,
+                                 Vector2(tile_size,
+                                         top_offset+(maze_side-1)*tile_size),
+                                 (1, maze_side-1), player_coord)
                 pink_g = Pinky('pink', radius,
                                Vector2(window_w - 2 * tile_size,
                                        top_offset+(maze_side-1)*tile_size),
