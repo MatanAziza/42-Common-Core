@@ -9,9 +9,8 @@ class Blinky(Ghost):
                  radius: float,
                  pos: Vector2,
                  cell: tuple[int, int],
-                 target: tuple[int, int],
-                 dt: int = 2) -> None:
-        super().__init__(color, radius, pos, cell, target, dt)
+                 target: tuple[int, int],) -> None:
+        super().__init__(color, radius, pos, cell, target)
         self.last_dir = 0
 
     def where_to_go(self, pacman: Pacman,
@@ -45,9 +44,8 @@ class Clyde(Ghost):
                  radius: float,
                  pos: Vector2,
                  cell: tuple[int, int],
-                 target: tuple[int, int],
-                 dt: int = 2) -> None:
-        super().__init__(color, radius, pos, cell, target, dt)
+                 target: tuple[int, int]) -> None:
+        super().__init__(color, radius, pos, cell, target)
         self.last_dir = 0
 
     def where_to_go(self, pacman: Pacman,
@@ -84,9 +82,8 @@ class Pinky(Ghost):
                  radius: float,
                  pos: Vector2,
                  cell: tuple[int, int],
-                 target: tuple[int, int],
-                 dt: int = 2) -> None:
-        super().__init__(color, radius, pos, cell, target, dt)
+                 target: tuple[int, int],) -> None:
+        super().__init__(color, radius, pos, cell, target)
         self.last_dir = 0
 
     def where_to_go(self, pacman: Pacman,
@@ -105,7 +102,6 @@ class Pinky(Ghost):
                 break
             radius -= 1
             new_pos = (new_pos[0]-x_axis[p_dir], new_pos[1]-y_axis[p_dir])
-        print(p_pos, new_pos, self.target)
         if (new_pos[0]-1, new_pos[1]-1) != self.target or not self.path:
             self.target = (new_pos[0]-1, new_pos[1]-1)
             if new_pos[0] <= 0:

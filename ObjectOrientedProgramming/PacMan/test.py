@@ -256,6 +256,7 @@ if __name__ == "__main__":
                 ghost.path_changed = False
                 ghost.dt = 2
         pacman.player_move(int(radius), keys, maze)
+        print('pacman speed: ', pacman.dt)
         assert pacman.rect is not None
         if pacman.rect.x < 0:
             pacman.tp_ltr(radius)
@@ -270,10 +271,11 @@ if __name__ == "__main__":
             lives = 0
 
         actual_time = time.time()
-        if actual_time - start_time >= 0.025:
+        if actual_time - start_time >= 0.0125:
             for ghost in Ghost.ghosts():
                 ghost.ghost_move(int(radius), maze,
                                  old_maze, pacman)
+                print(f'{ghost.color} is going {ghost.dt}')
             start_time = time.time()
 
         ghosts = Ghost.ghosts()

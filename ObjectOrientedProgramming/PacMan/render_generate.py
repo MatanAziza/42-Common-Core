@@ -1,5 +1,5 @@
 import pygame
-from pygame import Event
+from pygame.event import Event
 from typing import Any
 import pygame_textinput as py_text  # type: ignore[import-untyped]
 
