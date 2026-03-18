@@ -79,7 +79,7 @@ class Pacman(Sprite):
              color: str,
              radius: float,
              pos: Vector2,
-             cell: tuple[int, int], dt: int = 2) -> None:
+             cell: tuple[int, int], dt: int = 1) -> None:
         self.radius = radius/2
         self.color = color
         self.pos = cell
@@ -236,7 +236,7 @@ class Ghost(Sprite):
              pos: Vector2,
              cell: tuple[int, int],
              target: tuple[int, int],
-             dt: int = 2) -> None:
+             dt: int = 1) -> None:
         assert self.rect is not None
         self.radius = radius/2
         self.color = color

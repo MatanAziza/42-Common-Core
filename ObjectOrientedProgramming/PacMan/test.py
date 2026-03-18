@@ -107,6 +107,7 @@ if __name__ == "__main__":
     tick = 60
     eatable_start: float = 0
     eatable_timer: float = 0
+    refresh_rate = 0.0125
     walls_name = [
         'no_walls',
         'north',
@@ -245,7 +246,7 @@ if __name__ == "__main__":
             eatable_start = time.time()
             for ghost in Ghost.ghosts():
                 ghost.eatable = not ghost.eatable
-                ghost.dt = 1
+            refresh_rate = 0.025
         if eatable_start != 0:
             eatable_timer = time.time()
         if eatable_timer - eatable_start >= 5:
@@ -254,9 +255,8 @@ if __name__ == "__main__":
             for ghost in Ghost.ghosts():
                 ghost.eatable = not ghost.eatable
                 ghost.path_changed = False
-                ghost.dt = 2
+            refresh_rate = 0.0125
         pacman.player_move(int(radius), keys, maze)
-        print('pacman speed: ', pacman.dt)
         assert pacman.rect is not None
         if pacman.rect.x < 0:
             pacman.tp_ltr(radius)
@@ -271,11 +271,10 @@ if __name__ == "__main__":
             lives = 0
 
         actual_time = time.time()
-        if actual_time - start_time >= 0.0125:
+        if actual_time - start_time >= refresh_rate:
             for ghost in Ghost.ghosts():
                 ghost.ghost_move(int(radius), maze,
                                  old_maze, pacman)
-                print(f'{ghost.color} is going {ghost.dt}')
             start_time = time.time()
 
         ghosts = Ghost.ghosts()
@@ -290,6 +289,7 @@ if __name__ == "__main__":
                 lst.append(False)
         if True in lst:
             lives -= 1
+            refresh_rate = 0.0125
             reset(tile_size, top_offset, window_w, maze_side, player_coord)
             sprites_list.add(pacman)
             sprites_list.add(red_g)

@@ -115,7 +115,8 @@ class Pinky(Ghost):
             if self.target[0] in [0, 1, len(old_maze)-1, len(old_maze)]:
                 self.path.append(self.last_dir % 4)
             elif self.target == (self.pos[0]-1, self.pos[1]-1):
+                print(self.last_dir)
                 self.path.append((self.last_dir+2) % 4)
         self.direction = self.path[0]
-        self.last_dir = self.path[0]+2
+        self.last_dir = self.path[0]
         self.path.pop(0)
