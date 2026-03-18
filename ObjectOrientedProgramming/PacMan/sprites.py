@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import pygame
 from pygame import K_RIGHT, K_LEFT, K_UP, K_DOWN, K_a, K_w, K_s, K_d, Vector2
 from pygame.key import ScancodeWrapper
+from djikstra import shortest_path
 from utils import dec_to_bin
 from random import randint
 from typing import Any
@@ -56,7 +57,7 @@ class Pacman(Sprite):
                  color: str,
                  radius: float,
                  pos: Vector2,
-                 cell: tuple[int, int], dt: int = 1) -> None:
+                 cell: tuple[int, int], dt: int = 2) -> None:
         super().__init__(color, radius)
         self.radius = radius/2
         self.color = color
@@ -74,7 +75,7 @@ class Pacman(Sprite):
                  color: str,
                  radius: float,
                  pos: Vector2,
-                 cell: tuple[int, int], dt: int = 1) -> None:
+                 cell: tuple[int, int], dt: int = 2) -> None:
         self.radius = radius/2
         self.color = color
         self.pos = cell
@@ -198,7 +199,7 @@ class Ghost(Sprite):
                  pos: Vector2,
                  cell: tuple[int, int],
                  target: tuple[int, int],
-                 dt: int = 1) -> None:
+                 dt: int = 2) -> None:
         super().__init__(color, radius)
         self.radius = radius/2
         self.color = color
@@ -215,6 +216,8 @@ class Ghost(Sprite):
         self.target = (target[0]-1, target[1]-1)
         self.current_target = self.target
         self.path = []
+        self.eatable = False
+        self.path_changed = False
         Ghost._ghosts.append(self)
 
     def init(self,
@@ -223,7 +226,7 @@ class Ghost(Sprite):
                  pos: Vector2,
                  cell: tuple[int, int],
                  target: tuple[int, int],
-                 dt: int = 1) -> None:
+                 dt: int = 2) -> None:
         self.radius = radius/2
         self.color = color
         self.rect.x = int(pos.x)
@@ -239,6 +242,7 @@ class Ghost(Sprite):
         self.dt = dt
         self.target = target
         self.path = []
+        self.eatable = False
 
     @classmethod
     def ghosts(cls) -> list[Sprite]:
@@ -256,15 +260,21 @@ class Ghost(Sprite):
             self.distance = 0
             self.can_change = True
         if self.can_change:
+            self.rect.x = self.pos[0]*tile_size
+            self.rect.y = self.pos[1]*tile_size + 120
             string = dec_to_bin(old_maze[self.pos[1]-1][self.pos[0]-1])
             walls = [int(x) for x in string]
             walls.reverse()
             self.cell = walls
-            self.where_to_go(pacman, old_maze, walls)
+            if self.eatable:
+                self.flee(old_maze, walls)
+            else:
+                self.where_to_go(pacman, old_maze, walls)
             x_axis = [0, 1, 0, -1]
             y_axis = [-1, 0, 1, 0]
-            self.pos = (self.pos[0]+x_axis[self.direction],
-                        self.pos[1]+y_axis[self.direction])
+            if self.direction != -1:
+                self.pos = (self.pos[0]+x_axis[self.direction],
+                            self.pos[1]+y_axis[self.direction])
             self.can_change = False
         move = self.direction
         max_w = window_w - radius
@@ -285,3 +295,16 @@ class Ghost(Sprite):
         self.direction = randint(0, 3)
         while (walls[self.direction] == 1):
             self.direction = randint(0, 3)
+
+    def flee(self, maze: list[list[int]],
+             walls: list[int]) -> None:
+        scatter = {'red': (0, 1),
+                'blue': (len(maze)-1, 1),
+                'orange': (0, len(maze)-2),
+                'pink': (len(maze)-1, len(maze)-2)}
+        if self.eatable and not self.path_changed:
+            self.path = shortest_path(maze, (self.pos[0]-1, self.pos[1]-1),
+                                    scatter[self.color])
+            self.path_changed = True
+        self.direction = self.path[0] if self.path else -1
+        self.path.pop(0) if self.path else 0

@@ -2,6 +2,7 @@ import pygame
 from pygame import Vector2
 import time
 from ghosts import Blinky
+from djikstra import shortest_path
 from mazegenerator.mazegenerator import MazeGenerator
 from sprites import Pacman, Ghost, Walls, maze_side
 from manip_json import get_highscores, read_config, register_highscore
@@ -103,6 +104,8 @@ if __name__ == "__main__":
     player_pos = Vector2((maze_side//2 + 1)*tile_size,
                          (maze_side//2 + 1)*tile_size + top_offset)
     tick = 60
+    eatable_start = 0
+    eatable_timer = 0
     walls_name = [
         'no_walls',
         'north',
@@ -172,15 +175,15 @@ if __name__ == "__main__":
                 red_g = Blinky('red', radius,
                               Vector2(tile_size, top_offset + tile_size),
                               (1, 1), player_coord)
-                blue_g = Ghost('blue', radius,
+                blue_g = Blinky('blue', radius,
                                Vector2(window_w - 2 * tile_size,
                                        top_offset + tile_size),
                                (maze_side, 1), player_coord)
-                orange_g = Ghost('orange', radius,
+                orange_g = Blinky('orange', radius,
                                  Vector2(tile_size,
                                          top_offset+(maze_side)*tile_size),
                                  (1, maze_side), player_coord)
-                pink_g = Ghost('pink', radius,
+                pink_g = Blinky('pink', radius,
                                Vector2(window_w - 2 * tile_size,
                                        top_offset+(maze_side)*tile_size),
                                (maze_side, maze_side), player_coord)
@@ -230,8 +233,20 @@ if __name__ == "__main__":
 
         start = False
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_i]:
-            print("hehe")
+        if keys[pygame.K_e] and eatable_timer - eatable_start <= 0:
+            eatable_start = time.time()
+            for ghost in Ghost.ghosts():
+                ghost.eatable = not ghost.eatable
+                ghost.dt = 1
+        if eatable_start != 0:
+            eatable_timer = time.time()
+        if eatable_timer - eatable_start >= 5:
+            eatable_timer = 0
+            eatable_start = 0
+            for ghost in Ghost.ghosts():
+                ghost.eatable = not ghost.eatable
+                ghost.path_changed = False
+                ghost.dt = 2
         pacman.player_move(int(radius), keys, maze)
         if pacman.rect.x < 0:
             pacman.tp_ltr(radius)
@@ -246,7 +261,7 @@ if __name__ == "__main__":
             lives = 0
 
         actual_time = time.time()
-        if actual_time - start_time >= 0.0125:
+        if actual_time - start_time >= 0.025:
             for ghost in Ghost.ghosts():
                 ghost.ghost_move(int(radius), maze,
                                  old_maze, pacman)
@@ -257,7 +272,7 @@ if __name__ == "__main__":
         #   ghosts, pygame.sprite.collide_mask):
         lst = []
         for ghost in ghosts:
-            if pygame.sprite.collide_circle(pacman, ghost):
+            if pygame.sprite.collide_circle(pacman, ghost) and not ghost.eatable:
                 lst.append(True)
             else:
                 lst.append(False)

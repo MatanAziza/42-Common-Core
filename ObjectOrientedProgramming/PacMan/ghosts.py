@@ -9,7 +9,7 @@ class Blinky(Ghost):
                  pos: Vector2,
                  cell: tuple[int, int],
                  target: tuple[int, int],
-                 dt: int = 1) -> None:
+                 dt: int = 2) -> None:
         super().__init__(color, radius, pos, cell, target, dt)
         self.last_dir = 0
 
