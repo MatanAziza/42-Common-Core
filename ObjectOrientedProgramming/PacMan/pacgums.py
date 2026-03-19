@@ -1,6 +1,5 @@
 from sprites import Sprite, tile_size
 from typing import Any
-import pygame
 
 top_offset = 120
 
@@ -37,7 +36,7 @@ def pacgums_gen(maze_side: int,
                 pacman_coord: tuple[int, int]) -> list[Pacgum]:
 
     pacman_pos_x, pacman_pos_y = pacman_coord
-    pacgums_list: list[Pacgum] = [] 
+    pacgums_list: list[Pacgum] = []
     for y in range(1, maze_side + 1):
         for x in range(1, maze_side + 1):
             if ((x == 1 and y == 1) or

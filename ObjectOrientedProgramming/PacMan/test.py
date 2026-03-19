@@ -2,7 +2,7 @@ import pygame
 from pygame import Vector2
 from pygame.event import Event
 import time
-from ghosts import Blinky, Pinky, Clyde
+from ghosts import Blinky, Clyde
 from mazegenerator.mazegenerator import MazeGenerator  # type: ignore
 from sprites import Pacman, Ghost, Walls, maze_side
 from manip_json import get_highscores, read_config, register_highscore
@@ -10,7 +10,7 @@ from render_generate import main_title_render, main_title_generate
 from render_generate import pause_render, pause_generate, g_o_render
 from render_generate import g_o_generate, hud_render, hud_generate
 from render_generate import l_s_generate, l_s_render
-from pacgums import pacgums_gen, SuperPacgum
+from pacgums import Pacgum, pacgums_gen, SuperPacgum
 # 6, 8/, 10, 11, 12, 15, 16//, 20, 22, 24/, 25/, 30: 660 divisible by these
 
 
@@ -193,9 +193,10 @@ if __name__ == "__main__":
                                          top_offset+(maze_side-1)*tile_size),
                                  (1, maze_side-1), player_coord, 'clyde')
                 pink_g = Blinky('pink', radius,
-                               Vector2(window_w - 2 * tile_size,
-                                       top_offset+(maze_side-1)*tile_size),
-                               (maze_side, maze_side-1), player_coord, 'pinky')
+                                Vector2(window_w - 2 * tile_size,
+                                        top_offset+(maze_side-1)*tile_size),
+                                (maze_side, maze_side-1),
+                                player_coord, 'pinky')
                 start_time = time.time()
                 start_timer = time.time()
             else:
@@ -216,11 +217,11 @@ if __name__ == "__main__":
                                            orange_g,
                                            pink_g)
 
-        walls_sprites = pygame.sprite.Group()
+        walls_sprites: pygame.sprite.Group[Walls] = pygame.sprite.Group()
         for cell in walls:
             walls_sprites.add(cell)
 
-        pacgums_sprites = pygame.sprite.Group()
+        pacgums_sprites: pygame.sprite.Group[Pacgum] = pygame.sprite.Group()
         for pacgum in pacgums:
             pacgums_sprites.add(pacgum)
 
@@ -254,7 +255,8 @@ if __name__ == "__main__":
         start = False
 
         keys = pygame.key.get_pressed()
-        if (keys[pygame.K_e] or ghost_eatable) and eatable_timer - eatable_start <= 0:
+        if (keys[pygame.K_e] or
+           ghost_eatable) and eatable_timer - eatable_start <= 0:
             eatable_start = time.time()
             for ghost in Ghost.ghosts():
                 ghost.eatable = not ghost.eatable
@@ -274,20 +276,21 @@ if __name__ == "__main__":
             refresh_rate = 0.0125
 
         for pacgum in pacgums_sprites:
-            if pygame.sprite.collide_circle(pacman, pacgum) and not pacgum.eaten:
+            if (pygame.sprite.collide_circle(pacman, pacgum) and
+                    not pacgum.eaten):
                 score += pacgum.score
                 pacgum.radius = 0
                 pacgum.score = 0
                 pacgum.eaten = True
                 nb_of_pg_eaten += 1
-                pygame.draw.rect(pacgum.image, 'black', ((0, 0), (tile_size, tile_size)))
+                pygame.draw.rect(pacgum.image, 'black',
+                                 ((0, 0), (tile_size, tile_size)))
                 pygame.display.flip()
                 if isinstance(pacgum, SuperPacgum):
                     ghost_eatable = True
 
-
         pacman.player_move(int(radius), keys, maze)
-        pacman.animate()
+        pacman.animate(0)
         assert pacman.rect is not None
         if pacman.rect.x < 0:
             pacman.tp_ltr(radius)

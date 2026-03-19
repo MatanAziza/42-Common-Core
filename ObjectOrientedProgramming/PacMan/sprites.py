@@ -33,6 +33,9 @@ class Sprite(pygame.sprite.Sprite, ABC):
                    pacman: Any) -> None:
         pass
 
+    def animate(self, timer: float) -> None:
+        pass
+
 
 class Walls(Sprite):
     def __init__(self, sprite: str) -> None:
@@ -103,7 +106,7 @@ class Pacman(Sprite):
         self.dt = dt
         self.target = cell
 
-    def animate(self):
+    def animate(self, timer: float) -> None:
         dir = ['up', 'right', 'down', 'left']
         f = 1 if self.distance % (tile_size/2) < tile_size/8 else 2
         f = f if self.distance % (tile_size/2) < tile_size/4 else 3
@@ -240,8 +243,9 @@ class Ghost(Sprite):
         self.rad = radius
         self.radius = radius/2.1
         self.name = name
-        img = pygame.transform.scale(pygame.image.load(f'ghosts/{name}_left_1.png'),
-                                        (radius, radius))
+        img = pygame.transform.scale(
+            pygame.image.load(f'ghosts/{name}_left_1.png'),
+            (radius, radius))
         img.set_colorkey('black')
         img.convert_alpha()
         self.color = color
@@ -279,7 +283,7 @@ class Ghost(Sprite):
         self.radius = radius/2.5
         img = pygame.transform.scale(
             pygame.image.load(f'ghosts/{name}_left_1.png'),
-                                        (radius, radius))
+            (radius, radius))
         img.set_colorkey('black')
         img.convert_alpha()
         self.color = color
@@ -301,7 +305,7 @@ class Ghost(Sprite):
         self.path = []
         self.eatable = False
 
-    def animate(self, timer: float):
+    def animate(self, timer: float) -> None:
         dir = ['up', 'right', 'down', 'left']
         f = 1 if self.distance % (tile_size/4) < tile_size/8 else 2
         self.image = pygame.Surface((tile_size, tile_size))
