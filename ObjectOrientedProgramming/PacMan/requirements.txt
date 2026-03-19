@@ -1,0 +1,6 @@
+pip==26.0.1
+pygame==2.6.1
+pygame_ce==2.5.7
+pygame_textinput==1.0.1
+mypy==1.19.1
+./mazegenerator-2.0.0-py3-none-any.whl

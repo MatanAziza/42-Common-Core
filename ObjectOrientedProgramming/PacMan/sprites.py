@@ -6,7 +6,7 @@ from djikstra import shortest_path
 from utils import dec_to_bin
 from random import randint
 from typing import Any
-maze_side = 13
+maze_side = 10
 tile_size: float = 660/(maze_side+2)
 window_h, window_w = 1280, 660
 
@@ -21,7 +21,9 @@ class Sprite(pygame.sprite.Sprite, ABC):
                            (tile_size/2+1, tile_size/2+1), radius/2)
         self.rect = self.image.get_rect()
         self.eatable: bool = False
-        self.dt: int = 2
+        self.eaten: bool = False
+        self.color = ''
+        self.dt: int = 1
         self.path_changed: bool = False
 
     @abstractmethod
@@ -32,9 +34,9 @@ class Sprite(pygame.sprite.Sprite, ABC):
         pass
 
 
-class Walls(pygame.sprite.Sprite):
+class Walls(Sprite):
     def __init__(self, sprite: str) -> None:
-        super().__init__()
+        super().__init__('black', 0)
         self.image = pygame.Surface((int(tile_size), int(tile_size)))
         self.image.set_colorkey('black')
         self.image.convert_alpha()
@@ -47,12 +49,18 @@ class Walls(pygame.sprite.Sprite):
             pygame.draw.line(self.image, 'navy', (tile_size-2, 0),
                              (tile_size-2, tile_size-2), 4)
         if 'west' in sprite:
-            pygame.draw.line(self.image, 'navy', (0, 0), (0, tile_size), 4)
+            pygame.draw.line(self.image, 'navy', (0, 0), (0, tile_size-2), 4)
         pygame.draw.circle(self.image, 'navy', (0, 0), 3)
         pygame.draw.circle(self.image, 'navy', (0, tile_size), 3)
         pygame.draw.circle(self.image, 'navy', (tile_size, 0), 3)
         pygame.draw.circle(self.image, 'navy', (tile_size, tile_size), 3)
         self.rect = self.image.get_rect()
+
+    def ghost_move(self, radius: int,
+                   maze: list[list[int]],
+                   old_maze: list[list[int]],
+                   pacman: Any) -> None:
+        pass
 
 
 class Pacman(Sprite):
@@ -62,7 +70,8 @@ class Pacman(Sprite):
                  pos: Vector2,
                  cell: tuple[int, int], dt: int = 1) -> None:
         super().__init__(color, radius)
-        self.radius = radius/2
+        self.rad = radius
+        self.radius = radius/2.5
         self.color = color
         self.pos = cell
         assert self.rect is not None
@@ -80,7 +89,8 @@ class Pacman(Sprite):
              radius: float,
              pos: Vector2,
              cell: tuple[int, int], dt: int = 1) -> None:
-        self.radius = radius/2
+        self.rad = radius
+        self.radius = radius/2.5
         self.color = color
         self.pos = cell
         assert self.rect is not None
@@ -92,6 +102,22 @@ class Pacman(Sprite):
         self.next_direction = 1
         self.dt = dt
         self.target = cell
+
+    def animate(self):
+        dir = ['up', 'right', 'down', 'left']
+        f = 1 if self.distance % (tile_size/2) < tile_size/8 else 2
+        f = f if self.distance % (tile_size/2) < tile_size/4 else 3
+        f = f if self.distance % (tile_size/2) < 3*tile_size/8 else 4
+        self.image = pygame.Surface((tile_size, tile_size))
+        self.image.set_colorkey('black')
+        self.image.convert_alpha()
+        name = f'{dir[self.direction]}_{f}'
+        img = pygame.transform.scale(pygame.image.load(
+            f'pacman/{name}.png'), (self.rad, self.rad))
+        img.set_colorkey('black')
+        img.convert_alpha()
+        pygame.Surface.blit(self.image, img, (tile_size/2-self.rad/2,
+                                              tile_size/2-self.rad/2))
 
     def player_pos(self) -> tuple[int, int]:
         return self.pos
@@ -207,13 +233,22 @@ class Ghost(Sprite):
                  pos: Vector2,
                  cell: tuple[int, int],
                  target: tuple[int, int],
+                 name: str,
                  dt: int = 1) -> None:
-        super().__init__(color, radius)
+        super().__init__('black', radius)
         assert self.rect is not None
-        self.radius = radius/2
+        self.rad = radius
+        self.radius = radius/2.1
+        self.name = name
+        img = pygame.transform.scale(pygame.image.load(f'ghosts/{name}_left_1.png'),
+                                        (radius, radius))
+        img.set_colorkey('black')
+        img.convert_alpha()
         self.color = color
         self.rect.x = int(pos.x)
         self.rect.y = int(pos.y)
+        pygame.Surface.blit(self.image, img, (tile_size/2-self.rad/2,
+                                              tile_size/2-self.rad/2))
         self.pos = cell
         self.direction = -1
         assert self.image is not None
@@ -227,6 +262,7 @@ class Ghost(Sprite):
         self.current_target = self.target
         self.path: list[int] = []
         self.eatable = False
+        self.eaten = False
         self.path_changed = False
         Ghost._ghosts.append(self)
 
@@ -236,12 +272,21 @@ class Ghost(Sprite):
              pos: Vector2,
              cell: tuple[int, int],
              target: tuple[int, int],
+             name: str,
              dt: int = 1) -> None:
         assert self.rect is not None
-        self.radius = radius/2
+        self.rad = radius
+        self.radius = radius/2.5
+        img = pygame.transform.scale(
+            pygame.image.load(f'ghosts/{name}_left_1.png'),
+                                        (radius, radius))
+        img.set_colorkey('black')
+        img.convert_alpha()
         self.color = color
         self.rect.x = int(pos.x)
         self.rect.y = int(pos.y)
+        pygame.Surface.blit(self.image, img, (tile_size/2-self.rad/2,
+                                              tile_size/2-self.rad/2))
         self.pos = cell
         Ghost._ghosts.append(self)
         self.direction = -1
@@ -255,6 +300,29 @@ class Ghost(Sprite):
         self.target = target
         self.path = []
         self.eatable = False
+
+    def animate(self, timer: float):
+        dir = ['up', 'right', 'down', 'left']
+        f = 1 if self.distance % (tile_size/4) < tile_size/8 else 2
+        self.image = pygame.Surface((tile_size, tile_size))
+        self.image.set_colorkey('black')
+        self.image.convert_alpha()
+        name = f'{self.name}_{dir[self.direction]}_{f}'
+        if self.eatable and not self.eaten and timer >= 3:
+            f = 1 if self.distance % (tile_size/2) < tile_size/8 else 2
+            f = f if self.distance % (tile_size/2) < tile_size/4 else 3
+            f = f if self.distance % (tile_size/2) < 3*tile_size/8 else 4
+        if self.eatable and not self.eaten:
+            name = f'eatable_{f}'
+        elif self.eatable and self.eaten:
+            name = f'eyes_{dir[self.direction]}'
+        img = pygame.transform.scale(pygame.image.load(
+            f'ghosts/{name}.png'),
+                                     (self.rad, self.rad))
+        img.set_colorkey('black')
+        img.convert_alpha()
+        pygame.Surface.blit(self.image, img, (tile_size/2-self.rad/2,
+                                              tile_size/2-self.rad/2))
 
     @classmethod
     def ghosts(cls) -> list[Sprite]:
@@ -273,8 +341,8 @@ class Ghost(Sprite):
             self.distance = 0
             self.can_change = True
         if self.can_change:
-            self.rect.x = self.pos[0]*tile_size
-            self.rect.y = self.pos[1]*tile_size + 120
+            self.rect.x = int(self.pos[0]*tile_size)
+            self.rect.y = int(self.pos[1]*tile_size + 120)
             string = dec_to_bin(old_maze[self.pos[1]-1][self.pos[0]-1])
             walls = [int(x) for x in string]
             walls.reverse()
@@ -312,7 +380,7 @@ class Ghost(Sprite):
 
     def flee(self, maze: list[list[int]]) -> None:
         scatter = {'red': (0, 1),
-                   'blue': (len(maze)-1, 1),
+                   'cyan': (len(maze)-1, 1),
                    'orange': (0, len(maze)-2),
                    'pink': (len(maze)-1, len(maze)-2)}
         if self.eatable and not self.path_changed:

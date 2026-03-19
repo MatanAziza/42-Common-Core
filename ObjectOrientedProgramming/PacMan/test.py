@@ -10,7 +10,7 @@ from render_generate import main_title_render, main_title_generate
 from render_generate import pause_render, pause_generate, g_o_render
 from render_generate import g_o_generate, hud_render, hud_generate
 from render_generate import l_s_generate, l_s_render
-from pacgums import pacgums_gen
+from pacgums import pacgums_gen, SuperPacgum
 # 6, 8/, 10, 11, 12, 15, 16//, 20, 22, 24/, 25/, 30: 660 divisible by these
 
 
@@ -28,18 +28,18 @@ def back_to_title(tile_size: float,
                   player_coord: tuple[int, int]) -> tuple[bool, bool]:
     Ghost.clear_ghosts()
     pacman.init('yellow', radius, player_pos, player_coord)
-    red_g.init('red', radius, Vector2(tile_size, top_offset + tile_size),
-               (1, 2), player_coord)
-    blue_g.init('blue', radius,
+    red_g.init('red', radius, Vector2(tile_size, top_offset + 2*tile_size),
+               (1, 2), player_coord, 'blinky')
+    blue_g.init('cyan', radius,
                 Vector2(window_w - 2 * tile_size, top_offset + tile_size),
-                (maze_side, 2), player_coord)
+                (maze_side, 2), player_coord, 'inky')
     orange_g.init('orange', radius,
                   Vector2(tile_size, top_offset+(maze_side)*tile_size),
-                  (1, maze_side-1), player_coord)
+                  (1, maze_side-1), player_coord, 'clyde')
     pink_g.init('pink', radius,
                 Vector2(window_w - 2 * tile_size,
                         top_offset+(maze_side)*tile_size),
-                (maze_side, maze_side-1), player_coord)
+                (maze_side, maze_side-1), player_coord, 'pinky')
 
     return (False, True)
 
@@ -51,18 +51,18 @@ def reset(tile_size: float,
           player_coord: tuple[int, int]) -> None:
     Ghost.clear_ghosts()
     pacman.init('yellow', radius, player_pos, player_coord)
-    red_g.init('red', radius, Vector2(tile_size, top_offset + tile_size),
-               (1, 2), player_coord)
-    blue_g.init('blue', radius,
-                Vector2(window_w - 2 * tile_size, top_offset + tile_size),
-                (maze_side, 2), player_coord)
+    red_g.init('red', radius, Vector2(tile_size, top_offset + 2*tile_size),
+               (1, 2), player_coord, 'blinky')
+    blue_g.init('cyan', radius,
+                Vector2(window_w - 2 * tile_size, top_offset + 2*tile_size),
+                (maze_side, 2), player_coord, 'inky')
     orange_g.init('orange', radius,
-                  Vector2(tile_size, top_offset+(maze_side)*tile_size),
-                  (1, maze_side-1), player_coord)
+                  Vector2(tile_size, top_offset+(maze_side-1)*tile_size),
+                  (1, maze_side-1), player_coord, 'clyde')
     pink_g.init('pink', radius,
                 Vector2(window_w - 2 * tile_size,
-                        top_offset+(maze_side)*tile_size),
-                (maze_side, maze_side-1), player_coord)
+                        top_offset+(maze_side-1)*tile_size),
+                (maze_side, maze_side-1), player_coord, 'pinky')
 
 
 def maze_gen(maze: list[list[int]], walls_name: list[str]) -> list[Walls]:
@@ -137,16 +137,18 @@ if __name__ == "__main__":
             score = 0
             lives = config['lives']
             last_timer = config['level_max_time']
+            next_level = False
 
-        while main_title:
+        while main_title or next_level:
 
             main_title, running = quit(main_title, running)
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_SPACE]:
+            if keys[pygame.K_SPACE] or next_level:
                 l_s_generate(screen, l_s_render())
                 pygame.display.flip()
                 main_title = False
                 start = True
+                ghost_eatable = False
                 gen = MazeGenerator(size=(maze_side, maze_side), seed=42)
                 maze = gen.maze
                 old_maze = [[nb for nb in row] for row in maze]
@@ -160,10 +162,6 @@ if __name__ == "__main__":
                     new_maze[i] = row
                 maze = new_maze
                 walls = maze_gen(maze, walls_name)
-                pacgums = pacgums_gen(maze_side, config['pacgum'],
-                                      config['points_per_pacgum'],
-                                      config['points_per_super_pacgum'],
-                                      maze)
                 if maze_side >= 15:
                     old = player_coord
                     for j in range(len(maze)):
@@ -176,22 +174,28 @@ if __name__ == "__main__":
                                 break
                         if player_coord != old:
                             break
+                pacgums = pacgums_gen(maze_side,
+                                      maze_side * maze_side,
+                                      config['points_per_pacgum'],
+                                      config['points_per_super_pacgum'],
+                                      maze,
+                                      player_coord)
                 pacman = Pacman('yellow', radius, player_pos, player_coord)
                 red_g = Blinky('red', radius,
                                Vector2(tile_size, top_offset + 2*tile_size),
-                               (1, 2), player_coord)
-                blue_g = Blinky('blue', radius,
+                               (1, 2), player_coord, 'blinky')
+                blue_g = Blinky('cyan', radius,
                                 Vector2(window_w - 2 * tile_size,
                                         top_offset + 2*tile_size),
-                                (maze_side, 2), player_coord)
+                                (maze_side, 2), player_coord, 'inky')
                 orange_g = Clyde('orange', radius,
                                  Vector2(tile_size,
                                          top_offset+(maze_side-1)*tile_size),
-                                 (1, maze_side-1), player_coord)
-                pink_g = Pinky('pink', radius,
+                                 (1, maze_side-1), player_coord, 'clyde')
+                pink_g = Blinky('pink', radius,
                                Vector2(window_w - 2 * tile_size,
                                        top_offset+(maze_side-1)*tile_size),
-                               (maze_side, maze_side-1), player_coord)
+                               (maze_side, maze_side-1), player_coord, 'pinky')
                 start_time = time.time()
                 start_timer = time.time()
             else:
@@ -199,27 +203,35 @@ if __name__ == "__main__":
                                     scores_text, mt_text,
                                     play_text, leaderboard_text)
             clock.tick(tick)
+            next_level = False
+            nb_of_pg_eaten = 0
 
         _, running = quit(True, running)
         actual_timer = time.time()
         timer = int(last_timer - actual_timer + start_timer) + 1
 
-        list_all: list[pygame.sprite.Sprite] = [pacman,
-                                                red_g,
-                                                blue_g,
-                                                orange_g,
-                                                pink_g]
+        sprites_list = pygame.sprite.Group(pacman,
+                                           red_g,
+                                           blue_g,
+                                           orange_g,
+                                           pink_g)
+
+        walls_sprites = pygame.sprite.Group()
         for cell in walls:
-            list_all.append(cell)
+            walls_sprites.add(cell)
 
+        pacgums_sprites = pygame.sprite.Group()
         for pacgum in pacgums:
-            list_all.append(pacgum)
-        sprites_list = pygame.sprite.Group(list_all)
+            pacgums_sprites.add(pacgum)
 
+        pacgums_sprites.update()
+        walls_sprites.update()
         sprites_list.update()
 
         screen.fill('black')
         if not game_over and not pause:
+            walls_sprites.draw(screen)
+            pacgums_sprites.draw(screen)
             sprites_list.draw(screen)
 
             x = hud_render(score, highest_score, timer)
@@ -239,24 +251,43 @@ if __name__ == "__main__":
             actual_timer = time.time()
             start_timer = time.time()
             pygame.display.flip()
-
         start = False
+
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_e] and eatable_timer - eatable_start <= 0:
+        if (keys[pygame.K_e] or ghost_eatable) and eatable_timer - eatable_start <= 0:
             eatable_start = time.time()
             for ghost in Ghost.ghosts():
                 ghost.eatable = not ghost.eatable
-            refresh_rate = 0.025
+            refresh_rate = 0.0175
         if eatable_start != 0:
             eatable_timer = time.time()
+
         if eatable_timer - eatable_start >= 5:
             eatable_timer = 0
             eatable_start = 0
+            ghost_eatable = False
             for ghost in Ghost.ghosts():
                 ghost.eatable = not ghost.eatable
+                ghost.eaten = False
+                ghost.dt = 1
                 ghost.path_changed = False
             refresh_rate = 0.0125
+
+        for pacgum in pacgums_sprites:
+            if pygame.sprite.collide_circle(pacman, pacgum) and not pacgum.eaten:
+                score += pacgum.score
+                pacgum.radius = 0
+                pacgum.score = 0
+                pacgum.eaten = True
+                nb_of_pg_eaten += 1
+                pygame.draw.rect(pacgum.image, 'black', ((0, 0), (tile_size, tile_size)))
+                pygame.display.flip()
+                if isinstance(pacgum, SuperPacgum):
+                    ghost_eatable = True
+
+
         pacman.player_move(int(radius), keys, maze)
+        pacman.animate()
         assert pacman.rect is not None
         if pacman.rect.x < 0:
             pacman.tp_ltr(radius)
@@ -275,18 +306,25 @@ if __name__ == "__main__":
             for ghost in Ghost.ghosts():
                 ghost.ghost_move(int(radius), maze,
                                  old_maze, pacman)
+                ghost.animate(eatable_timer - eatable_start)
             start_time = time.time()
 
         ghosts = Ghost.ghosts()
         # if pygame.sprite.spritecollideany(pacman,
         #   ghosts, pygame.sprite.collide_mask):
         lst = []
+        eaten = []
         for ghost in ghosts:
-            if (pygame.sprite.collide_circle(pacman, ghost) and
+            if pygame.sprite.collide_circle(pacman, ghost) and ghost.eatable:
+                eaten.append(ghost)
+            elif (pygame.sprite.collide_circle(pacman, ghost) and
                     not ghost.eatable):
                 lst.append(True)
             else:
                 lst.append(False)
+        for ghost in eaten:
+            ghost.eaten = True
+            ghost.dt = 10
         if True in lst:
             lives -= 1
             refresh_rate = 0.0125
@@ -297,6 +335,8 @@ if __name__ == "__main__":
             sprites_list.add(orange_g)
             sprites_list.add(pink_g)
             screen.fill('black')
+            walls_sprites.draw(screen)
+            pacgums_sprites.draw(screen)
             sprites_list.draw(screen)
             clock.tick(tick)
             actual_time = time.time()
@@ -322,6 +362,9 @@ if __name__ == "__main__":
                 game_over = True
         pygame.display.flip()
         clock.tick(tick)
+
+        if nb_of_pg_eaten == len(pacgums_sprites):
+            next_level = True
 
         if pause:
             pause_text, resume_text, back_text = pause_render()
