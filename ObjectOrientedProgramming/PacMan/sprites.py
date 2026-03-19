@@ -6,7 +6,7 @@ from djikstra import shortest_path
 from utils import dec_to_bin
 from random import randint
 from typing import Any
-maze_side = 10
+maze_side = 12
 tile_size: float = 660/(maze_side+2)
 window_h, window_w = 1280, 660
 

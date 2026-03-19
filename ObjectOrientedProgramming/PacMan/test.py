@@ -1,4 +1,5 @@
 import pygame
+import random
 from pygame import Vector2
 from pygame.event import Event
 import time
@@ -149,7 +150,7 @@ if __name__ == "__main__":
                 main_title = False
                 start = True
                 ghost_eatable = False
-                gen = MazeGenerator(size=(maze_side, maze_side), seed=42)
+                gen = MazeGenerator(size=(maze_side, maze_side), seed=random.randint(1, 99))
                 maze = gen.maze
                 old_maze = [[nb for nb in row] for row in maze]
                 new_maze = [[15]*(maze_side+2)]*(maze_side+2)
