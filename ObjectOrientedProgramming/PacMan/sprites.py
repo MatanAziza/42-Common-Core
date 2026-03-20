@@ -6,14 +6,12 @@ from djikstra import shortest_path
 from utils import dec_to_bin
 from random import randint
 from typing import Any
-maze_side = 12
-tile_size: float = 660/(maze_side+2)
-window_h, window_w = 1280, 660
 
 
 class Sprite(pygame.sprite.Sprite, ABC):
-    def __init__(self, color: str, radius: float) -> None:
+    def __init__(self,config: dict[str, Any], color: str, radius: float) -> None:
         super().__init__()
+        tile_size = config['tile_size']
         self.image = pygame.Surface([tile_size, tile_size])
         self.image.set_colorkey('black')
         self.image.convert_alpha()
@@ -25,21 +23,23 @@ class Sprite(pygame.sprite.Sprite, ABC):
         self.color = ''
         self.dt: int = 1
         self.path_changed: bool = False
+        self.config = config
 
     @abstractmethod
-    def ghost_move(self, radius: int,
+    def ghost_move(self,
                    maze: list[list[int]],
                    old_maze: list[list[int]],
                    pacman: Any) -> None:
         pass
 
-    def animate(self, timer: float) -> None:
+    def animate(self, config: dict[str, Any], timer: float) -> None:
         pass
 
 
 class Walls(Sprite):
-    def __init__(self, sprite: str) -> None:
-        super().__init__('black', 0)
+    def __init__(self, config: dict[str, Any], sprite: str) -> None:
+        super().__init__(config, 'black', 0)
+        tile_size = config['tile_size']
         self.image = pygame.Surface((int(tile_size), int(tile_size)))
         self.image.set_colorkey('black')
         self.image.convert_alpha()
@@ -59,7 +59,7 @@ class Walls(Sprite):
         pygame.draw.circle(self.image, 'navy', (tile_size, tile_size), 3)
         self.rect = self.image.get_rect()
 
-    def ghost_move(self, radius: int,
+    def ghost_move(self,
                    maze: list[list[int]],
                    old_maze: list[list[int]],
                    pacman: Any) -> None:
@@ -68,11 +68,12 @@ class Walls(Sprite):
 
 class Pacman(Sprite):
     def __init__(self,
+                 config: dict[str, Any],
                  color: str,
                  radius: float,
                  pos: Vector2,
-                 cell: tuple[int, int], dt: int = 1) -> None:
-        super().__init__(color, radius)
+                 cell: tuple[int, int], dt: int = 2) -> None:
+        super().__init__(config, color, radius)
         self.rad = radius
         self.radius = radius/2.5
         self.color = color
@@ -91,7 +92,7 @@ class Pacman(Sprite):
              color: str,
              radius: float,
              pos: Vector2,
-             cell: tuple[int, int], dt: int = 1) -> None:
+             cell: tuple[int, int], dt: int = 2) -> None:
         self.rad = radius
         self.radius = radius/2.5
         self.color = color
@@ -106,8 +107,9 @@ class Pacman(Sprite):
         self.dt = dt
         self.target = cell
 
-    def animate(self, timer: float) -> None:
+    def animate(self, config: dict[str, Any], timer: float) -> None:
         dir = ['up', 'right', 'down', 'left']
+        tile_size = config['tile_size']
         f = 1 if self.distance % (tile_size/2) < tile_size/8 else 2
         f = f if self.distance % (tile_size/2) < tile_size/4 else 3
         f = f if self.distance % (tile_size/2) < 3*tile_size/8 else 4
@@ -126,7 +128,6 @@ class Pacman(Sprite):
         return self.pos
 
     def ghost_move(self,
-                   radius: int,
                    maze: list[list[int]],
                    old_maze: list[list[int]],
                    pacman: Any) -> None:
@@ -139,34 +140,34 @@ class Pacman(Sprite):
                 self.pos[1]+y_axis[self.direction])
 
     def player_move(self,
-                    radius: int,
                     keys: ScancodeWrapper, maze: list[list[int]]) -> None:
         x_axis = [0, 1, 0, -1]
         y_axis = [-1, 0, 1, 0]
+        tile_size = self.config['tile_size']
+        config = self.config
         assert self.rect is not None
         if self.distance >= tile_size and not self.can_change:
             self.distance = 0
             self.can_change = True
             self.pos = (self.pos[0]+x_axis[self.direction],
                         self.pos[1]+y_axis[self.direction])
-        if self.pos[0] in [maze_side + 2, -1]:
-            if self.pos[0] == maze_side+2:
+        if self.pos[0] in [config['maze_side'][config['level']] + 2, -1]:
+            if self.pos[0] == config['maze_side'][config['level']]+2:
                 self.pos = (0, self.pos[1])
             else:
-                self.pos = (maze_side+1, self.pos[1])
+                self.pos = (config['maze_side'][config['level']]+1,
+                            self.pos[1])
             assert self.rect is not None
-            self.rect.x = 0 if self.pos[0] == 0 else int(window_w - tile_size)
+            self.rect.x = 0 if self.pos[0] == 0 else int(660 - tile_size)
             self.image = pygame.Surface([tile_size, tile_size])
             self.image.set_colorkey('black')
             self.image.convert_alpha()
-            pygame.draw.circle(self.image, self.color,
-                               (tile_size/2+1, tile_size/2+1), radius/2)
-        max_w = window_w - radius
-        max_h = window_h - radius - 128
+        max_w = 660 - self.rad
+        max_h = 990 - self.rad - 128
         if self.can_change:
-            string = dec_to_bin(maze[self.pos[1]][self.pos[0]])
-            walls = [int(x) for x in string]
-            walls.reverse()
+            self.rect.x = int(self.pos[0]*tile_size)
+            self.rect.y = int(self.pos[1]*tile_size + 120)
+            walls = dec_to_bin(maze[self.pos[1]][self.pos[0]])
             self.cell = walls
             moved = 0
             up, down = keys[K_w] or keys[K_UP], keys[K_s] or keys[K_DOWN]
@@ -205,24 +206,26 @@ class Pacman(Sprite):
             self.next_direction = 2
 
     def tp_ltr(self, radius: float) -> None:
-        self.image = pygame.Surface([tile_size+window_w, tile_size])
+        tile_size = self.config['tile_size']
+        self.image = pygame.Surface([tile_size+660, tile_size])
         self.image.set_colorkey('black')
         self.image.convert_alpha()
         pygame.draw.circle(self.image, self.color, (tile_size/2+1,
                                                     tile_size/2+1), radius/2)
-        pygame.draw.circle(self.image, self.color, (tile_size/2+1+window_w,
+        pygame.draw.circle(self.image, self.color, (tile_size/2+1+660,
                                                     tile_size/2+1), radius/2)
         self.is_tping = True
 
     def tp_rtl(self, radius: float) -> None:
         assert self.rect is not None
-        self.image = pygame.Surface([tile_size+window_w, tile_size])
+        tile_size = self.config['tile_size']
+        self.image = pygame.Surface([tile_size+660, tile_size])
         self.image.set_colorkey('black')
         self.image.convert_alpha()
         self.rect.x = int(-tile_size)
         pygame.draw.circle(self.image, self.color, (tile_size/2+1,
                                                     tile_size/2+1), radius/2)
-        pygame.draw.circle(self.image, self.color, (tile_size/2+1 + window_w,
+        pygame.draw.circle(self.image, self.color, (tile_size/2+1 + 660,
                                                     tile_size/2+1), radius/2)
         self.is_tping = True
 
@@ -231,14 +234,15 @@ class Ghost(Sprite):
     _ghosts: list[Sprite] = []
 
     def __init__(self,
+                 config: dict[str, Any],
                  color: str,
                  radius: float,
                  pos: Vector2,
                  cell: tuple[int, int],
                  target: tuple[int, int],
                  name: str,
-                 dt: int = 1) -> None:
-        super().__init__('black', radius)
+                 dt: int = 2) -> None:
+        super().__init__(config, 'black', radius)
         assert self.rect is not None
         self.rad = radius
         self.radius = radius/2.1
@@ -251,8 +255,8 @@ class Ghost(Sprite):
         self.color = color
         self.rect.x = int(pos.x)
         self.rect.y = int(pos.y)
-        pygame.Surface.blit(self.image, img, (tile_size/2-self.rad/2,
-                                              tile_size/2-self.rad/2))
+        pygame.Surface.blit(self.image, img, (config['tile_size']/2-self.rad/2,
+                                              config['tile_size']/2-self.rad/2))
         self.pos = cell
         self.direction = -1
         assert self.image is not None
@@ -277,10 +281,12 @@ class Ghost(Sprite):
              cell: tuple[int, int],
              target: tuple[int, int],
              name: str,
-             dt: int = 1) -> None:
+             dt: int = 2) -> None:
         assert self.rect is not None
         self.rad = radius
-        self.radius = radius/2.5
+        self.radius = radius/2.1
+        config = self.config
+        self.name = name
         img = pygame.transform.scale(
             pygame.image.load(f'ghosts/{name}_left_1.png'),
             (radius, radius))
@@ -289,10 +295,9 @@ class Ghost(Sprite):
         self.color = color
         self.rect.x = int(pos.x)
         self.rect.y = int(pos.y)
-        pygame.Surface.blit(self.image, img, (tile_size/2-self.rad/2,
-                                              tile_size/2-self.rad/2))
+        pygame.Surface.blit(self.image, img, (config['tile_size']/2-self.rad/2,
+                                              config['tile_size']/2-self.rad/2))
         self.pos = cell
-        Ghost._ghosts.append(self)
         self.direction = -1
         assert self.image is not None
         self.mask = pygame.mask.from_threshold(self.image,
@@ -301,18 +306,22 @@ class Ghost(Sprite):
         self.can_change = True
         self.distance = 0
         self.dt = dt
-        self.target = target
-        self.path = []
+        self.target = (target[0]-1, target[1]-1)
+        self.current_target = self.target
+        self.path: list[int] = []
         self.eatable = False
+        self.eaten = False
+        self.path_changed = False
 
-    def animate(self, timer: float) -> None:
+    def animate(self, config: dict[str, Any], timer: float) -> None:
         dir = ['up', 'right', 'down', 'left']
+        tile_size = self.config['tile_size']
         f = 1 if self.distance % (tile_size/4) < tile_size/8 else 2
         self.image = pygame.Surface((tile_size, tile_size))
         self.image.set_colorkey('black')
         self.image.convert_alpha()
         name = f'{self.name}_{dir[self.direction]}_{f}'
-        if self.eatable and not self.eaten and timer >= 3:
+        if self.eatable and not self.eaten and timer >= 7:
             f = 1 if self.distance % (tile_size/2) < tile_size/8 else 2
             f = f if self.distance % (tile_size/2) < tile_size/4 else 3
             f = f if self.distance % (tile_size/2) < 3*tile_size/8 else 4
@@ -336,23 +345,25 @@ class Ghost(Sprite):
     def clear_ghosts(cls) -> None:
         cls._ghosts.clear()
 
-    def ghost_move(self, radius: int,
+    def ghost_move(self,
                    maze: list[list[int]],
                    old_maze: list[list[int]],
                    pacman: Pacman) -> None:
         assert self.rect is not None
+        config = self.config
+        tile_size = config['tile_size']
         if self.distance >= tile_size:
             self.distance = 0
             self.can_change = True
         if self.can_change:
             self.rect.x = int(self.pos[0]*tile_size)
             self.rect.y = int(self.pos[1]*tile_size + 120)
-            string = dec_to_bin(old_maze[self.pos[1]-1][self.pos[0]-1])
-            walls = [int(x) for x in string]
-            walls.reverse()
+            walls = dec_to_bin(old_maze[self.pos[1]-1][self.pos[0]-1])
             self.cell = walls
             if self.eatable:
                 self.flee(old_maze)
+            elif randint(1, 8) == 1:
+                self.where_to_go_random(walls)
             else:
                 self.where_to_go(pacman, old_maze, walls)
             x_axis = [0, 1, 0, -1]
@@ -362,8 +373,8 @@ class Ghost(Sprite):
                             self.pos[1]+y_axis[self.direction])
             self.can_change = False
         move = self.direction
-        max_w = window_w - radius
-        max_h = window_h - radius - 128
+        max_w = 660 - self.rad
+        max_h = 990 - self.rad - 128
         if move == 1 and self.rect.x < max_w and self.cell[1] == 0:
             self.rect.x += self.dt
         elif move == 3 and self.rect.x > 0 and self.cell[3] == 0:
@@ -377,6 +388,13 @@ class Ghost(Sprite):
     def where_to_go(self, pacman: Pacman,
                     old_maze: list[list[int]],
                     walls: list[int]) -> None:
+        assert self.rect is not None
+        self.direction = randint(0, 3)
+        while (walls[self.direction] == 1):
+            self.direction = randint(0, 3)
+
+    def where_to_go_random(self,
+                           walls: list[int]) -> None:
         assert self.rect is not None
         self.direction = randint(0, 3)
         while (walls[self.direction] == 1):

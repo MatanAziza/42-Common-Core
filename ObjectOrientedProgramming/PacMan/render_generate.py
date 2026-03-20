@@ -14,7 +14,7 @@ def create_fonts() -> tuple[pygame.font.Font,
     return (main_font, reduced_font, hs_font)
 
 
-def main_title_render(highscores: dict[str, int]
+def main_title_render(highscores: list[list[str, int]]
                       ) -> tuple[pygame.surface.Surface,
                                  pygame.surface.Surface,
                                  pygame.surface.Surface,
@@ -22,8 +22,11 @@ def main_title_render(highscores: dict[str, int]
                                  list[pygame.surface.Surface]]:
     main_font, reduced_font, hs_font = create_fonts()
 
-    names = list(highscores.keys())
-    scores = list(highscores.values())
+    names: list[str] = []
+    scores: list[int] = []
+    for x in highscores:
+        names.append(x[0])
+        scores.append(x[1])
 
     mt_text = main_font.render('PAC-MAN', False, (255, 255, 0))
     play_text = reduced_font.render('Press SPACE to play', False,
@@ -204,6 +207,23 @@ def g_o_generate(screen: pygame.surface.Surface,
     screen.blit(g_o_text_input.surface, (250, 650))
 
     pygame.display.flip()
+
+
+def won_render(score: int) -> tuple[pygame.surface.Surface,
+                                    pygame.surface.Surface,
+                                    pygame.surface.Surface,
+                                    pygame.surface.Surface,
+                                    py_text.TextInputVisualizer]:
+    main_font, reduced_font, _ = create_fonts()
+
+    g_o_text = main_font.render('You won !', False, (255, 0, 0))
+    g_o_score_text = main_font.render('Score', False, (255, 0, 0))
+    g_o_score = main_font.render(str(score), False, (255, 0, 0))
+    g_o_name = reduced_font.render('Enter your name (max 10 characters)',
+                                   False,
+                                   (255, 0, 0))
+    text_input = py_text.TextInputVisualizer()
+    return (g_o_text, g_o_score_text, g_o_score, g_o_name, text_input)
 
 
 def hud_render(score: int,

@@ -9,29 +9,28 @@ def read_config(filename: str) -> dict[str, Any]:
     return stats_dict
 
 
-def get_highscores(filename: str) -> dict[str, int]:
+def get_highscores(filename: str) -> list[list[str, int]]:
     with open(filename, "r") as f:
         highscores = f.read()
-    highscores_dict = dict(loads(highscores))
-    return highscores_dict
+    highscores_list = list(loads(highscores))
+    return highscores_list
 
 
-def register_highscore(filename: str, player_name: str, score: int) -> None:
+def register_highscore(filename: str, player_name: str, player_score: int) -> None:
     with open(filename, "r") as f:
         highscores = f.read()
     highscores = loads(highscores)
-    highscores.update({player_name: score})
+    highscores.append([player_name, player_score])
     min_score = 999999
-    min_name = ""
-    for name, score in highscores.items():
-        if score < min_score:
-            min_score = score
-            min_name = name
-    highscores.pop(min_name)
-    highscores_dict = dict({key: value
-                            for key, value in sorted(highscores.items(),
-                                                     key=lambda item: item[1],
-                                                     reverse=True)})
-    highscores_rest = dumps(highscores_dict)
+    i_min = 0
+    for i, x in enumerate(highscores):
+        if x[1] < min_score:
+            min_score = x[1]
+            i_min = i
+    highscores.pop(i_min)
+    highscores_list = list(x for x in sorted(highscores,
+                                              key=lambda x: x[1],
+                                              reverse=True))
+    highscores_rest = dumps(highscores_list)
     with open(filename, "w") as f:
         f.write(highscores_rest)

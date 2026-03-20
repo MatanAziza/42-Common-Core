@@ -67,9 +67,7 @@ def shortest_path(maze: list[list[int]],
     G = Graph(graph)
     for y, row in enumerate(maze):
         for x, old_cell in enumerate(row):
-            c = dec_to_bin(old_cell)
-            cell = [int(xz) for xz in c]
-            cell.reverse()
+            cell = dec_to_bin(old_cell)
             if cell[0] == 0:
                 G.add_edge((x, y), (x, y - 1))
             if cell[1] == 0:
