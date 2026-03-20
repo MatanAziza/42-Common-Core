@@ -9,7 +9,9 @@ from typing import Any
 
 
 class Sprite(pygame.sprite.Sprite, ABC):
-    def __init__(self,config: dict[str, Any], color: str, radius: float) -> None:
+    def __init__(self, config: dict[str, Any],
+                 color: str,
+                 radius: float) -> None:
         super().__init__()
         tile_size = config['tile_size']
         self.image = pygame.Surface([tile_size, tile_size])
@@ -151,11 +153,11 @@ class Pacman(Sprite):
             self.can_change = True
             self.pos = (self.pos[0]+x_axis[self.direction],
                         self.pos[1]+y_axis[self.direction])
-        if self.pos[0] in [config['maze_side'][config['level']] + 2, -1]:
-            if self.pos[0] == config['maze_side'][config['level']]+2:
+        if self.pos[0] in [config['side'][config['level']] + 2, -1]:
+            if self.pos[0] == config['side'][config['level']]+2:
                 self.pos = (0, self.pos[1])
             else:
-                self.pos = (config['maze_side'][config['level']]+1,
+                self.pos = (config['side'][config['level']]+1,
                             self.pos[1])
             assert self.rect is not None
             self.rect.x = 0 if self.pos[0] == 0 else int(660 - tile_size)
@@ -255,8 +257,10 @@ class Ghost(Sprite):
         self.color = color
         self.rect.x = int(pos.x)
         self.rect.y = int(pos.y)
-        pygame.Surface.blit(self.image, img, (config['tile_size']/2-self.rad/2,
-                                              config['tile_size']/2-self.rad/2))
+        pygame.Surface.blit(self.image,
+                            img,
+                            (config['tile_size']/2-self.rad/2,
+                             config['tile_size']/2-self.rad/2))
         self.pos = cell
         self.direction = -1
         assert self.image is not None
@@ -295,8 +299,10 @@ class Ghost(Sprite):
         self.color = color
         self.rect.x = int(pos.x)
         self.rect.y = int(pos.y)
-        pygame.Surface.blit(self.image, img, (config['tile_size']/2-self.rad/2,
-                                              config['tile_size']/2-self.rad/2))
+        pygame.Surface.blit(self.image,
+                            img,
+                            (config['tile_size']/2-self.rad/2,
+                             config['tile_size']/2-self.rad/2))
         self.pos = cell
         self.direction = -1
         assert self.image is not None
@@ -308,7 +314,6 @@ class Ghost(Sprite):
         self.dt = dt
         self.target = (target[0]-1, target[1]-1)
         self.current_target = self.target
-        self.path: list[int] = []
         self.eatable = False
         self.eaten = False
         self.path_changed = False

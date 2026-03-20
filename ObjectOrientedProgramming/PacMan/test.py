@@ -15,7 +15,7 @@ from pacgums import pacgums_gen, SuperPacgum
 from utils import dec_to_bin
 from typing import Any
 
-# tile_size: float = 660/(config['maze_side'][config['level']]+2)
+# tile_size: float = 660/(config['side'][config['level']]+2)
 # window_h, window_w = 990, 660
 # 6, 8/, 10, 11, 12, 15, 16//, 20, 22, 24/, 25/, 30: 660 divisible by these
 
@@ -30,22 +30,35 @@ def quit(state: bool, running: bool) -> tuple[bool, bool]:
 def back_to_title(tile_size: float,
                   top_offset: int,
                   window_w: int,
-                  maze_side: int,
+                  side: int,
                   player_coord: tuple[int, int]) -> tuple[bool, bool]:
     Ghost.clear_ghosts()
     pacman.init('yellow', config['radius'], player_pos, player_coord)
-    red_g.init('red', config['radius'], Vector2(tile_size, top_offset + 2*tile_size),
-               (1, 2), player_coord, 'blinky')
-    blue_g.init('cyan', config['radius'],
+    red_g.init('red',
+               config['radius'],
+               Vector2(tile_size, top_offset + 2*tile_size),
+               (1, 2),
+               player_coord,
+               'blinky')
+    blue_g.init('cyan',
+                config['radius'],
                 Vector2(window_w - 2 * tile_size, top_offset + tile_size),
-                (maze_side, 2), player_coord, 'inky')
-    orange_g.init('orange', config['radius'],
-                  Vector2(tile_size, top_offset+(maze_side)*tile_size),
-                  (1, maze_side-1), player_coord, 'clyde')
-    pink_g.init('pink', config['radius'],
+                (side, 2),
+                player_coord,
+                'inky')
+    orange_g.init('orange',
+                  config['radius'],
+                  Vector2(tile_size, top_offset+(side)*tile_size),
+                  (1, side-1),
+                  player_coord,
+                  'clyde')
+    pink_g.init('pink',
+                config['radius'],
                 Vector2(window_w - 2 * tile_size,
-                        top_offset+(maze_side)*tile_size),
-                (maze_side, maze_side-1), player_coord, 'pinky')
+                        top_offset+(side)*tile_size),
+                (side, side-1),
+                player_coord,
+                'pinky')
 
     return (False, True)
 
@@ -53,28 +66,43 @@ def back_to_title(tile_size: float,
 def reset(tile_size: float,
           top_offset: int,
           window_w: int,
-          maze_side: int,
+          side: int,
           player_coord: tuple[int, int]) -> None:
     # Ghost.clear_ghosts()
     pacman.init('yellow', config['radius'], player_pos, player_coord)
-    red_g.init('red', config['radius'], Vector2(tile_size, top_offset + 2*tile_size),
-               (1, 2), player_coord, 'blinky')
-    blue_g.init('cyan', config['radius'],
+    red_g.init('red',
+               config['radius'],
+               Vector2(tile_size, top_offset + 2*tile_size),
+               (1, 2),
+               player_coord,
+               'blinky')
+    blue_g.init('cyan',
+                config['radius'],
                 Vector2(window_w - 2 * tile_size, top_offset + 2*tile_size),
-                (maze_side, 2), player_coord, 'inky')
-    orange_g.init('orange', config['radius'],
-                  Vector2(tile_size, top_offset+(maze_side-1)*tile_size),
-                  (1, maze_side-1), player_coord, 'clyde')
-    pink_g.init('pink', config['radius'],
+                (side, 2),
+                player_coord,
+                'inky')
+    orange_g.init('orange',
+                  config['radius'],
+                  Vector2(tile_size, top_offset+(side-1)*tile_size),
+                  (1, side-1),
+                  player_coord,
+                  'clyde')
+    pink_g.init('pink',
+                config['radius'],
                 Vector2(window_w - 2 * tile_size,
-                        top_offset+(maze_side-1)*tile_size),
-                (maze_side, maze_side-1), player_coord, 'pinky')
+                        top_offset+(side-1)*tile_size),
+                (side, side-1),
+                player_coord,
+                'pinky')
 
 
-def maze_gen(config: dict[str, Any], maze: list[list[int]], walls_name: list[str]) -> list[Walls]:
+def maze_gen(config: dict[str, Any],
+             maze: list[list[int]],
+             walls_name: list[str]) -> list[Walls]:
     walls: list[Walls] = []
-    for y in range(config['maze_side'][config['level']]+2):
-        for x in range(config['maze_side'][config['level']]+2):
+    for y in range(config['side'][config['level']]+2):
+        for x in range(config['side'][config['level']]+2):
             cell = Walls(config, walls_name[maze[y][x]])
             assert cell.rect is not None
             cell.rect.x = int(x * config['tile_size'])
@@ -102,7 +130,11 @@ if __name__ == "__main__":
     next_level = False
 
     config = read_config('config.json')
-    running, main_title, pause, game_over = True, True, False, False
+    running, main_title, pause, game_over, won = (True,
+                                                  True,
+                                                  False,
+                                                  False,
+                                                  False)
     refresh_rate = 0.0125
 
     walls_name = [
@@ -135,6 +167,9 @@ if __name__ == "__main__":
             lives = config['lives']
             last_timer = config['level_max_time']
             next_level = False
+            cheat_mode = False
+            eatable_start: float = 0
+            eatable_timer: float = 0
             config.update({'level': 0})
             config.update({'tick': 60})
 
@@ -146,80 +181,123 @@ if __name__ == "__main__":
                 l_s_generate(screen, l_s_render())
                 pygame.display.flip()
                 config.update({'top_offset': 120})
-                config.update({'radius': 480/(config['maze_side'][config['level']]+2)})
-                config.update({'tile_size': 660/(config['maze_side'][config['level']]+2)})
+                config.update({'radius':
+                               480/(config['side'][config['level']]+2)})
+                config.update({'tile_size':
+                               660/(config['side'][config['level']]+2)})
                 main_title = False
                 start = True
                 ghost_eatable = False
-                player_coord = (int(config['maze_side'][config['level']]//2 + 1), int(config['maze_side'][config['level']]//2 + 1))
-                player_pos = Vector2((config['maze_side'][config['level']]//2 + 1)*config['tile_size'],
-                         (config['maze_side'][config['level']]//2 + 1)*config['tile_size'] + config['top_offset'])
-                print(player_pos, player_coord)
-                gen = MazeGenerator(size=(config['maze_side'][config['level']], config['maze_side'][config['level']]),
+                player_coord = (int(config['side'][config['level']]//2+1),
+                                int(config['side'][config['level']]//2+1))
+                player_pos = Vector2(((config['side'][config['level']]//2+1) *
+                                      config['tile_size']),
+                                     ((config['side'][config['level']]//2+1) *
+                                      config['tile_size'] +
+                                      config['top_offset']))
+                gen = MazeGenerator(size=(config['side'][config['level']],
+                                          config['side'][config['level']]),
                                     seed=random.randint(1, 99))
                 maze = gen.maze
                 old_maze = [[nb for nb in row] for row in maze]
-                new_maze = [[15]*(config['maze_side'][config['level']]+2)]*(config['maze_side'][config['level']]+2)
-                for i in range(1, config['maze_side'][config['level']] + 1):
+                new_maze = ([([15] *
+                              (config['side'][config['level']]+2))] *
+                            (config['side'][config['level']]+2))
+                for i in range(1, config['side'][config['level']] + 1):
                     row = maze[i-1]
-                    row.insert(0, 15 if i != config['maze_side'][config['level']]//2+1 else 5)
-                    row.insert(len(row), 15 if i != config['maze_side'][config['level']]//2+1 else 5)
+                    row.insert(0, 15 if i != (config['side'][config['level']]
+                                              // 2 + 1)
+                               else 5)
+                    row.insert(len(row), 15
+                               if i != (config['side'][config['level']]
+                                        // 2 + 1)
+                               else 5)
                     row[1] -= 8 if row[0] == 5 else 0
-                    row[config['maze_side'][config['level']]] -= 2 if row[config['maze_side'][config['level']]+1] == 5 else 0
+                    row[config['side']
+                        [config['level']]] -= (2 if
+                                               row[config['side']
+                                                   [config['level']]+1]
+                                               == 5
+                                               else 0)
                     new_maze[i] = row
                 maze = new_maze
-                if config['maze_side'][config['level']] >= 14:
+                if config['side'][config['level']] >= 14:
                     old = player_coord
                     for j in range(len(maze)):
-                        for i in range(config['maze_side'][config['level']]-4):
+                        for i in range(config['side'][config['level']]-4):
                             if between_42(maze, i, j):
                                 player_pos = Vector2(
                                     (i+3)*config['tile_size'],
-                                    (j)*config['tile_size'] + config['top_offset'])
+                                    j*config['tile_size']+config['top_offset'])
                                 player_coord = (i+3, j)
                                 break
                         if player_coord != old:
                             break
                 walls = maze_gen(config, maze, walls_name)
-                pacgums = pacgums_gen(config, config['maze_side'][config['level']],
+                pacgums = pacgums_gen(config, config['side'][config['level']],
                                       config['points_per_pacgum'],
                                       config['points_per_super_pacgum'],
                                       maze,
                                       player_coord,
                                       config['top_offset'])
-                pacman = Pacman(config, 'yellow', config['radius'], player_pos, player_coord)
-                while dec_to_bin(maze[player_coord[1]][player_coord[0]])[pacman.direction] == 0:
+                pacman = Pacman(config,
+                                'yellow',
+                                config['radius'],
+                                player_pos,
+                                player_coord)
+                while dec_to_bin(maze[player_coord[1]]
+                                 [player_coord[0]])[pacman.direction] == 0:
                     pacman.direction = (pacman.direction+1) % 4
                     pacman.next_direction = pacman.direction
                 Ghost.clear_ghosts()
-                red_g = Blinky(config, 'red', config['radius'],
-                               Vector2(config['tile_size'], config['top_offset'] + 2*config['tile_size']),
-                               (1, 2), player_coord, 'blinky')
-                blue_g = Blinky(config, 'cyan', config['radius'],
-                                Vector2(window_w - 2 * config['tile_size'],
-                                        config['top_offset'] + 2*config['tile_size']),
-                                (config['maze_side'][config['level']], 2), player_coord, 'inky')
-                orange_g = Clyde(config, 'orange', config['radius'],
+                red_g = Blinky(config,
+                               'red',
+                               config['radius'],
+                               Vector2(config['tile_size'],
+                                       (config['top_offset']+2 *
+                                        config['tile_size'])),
+                               (1, 2),
+                               player_coord,
+                               'blinky')
+                blue_g = Blinky(config,
+                                'cyan',
+                                config['radius'],
+                                Vector2(window_w-2*config['tile_size'],
+                                        (config['top_offset']+2 *
+                                         config['tile_size'])),
+                                (config['side'][config['level']], 2),
+                                player_coord,
+                                'inky')
+                orange_g = Clyde(config,
+                                 'orange',
+                                 config['radius'],
                                  Vector2(config['tile_size'],
-                                         config['top_offset']+(config['maze_side'][config['level']]-1)*config['tile_size']),
-                                 (1, config['maze_side'][config['level']]-1), player_coord, 'clyde')
-                pink_g = Pinky(config, 'pink', config['radius'],
+                                         (config['top_offset'] +
+                                          (config['side'][config['level']]-1) *
+                                          config['tile_size'])),
+                                 (1, config['side'][config['level']]-1),
+                                 player_coord,
+                                 'clyde')
+                pink_g = Pinky(config,
+                               'pink',
+                               config['radius'],
                                Vector2(window_w - 2 * config['tile_size'],
-                                       config['top_offset']+(config['maze_side'][config['level']]-1)*config['tile_size']),
-                               (config['maze_side'][config['level']], config['maze_side'][config['level']]-1),
-                               player_coord, 'pinky')
+                                       (config['top_offset'] +
+                                        (config['side'][config['level']]-1) *
+                                        config['tile_size'])),
+                               (config['side'][config['level']],
+                                config['side'][config['level']]-1),
+                               player_coord,
+                               'pinky')
                 start_time = time.time()
                 start_timer = time.time()
+                nb_of_pg_eaten = 0
+                next_level = False
             else:
                 main_title_generate(screen, names_text,
                                     scores_text, mt_text,
                                     play_text, leaderboard_text)
             clock.tick(config['tick'])
-            next_level = False
-            won = False
-            nb_of_pg_eaten = 0
-            eatable_start: float = 0
-            eatable_timer: float = 0
 
         _, running = quit(True, running)
         actual_timer = time.time()
@@ -269,8 +347,8 @@ if __name__ == "__main__":
         start = False
 
         keys = pygame.key.get_pressed()
-        if (keys[pygame.K_e] or
-           ghost_eatable) and eatable_timer - eatable_start <= 0:
+        if ((keys[pygame.K_e] and cheat_mode) or
+                ghost_eatable) and eatable_timer - eatable_start <= 0:
             eatable_start = time.time()
             for ghost in Ghost.ghosts():
                 ghost.eatable = True
@@ -297,8 +375,11 @@ if __name__ == "__main__":
                 pacgum.score = 0
                 pacgum.eaten = True
                 nb_of_pg_eaten += 1
-                pygame.draw.rect(pacgum.image, 'black',
-                                 ((0, 0), (config['tile_size'], config['tile_size'])))
+                pygame.draw.rect(pacgum.image,
+                                 'black',
+                                 ((0, 0),
+                                  (config['tile_size'],
+                                   config['tile_size'])))
                 pygame.display.flip()
                 if isinstance(pacgum, SuperPacgum):
                     ghost_eatable = True
@@ -314,11 +395,17 @@ if __name__ == "__main__":
             pacman.tp_rtl(config['radius'])
         if keys[pygame.K_p] and not main_title:
             pause = True
-        if keys[pygame.K_KP_MINUS]:
+        if keys[pygame.K_KP_PLUS] and cheat_mode:
+            nb_of_pg_eaten = len(pacgums_sprites)
+        if keys[pygame.K_KP_MINUS] and cheat_mode:
             game_over = True
             lives = 0
-        if keys[pygame.K_g]:
+        if keys[pygame.K_g] and cheat_mode:
             won = True
+        if keys[pygame.K_c]:
+            cheat_mode = True
+        if keys[pygame.K_c] and keys[pygame.K_LCTRL]:
+            cheat_mode = False
 
         actual_time = time.time()
         if actual_time - start_time >= refresh_rate:
@@ -335,7 +422,7 @@ if __name__ == "__main__":
             if pygame.sprite.collide_circle(pacman, ghost) and ghost.eatable:
                 eaten.append(ghost)
             elif (pygame.sprite.collide_circle(pacman, ghost) and
-                    not ghost.eatable):
+                    not ghost.eatable) and not cheat_mode:
                 lst.append(True)
             else:
                 lst.append(False)
@@ -345,12 +432,11 @@ if __name__ == "__main__":
         if True in lst:
             lives -= 1
             refresh_rate = 0.0125
-            reset(config['tile_size'], config['top_offset'], window_w, config['maze_side'][config['level']], player_coord)
-            # sprites_list.add(pacman)
-            # sprites_list.add(red_g)
-            # sprites_list.add(blue_g)
-            # sprites_list.add(orange_g)
-            # sprites_list.add(pink_g)
+            reset(config['tile_size'],
+                  config['top_offset'],
+                  window_w,
+                  config['side'][config['level']],
+                  player_coord)
             screen.fill('black')
             walls_sprites.draw(screen)
             pacgums_sprites.draw(screen)
@@ -373,15 +459,18 @@ if __name__ == "__main__":
             game_over = True
         if timer <= 0:
             lives -= 1
-            reset(config['tile_size'], config['top_offset'], window_w, config['maze_side'][config['level']], player_coord)
+            reset(config['tile_size'],
+                  config['top_offset'],
+                  window_w,
+                  config['side'][config['level']],
+                  player_coord)
             start_timer = time.time()
             if lives <= 0:
                 game_over = True
         pygame.display.flip()
         clock.tick(config['tick'])
 
-        if nb_of_pg_eaten == len(pacgums_sprites) or keys[pygame.K_KP_PLUS]:
-        # if nb_of_pg_eaten >= 3 or keys[pygame.K_KP_PLUS]:
+        if nb_of_pg_eaten == len(pacgums_sprites):
             if config['level'] == 9:
                 won = True
             else:
@@ -402,7 +491,8 @@ if __name__ == "__main__":
                 pause, main_title = back_to_title(config['tile_size'],
                                                   config['top_offset'],
                                                   window_w,
-                                                  config['maze_side'][config['level']],
+                                                  (config['side']
+                                                   [config['level']]),
                                                   player_coord)
             start_timer = time.time()
             pause_generate(screen, pause_text, resume_text, back_text)
@@ -432,7 +522,8 @@ if __name__ == "__main__":
                 game_over, main_title = back_to_title(config['tile_size'],
                                                       config['top_offset'],
                                                       window_w,
-                                                      config['maze_side'][config['level']],
+                                                      (config['side']
+                                                       [config['level']]),
                                                       player_coord)
                 won = False
             clock.tick(config['tick'])

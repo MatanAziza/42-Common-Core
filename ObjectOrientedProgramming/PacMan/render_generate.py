@@ -14,7 +14,7 @@ def create_fonts() -> tuple[pygame.font.Font,
     return (main_font, reduced_font, hs_font)
 
 
-def main_title_render(highscores: list[list[str, int]]
+def main_title_render(highscores: list[list[Any]]
                       ) -> tuple[pygame.surface.Surface,
                                  pygame.surface.Surface,
                                  pygame.surface.Surface,
@@ -183,6 +183,8 @@ def g_o_render(score: int) -> tuple[pygame.surface.Surface,
                                    False,
                                    (255, 0, 0))
     text_input = py_text.TextInputVisualizer()
+    text_input.cursor_color = 'red'
+    text_input.font_color = (255, 0, 0)
     return (g_o_text, g_o_score_text, g_o_score, g_o_name, text_input)
 
 
@@ -202,8 +204,6 @@ def g_o_generate(screen: pygame.surface.Surface,
     screen.blit(g_o_name, (20, 600))
 
     g_o_text_input.update(events)
-    g_o_text_input.font_color = (255, 0, 0)
-    g_o_text_input.cursor_color = 'red'
     screen.blit(g_o_text_input.surface, (250, 650))
 
     pygame.display.flip()
@@ -216,13 +216,15 @@ def won_render(score: int) -> tuple[pygame.surface.Surface,
                                     py_text.TextInputVisualizer]:
     main_font, reduced_font, _ = create_fonts()
 
-    g_o_text = main_font.render('You won !', False, (255, 0, 0))
-    g_o_score_text = main_font.render('Score', False, (255, 0, 0))
-    g_o_score = main_font.render(str(score), False, (255, 0, 0))
+    g_o_text = main_font.render('You won !', False, (0, 255, 0))
+    g_o_score_text = main_font.render('Score', False, (0, 255, 0))
+    g_o_score = main_font.render(str(score), False, (0, 255, 0))
     g_o_name = reduced_font.render('Enter your name (max 10 characters)',
                                    False,
-                                   (255, 0, 0))
+                                   (0, 255, 0))
     text_input = py_text.TextInputVisualizer()
+    text_input.cursor_color = 'green'
+    text_input.font_color = (0, 255, 0)
     return (g_o_text, g_o_score_text, g_o_score, g_o_name, text_input)
 
 

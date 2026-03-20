@@ -1,8 +1,13 @@
 from sprites import Sprite
 from typing import Any
 
+
 class Pacgum(Sprite):
-    def __init__(self, config: dict[str, Any], color: str, radius: int, score: int):
+    def __init__(self,
+                 config: dict[str, Any],
+                 color: str,
+                 radius: int,
+                 score: int):
         super().__init__(config, color, radius)
         self.score = score
         self.eaten = False
@@ -17,7 +22,11 @@ class Pacgum(Sprite):
 
 
 class SuperPacgum(Pacgum):
-    def __init__(self, config: dict[str, Any], color: str, radius: int, score: int):
+    def __init__(self,
+                 config: dict[str, Any],
+                 color: str,
+                 radius: int,
+                 score: int):
         super().__init__(config, color, radius, score)
         self.eaten = False
         self.rad = radius
@@ -41,7 +50,10 @@ def pacgums_gen(config: dict[str, Any],
                (x == maze_side and y == 1) or
                (x == 1 and y == maze_side) or
                (x == maze_side and y == maze_side)):
-                supercell = SuperPacgum(config, 'white', 10, score_super_pacgums)
+                supercell = SuperPacgum(config,
+                                        'white',
+                                        10,
+                                        score_super_pacgums)
                 assert supercell.rect is not None
                 supercell.rect.x = int(x * tile_size)
                 supercell.rect.y = int(y * tile_size + top_offset)
