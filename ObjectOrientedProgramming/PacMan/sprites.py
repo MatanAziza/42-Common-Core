@@ -367,13 +367,12 @@ class Ghost(Sprite):
             self.cell = walls
             if self.eatable:
                 self.flee(old_maze)
-            elif randint(1, 8) == 1:
-                self.where_to_go_random(walls)
             else:
                 self.where_to_go(pacman, old_maze, walls)
             x_axis = [0, 1, 0, -1]
             y_axis = [-1, 0, 1, 0]
             if self.direction != -1:
+                print(self.direction, self.pos, self.color)
                 self.pos = (self.pos[0]+x_axis[self.direction],
                             self.pos[1]+y_axis[self.direction])
             self.can_change = False
@@ -393,13 +392,6 @@ class Ghost(Sprite):
     def where_to_go(self, pacman: Pacman,
                     old_maze: list[list[int]],
                     walls: list[int]) -> None:
-        assert self.rect is not None
-        self.direction = randint(0, 3)
-        while (walls[self.direction] == 1):
-            self.direction = randint(0, 3)
-
-    def where_to_go_random(self,
-                           walls: list[int]) -> None:
         assert self.rect is not None
         self.direction = randint(0, 3)
         while (walls[self.direction] == 1):
