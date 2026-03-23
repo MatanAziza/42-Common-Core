@@ -1,23 +1,21 @@
-import pygame
 import random
+import time
+import pygame
+from typing import Any
 from pygame import Vector2
 from pygame.event import Event
-import time
+from pygame.key import ScancodeWrapper
 from ghosts import Blinky, Clyde, Pinky
 from mazegenerator.mazegenerator import MazeGenerator  # type: ignore
 from sprites import Pacman, Ghost, Walls
 from manip_json import get_highscores, read_config, register_highscore
 from render_generate import main_title_render, main_title_generate
+from render_generate import ready_generate, ready_render
 from render_generate import pause_render, pause_generate, g_o_render
 from render_generate import g_o_generate, hud_render, hud_generate
 from render_generate import l_s_generate, l_s_render, won_render
 from pacgums import pacgums_gen, SuperPacgum
 from utils import dec_to_bin
-from typing import Any
-
-# tile_size: float = 660/(config['side'][config['level']]+2)
-# window_h, window_w = 990, 660
-# 6, 8/, 10, 11, 12, 15, 16//, 20, 22, 24/, 25/, 30: 660 divisible by these
 
 
 def quit(state: bool, running: bool) -> tuple[bool, bool]:
@@ -27,74 +25,106 @@ def quit(state: bool, running: bool) -> tuple[bool, bool]:
     return (state, running)
 
 
-def back_to_title(tile_size: float,
-                  top_offset: int,
-                  window_w: int,
+def level_changer(keys: ScancodeWrapper) -> int:
+    if keys[pygame.K_KP_0] or keys[pygame.K_0]:
+        return 0
+    elif keys[pygame.K_KP_1] or keys[pygame.K_1]:
+        return 1
+    elif keys[pygame.K_KP_2] or keys[pygame.K_2]:
+        return 2
+    elif keys[pygame.K_KP_3] or keys[pygame.K_3]:
+        return 3
+    elif keys[pygame.K_KP_4] or keys[pygame.K_4]:
+        return 4
+    elif keys[pygame.K_KP_5] or keys[pygame.K_5]:
+        return 5
+    elif keys[pygame.K_KP_6] or keys[pygame.K_6]:
+        return 6
+    elif keys[pygame.K_KP_7] or keys[pygame.K_7]:
+        return 7
+    elif keys[pygame.K_KP_8] or keys[pygame.K_8]:
+        return 8
+    elif keys[pygame.K_KP_9] or keys[pygame.K_9]:
+        return 9
+    else:
+        return -1
+
+
+def back_to_title(config: dict[str, Any],
                   side: int,
                   player_coord: tuple[int, int]) -> tuple[bool, bool]:
     Ghost.clear_ghosts()
+    tile_size = config['tile_size']
+    top_offset = config['top_offset']
     pacman.init('yellow', config['radius'], player_pos, player_coord)
     red_g.init('red',
                config['radius'],
                Vector2(tile_size, top_offset + 2*tile_size),
                (1, 2),
                player_coord,
-               'blinky')
+               'blinky',
+               config['dt'][config['level']])
     blue_g.init('cyan',
                 config['radius'],
-                Vector2(window_w - 2 * tile_size, top_offset + tile_size),
+                Vector2(660 - 2 * tile_size, top_offset + 2*tile_size),
                 (side, 2),
                 player_coord,
-                'inky')
-    orange_g.init('orange',
-                  config['radius'],
-                  Vector2(tile_size, top_offset+(side)*tile_size),
-                  (1, side-1),
-                  player_coord,
-                  'clyde')
-    pink_g.init('pink',
-                config['radius'],
-                Vector2(window_w - 2 * tile_size,
-                        top_offset+(side)*tile_size),
-                (side, side-1),
-                player_coord,
-                'pinky')
-
-    return (False, True)
-
-
-def reset(tile_size: float,
-          top_offset: int,
-          window_w: int,
-          side: int,
-          player_coord: tuple[int, int]) -> None:
-    # Ghost.clear_ghosts()
-    pacman.init('yellow', config['radius'], player_pos, player_coord)
-    red_g.init('red',
-               config['radius'],
-               Vector2(tile_size, top_offset + 2*tile_size),
-               (1, 2),
-               player_coord,
-               'blinky')
-    blue_g.init('cyan',
-                config['radius'],
-                Vector2(window_w - 2 * tile_size, top_offset + 2*tile_size),
-                (side, 2),
-                player_coord,
-                'inky')
+                'inky',
+                config['dt'][config['level']])
     orange_g.init('orange',
                   config['radius'],
                   Vector2(tile_size, top_offset+(side-1)*tile_size),
                   (1, side-1),
                   player_coord,
-                  'clyde')
+                  'clyde',
+                  config['dt'][config['level']])
     pink_g.init('pink',
                 config['radius'],
-                Vector2(window_w - 2 * tile_size,
+                Vector2(660 - 2 * tile_size,
                         top_offset+(side-1)*tile_size),
                 (side, side-1),
                 player_coord,
-                'pinky')
+                'pinky',
+                config['dt'][config['level']])
+
+    return (False, True)
+
+
+def reset(config: dict[str, Any],
+          side: int,
+          player_coord: tuple[int, int]) -> None:
+    tile_size = config['tile_size']
+    top_offset = config['top_offset']
+    pacman.init('yellow', config['radius'], player_pos, player_coord)
+    red_g.init('red',
+               config['radius'],
+               Vector2(tile_size, top_offset + 2*tile_size),
+               (1, 2),
+               player_coord,
+               'blinky',
+               config['dt'][config['level']])
+    blue_g.init('cyan',
+                config['radius'],
+                Vector2(660 - 2 * tile_size, top_offset + 2*tile_size),
+                (side, 2),
+                player_coord,
+                'inky',
+                config['dt'][config['level']])
+    orange_g.init('orange',
+                  config['radius'],
+                  Vector2(tile_size, top_offset+(side-1)*tile_size),
+                  (1, side-1),
+                  player_coord,
+                  'clyde',
+                  config['dt'][config['level']])
+    pink_g.init('pink',
+                config['radius'],
+                Vector2(660 - 2 * tile_size,
+                        top_offset+(side-1)*tile_size),
+                (side, side-1),
+                player_coord,
+                'pinky',
+                config['dt'][config['level']])
 
 
 def maze_gen(config: dict[str, Any],
@@ -128,6 +158,8 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((window_w, window_h))
     clock = pygame.time.Clock()
     next_level = False
+    nb_of_pg_eaten = 0
+    ready, set_txt, go = ready_render()
 
     config = read_config('config.json')
     running, main_title, pause, game_over, won = (True,
@@ -168,6 +200,7 @@ if __name__ == "__main__":
             last_timer = config['level_max_time']
             next_level = False
             cheat_mode = False
+            can_move = True
             eatable_start: float = 0
             eatable_timer: float = 0
             config.update({'level': 0})
@@ -190,14 +223,15 @@ if __name__ == "__main__":
                 ghost_eatable = False
                 player_coord = (int(config['side'][config['level']]//2+1),
                                 int(config['side'][config['level']]//2+1))
-                player_pos = Vector2(((config['side'][config['level']]//2+1) *
+                player_pos = Vector2(((config['side'][config['level']]//2+2) *
                                       config['tile_size']),
-                                     ((config['side'][config['level']]//2+1) *
+                                     ((config['side'][config['level']]//2+2) *
                                       config['tile_size'] +
                                       config['top_offset']))
                 gen = MazeGenerator(size=(config['side'][config['level']],
                                           config['side'][config['level']]),
                                     seed=random.randint(1, 99))
+                print('finished generating')
                 maze = gen.maze
                 old_maze = [[nb for nb in row] for row in maze]
                 new_maze = ([([15] *
@@ -244,7 +278,8 @@ if __name__ == "__main__":
                                 'yellow',
                                 config['radius'],
                                 player_pos,
-                                player_coord)
+                                player_coord,
+                                config['dt'][config['level']])
                 while dec_to_bin(maze[player_coord[1]]
                                  [player_coord[0]])[pacman.direction] == 0:
                     pacman.direction = (pacman.direction+1) % 4
@@ -343,6 +378,12 @@ if __name__ == "__main__":
             actual_time = time.time()
             actual_timer = time.time()
             start_timer = time.time()
+            if actual_time - start_time < 1.2:
+                ready_generate(screen, ready, 0)
+            elif actual_time - start_time < 2.4:
+                ready_generate(screen, set_txt, 1)
+            else:
+                ready_generate(screen, go, 2)
             pygame.display.flip()
         start = False
 
@@ -363,7 +404,7 @@ if __name__ == "__main__":
             for ghost in Ghost.ghosts():
                 ghost.eatable = False
                 ghost.eaten = False
-                ghost.dt = 2
+                ghost.dt = ghost.config['dt'][config['level']]
                 ghost.path_changed = False
             refresh_rate = 0.0125
 
@@ -395,8 +436,6 @@ if __name__ == "__main__":
             pacman.tp_rtl(config['radius'])
         if keys[pygame.K_p] and not main_title:
             pause = True
-        if keys[pygame.K_KP_PLUS] and cheat_mode:
-            nb_of_pg_eaten = len(pacgums_sprites)
         if keys[pygame.K_KP_MINUS] and cheat_mode:
             game_over = True
             lives = 0
@@ -406,12 +445,17 @@ if __name__ == "__main__":
             cheat_mode = True
         if keys[pygame.K_c] and keys[pygame.K_LCTRL]:
             cheat_mode = False
+        if keys[pygame.K_m] and cheat_mode:
+            can_move = False
+        if keys[pygame.K_m] and cheat_mode and keys[pygame.K_LCTRL]:
+            can_move = True
 
         actual_time = time.time()
         if actual_time - start_time >= refresh_rate:
             for ghost in Ghost.ghosts():
-                ghost.ghost_move(maze,
-                                 old_maze, pacman)
+                if can_move:
+                    ghost.ghost_move(maze,
+                                     old_maze, pacman)
                 ghost.animate(config, eatable_timer - eatable_start)
             start_time = time.time()
 
@@ -432,9 +476,7 @@ if __name__ == "__main__":
         if True in lst:
             lives -= 1
             refresh_rate = 0.0125
-            reset(config['tile_size'],
-                  config['top_offset'],
-                  window_w,
+            reset(config,
                   config['side'][config['level']],
                   player_coord)
             screen.fill('black')
@@ -452,16 +494,21 @@ if __name__ == "__main__":
                              score_nb, h_s_text,
                              h_s_nb, timer_text,
                              timer_nb, lives)
+                if actual_time - start_timer < 1.2:
+                    ready_generate(screen, ready, 0)
+                elif actual_time - start_timer < 2.4:
+                    ready_generate(screen, set_txt, 1)
+                else:
+                    ready_generate(screen, go, 2)
                 pygame.display.flip()
             last_timer = config['level_max_time']
             start_timer = time.time()
         if lives == 0:
             game_over = True
         if timer <= 0:
+            start = True
             lives -= 1
-            reset(config['tile_size'],
-                  config['top_offset'],
-                  window_w,
+            reset(config,
                   config['side'][config['level']],
                   player_coord)
             start_timer = time.time()
@@ -475,7 +522,14 @@ if __name__ == "__main__":
                 won = True
             else:
                 next_level = True
+                nb_of_pg_eaten = 0
                 config.update({'level': config['level'] + 1})
+
+        if cheat_mode and level_changer(keys) != -1:
+            level_number = level_changer(keys)
+            next_level = True
+            nb_of_pg_eaten = 0
+            config.update({'level': level_number})
 
         if pause:
             pause_text, resume_text, back_text = pause_render()
@@ -488,9 +542,7 @@ if __name__ == "__main__":
             if keys[pygame.K_r]:
                 pause = False
             elif keys[pygame.K_BACKSPACE]:
-                pause, main_title = back_to_title(config['tile_size'],
-                                                  config['top_offset'],
-                                                  window_w,
+                pause, main_title = back_to_title(config,
                                                   (config['side']
                                                    [config['level']]),
                                                   player_coord)
@@ -519,9 +571,7 @@ if __name__ == "__main__":
                     len(text_input.value) > 0):
                 name = text_input.value
                 register_highscore('highscores.json', name, score)
-                game_over, main_title = back_to_title(config['tile_size'],
-                                                      config['top_offset'],
-                                                      window_w,
+                game_over, main_title = back_to_title(config,
                                                       (config['side']
                                                        [config['level']]),
                                                       player_coord)

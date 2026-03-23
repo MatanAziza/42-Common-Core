@@ -75,7 +75,7 @@ class Pacman(Sprite):
                  radius: float,
                  pos: Vector2,
                  cell: tuple[int, int], dt: int = 2) -> None:
-        super().__init__(config, color, radius)
+        super().__init__(config, color, 0)
         self.rad = radius
         self.radius = radius/2.5
         self.color = color
@@ -269,7 +269,7 @@ class Ghost(Sprite):
                                                (1, 1, 1, 255))
         self.can_change = True
         self.distance = 0
-        self.dt = dt
+        self.dt = config['dt'][config['level']]
         self.target = (target[0]-1, target[1]-1)
         self.current_target = self.target
         self.path: list[int] = []
@@ -372,7 +372,6 @@ class Ghost(Sprite):
             x_axis = [0, 1, 0, -1]
             y_axis = [-1, 0, 1, 0]
             if self.direction != -1:
-                print(self.direction, self.pos, self.color)
                 self.pos = (self.pos[0]+x_axis[self.direction],
                             self.pos[1]+y_axis[self.direction])
             self.can_change = False

@@ -124,7 +124,7 @@ def main_title_generate(screen: pygame.surface.Surface,
 
 
 def l_s_render() -> pygame.surface.Surface:
-    main_font, reduced_font, hs_font = create_fonts()
+    main_font, _, _ = create_fonts()
 
     loading_text = main_font.render('Loading', False, (255, 255, 255))
 
@@ -135,6 +135,32 @@ def l_s_generate(screen: pygame.surface.Surface,
                  loading_text: pygame.surface.Surface) -> None:
     screen.fill('black')
     screen.blit(loading_text, (180, 500))
+
+
+def ready_render() -> tuple[pygame.surface.Surface,
+                            pygame.surface.Surface,
+                            pygame.surface.Surface]:
+    main_font, _, _ = create_fonts()
+
+    ready_text = main_font.render('Ready ?', False, (255, 255, 255))
+    set_text = main_font.render('Set', False, (255, 255, 255))
+    go_text = main_font.render('GO !', False, (255, 255, 255))
+
+    return (ready_text, set_text, go_text)
+
+
+def ready_generate(screen: pygame.surface.Surface,
+                   text: pygame.surface.Surface,
+                   pos: int) -> None:
+
+    poss = [(187, 400), (270, 400), (260, 400)]
+    surface = pygame.Surface((660, 990)).convert_alpha()
+    surface.fill((0, 0, 0, 0))
+    screen.blit(surface, (0, 0))
+    pygame.draw.rect(screen, (0, 0, 0), ((187, 400), (286, 56)))
+    screen.blit(text, poss[pos])
+
+    pygame.display.flip()
 
 
 def pause_render() -> tuple[pygame.surface.Surface,
