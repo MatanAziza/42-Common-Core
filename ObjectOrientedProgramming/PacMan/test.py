@@ -16,6 +16,7 @@ from render_generate import g_o_generate, hud_render, hud_generate
 from render_generate import l_s_generate, l_s_render, won_render
 from pacgums import pacgums_gen, SuperPacgum
 from utils import dec_to_bin
+from pygame.mixer import Sound
 
 
 def quit(state: bool, running: bool) -> tuple[bool, bool]:
@@ -154,6 +155,8 @@ def between_42(maze: list[list[int]], i: int, j: int) -> bool:
 
 if __name__ == "__main__":
     pygame.init()
+    pygame.mixer.init()
+    pygame.mixer.pre_init()
     window_w, window_h = 660, 990
     screen = pygame.display.set_mode((window_w, window_h))
     clock = pygame.time.Clock()
@@ -168,6 +171,9 @@ if __name__ == "__main__":
                                                   False,
                                                   False)
     refresh_rate = 0.0125
+    flee = Sound('sounds/flee.mp3')
+    chase = Sound('sounds/purchase.mp3')
+    eat = Sound('sounds/eat.mp3')
 
     walls_name = [
         'no_walls',
@@ -231,7 +237,6 @@ if __name__ == "__main__":
                 gen = MazeGenerator(size=(config['side'][config['level']],
                                           config['side'][config['level']]),
                                     seed=random.randint(1, 99))
-                print('finished generating')
                 maze = gen.maze
                 old_maze = [[nb for nb in row] for row in maze]
                 new_maze = ([([15] *
@@ -325,6 +330,7 @@ if __name__ == "__main__":
                                player_coord,
                                'pinky')
                 start_time = time.time()
+                s_time = time.time()
                 start_timer = time.time()
                 nb_of_pg_eaten = 0
                 next_level = False
@@ -374,13 +380,17 @@ if __name__ == "__main__":
                          h_s_nb, timer_text, timer_nb, lives)
 
         actual_time = time.time()
-        while start and actual_time - start_time < 3:
+        if start:
+            pygame.mixer.music.load('sounds/intro.mp3')
+            pygame.mixer.music.play()
+
+        while start and actual_time - start_time < 4:
             actual_time = time.time()
             actual_timer = time.time()
             start_timer = time.time()
-            if actual_time - start_time < 1.2:
+            if actual_time - start_time < 2.2:
                 ready_generate(screen, ready, 0)
-            elif actual_time - start_time < 2.4:
+            elif actual_time - start_time < 3.4:
                 ready_generate(screen, set_txt, 1)
             else:
                 ready_generate(screen, go, 2)
@@ -408,9 +418,11 @@ if __name__ == "__main__":
                 ghost.path_changed = False
             refresh_rate = 0.0125
 
+
         for pacgum in pacgums_sprites:
             if (pygame.sprite.collide_circle(pacman, pacgum) and
                     not pacgum.eaten):
+                eat.play()
                 score += pacgum.score
                 pacgum.radius = 0
                 pacgum.score = 0
@@ -450,6 +462,14 @@ if __name__ == "__main__":
         if keys[pygame.K_m] and cheat_mode and keys[pygame.K_LCTRL]:
             can_move = True
 
+        sound_time = time.time()
+        if sound_time - s_time >= 0.39:
+            if pink_g.eatable:
+                flee.play()
+            else:
+                chase.play()
+            s_time = time.time()
+
         actual_time = time.time()
         if actual_time - start_time >= refresh_rate:
             for ghost in Ghost.ghosts():
@@ -488,15 +508,15 @@ if __name__ == "__main__":
             start_timer = time.time()
             txt = hud_render(score, highest_score, 90)
             score_text, score_nb, h_s_text, h_s_nb, timer_text, timer_nb = txt
-            while actual_time - start_timer < 3 and lives != 0:
+            while actual_time - start_timer < 4 and lives != 0:
                 actual_time = time.time()
                 hud_generate(screen, score_text,
                              score_nb, h_s_text,
                              h_s_nb, timer_text,
                              timer_nb, lives)
-                if actual_time - start_timer < 1.2:
+                if actual_time - start_timer < 2.2:
                     ready_generate(screen, ready, 0)
-                elif actual_time - start_timer < 2.4:
+                elif actual_time - start_timer < 3.4:
                     ready_generate(screen, set_txt, 1)
                 else:
                     ready_generate(screen, go, 2)
