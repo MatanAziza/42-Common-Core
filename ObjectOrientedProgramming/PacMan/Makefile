@@ -4,10 +4,10 @@ install:
 	python3 -m venv env;source env/bin/activate;python -m pip install -r requirements.txt
 
 run:
-	source env/bin/activate; python3 test.py
+	source env/bin/activate; python3 pacman.py config.json
 
 debug:
-	python -m pdb test.py
+	source env/bin/activate; python3 -m pdb pacman.py config.json
 
 clean:
 	rm -rf __pycache__

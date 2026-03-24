@@ -256,7 +256,12 @@ def won_render(score: int) -> tuple[pygame.surface.Surface,
 
 def hud_render(score: int,
                highest_score: int,
-               timer: int) -> list[pygame.surface.Surface]:
+               timer: int) -> tuple[pygame.surface.Surface,
+                                    pygame.surface.Surface,
+                                    pygame.surface.Surface,
+                                    pygame.surface.Surface,
+                                    pygame.surface.Surface,
+                                    pygame.surface.Surface]:
     _, reduced_font, _ = create_fonts()
 
     score_text = reduced_font.render('Score', False, (255, 255, 255))
@@ -268,7 +273,7 @@ def hud_render(score: int,
     timer_text = reduced_font.render('Timer', False, (255, 255, 255))
     timer_nb = reduced_font.render(str(timer), False, (255, 255, 255))
 
-    return [score_text, score_nb, h_s_text, h_s_nb, timer_text, timer_nb]
+    return (score_text, score_nb, h_s_text, h_s_nb, timer_text, timer_nb)
 
 
 def hud_generate(screen: pygame.surface.Surface,
@@ -293,3 +298,40 @@ def hud_generate(screen: pygame.surface.Surface,
         pygame.draw.circle(screen, "yellow", (80, 820), 20)
     if lives == 3:
         pygame.draw.circle(screen, "yellow", (130, 820), 20)
+
+
+def instructions_render() -> tuple[pygame.surface.Surface,
+                                   pygame.surface.Surface,
+                                   pygame.surface.Surface,
+                                   pygame.surface.Surface,
+                                   pygame.surface.Surface]:
+    main_font, reduced_font, _ = create_fonts()
+
+    keys = pygame.image.load('keys/keys.png')
+    keys = pygame.transform.scale(keys, (660, 200))
+    keys.set_colorkey('white')
+    keys.convert_alpha()
+
+    press_text = main_font.render('Press', False, (0, 0, 0))
+    or_text = main_font.render('or', False, (0, 0, 0))
+    tomove_text = main_font.render('to move', False, (0, 0, 0))
+    press_return = reduced_font.render('Press ENTER to play',
+                                       False,
+                                       (255, 255, 255))
+
+    return (keys, press_text, or_text, tomove_text, press_return)
+
+
+def instructions_generate(screen: pygame.surface.Surface,
+                          wasd_arrows: pygame.surface.Surface,
+                          press_text: pygame.surface.Surface,
+                          or_text: pygame.surface.Surface,
+                          tomove_text: pygame.surface.Surface,
+                          press_return: pygame.surface.Surface) -> None:
+
+    pygame.draw.rect(screen, (255, 255, 255), ((0, 50), (660, 600)))
+    screen.blit(press_text, (220, 100))
+    screen.blit(or_text, (290, 250))
+    screen.blit(wasd_arrows, (00, 200))
+    screen.blit(tomove_text, (180, 500))
+    screen.blit(press_return, (170, 800))

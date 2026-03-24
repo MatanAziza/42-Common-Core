@@ -1,6 +1,7 @@
 import random
 import time
 import pygame
+import sys
 from typing import Any
 from pygame import Vector2
 from pygame.event import Event
@@ -14,6 +15,7 @@ from render_generate import ready_generate, ready_render
 from render_generate import pause_render, pause_generate, g_o_render
 from render_generate import g_o_generate, hud_render, hud_generate
 from render_generate import l_s_generate, l_s_render, won_render
+from render_generate import instructions_render, instructions_generate
 from pacgums import pacgums_gen, SuperPacgum
 from utils import dec_to_bin
 from pygame.mixer import Sound
@@ -154,6 +156,28 @@ def between_42(maze: list[list[int]], i: int, j: int) -> bool:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        print(
+            "Missing config file. Please provide "
+            "this file named 'config.json' and run with:\n"
+            "make run\nor\npython3 pacman.py config.json"
+        )
+        sys.exit(1)
+    elif len(sys.argv) > 2:
+        print(
+            "Too much arguments provided. Please run with:\n"
+            "make run\nor\npython3 pacman.py config.json"
+        )
+        sys.exit(1)
+    file = sys.argv[1]
+    try:
+        config = read_config(file)
+    except Exception:
+        print(
+            "Wrong config file syntax. Please provide one with "
+            "such syntax:\nKEY1=VALUE1\nKEY2=VALUE2\netc"
+        )
+        sys.exit(1)
     pygame.init()
     pygame.mixer.init()
     pygame.mixer.pre_init()
@@ -163,8 +187,6 @@ if __name__ == "__main__":
     next_level = False
     nb_of_pg_eaten = 0
     ready, set_txt, go = ready_render()
-
-    config = read_config('config.json')
     running, main_title, pause, game_over, won = (True,
                                                   True,
                                                   False,
@@ -207,6 +229,7 @@ if __name__ == "__main__":
             next_level = False
             cheat_mode = False
             can_move = True
+            instructions = True
             eatable_start: float = 0
             eatable_timer: float = 0
             config.update({'level': 0})
@@ -329,7 +352,6 @@ if __name__ == "__main__":
                                 config['side'][config['level']]-1),
                                player_coord,
                                'pinky')
-                start_time = time.time()
                 s_time = time.time()
                 start_timer = time.time()
                 nb_of_pg_eaten = 0
@@ -339,6 +361,24 @@ if __name__ == "__main__":
                                     scores_text, mt_text,
                                     play_text, leaderboard_text)
             clock.tick(config['tick'])
+
+        if instructions:
+            temp = instructions_render()
+            wasd_arrows, press_text, or_text, tomove_text, press_return = temp
+            screen.fill('black')
+            instructions_generate(screen,
+                                  wasd_arrows,
+                                  press_text,
+                                  or_text,
+                                  tomove_text,
+                                  press_return)
+            pygame.display.flip()
+        while instructions:
+            instructions, running = quit(instructions, running)
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_RETURN]:
+                instructions = False
+                start_time = time.time()
 
         _, running = quit(True, running)
         actual_timer = time.time()
@@ -385,6 +425,7 @@ if __name__ == "__main__":
             pygame.mixer.music.play()
 
         while start and actual_time - start_time < 4:
+            start, running = quit(start, running)
             actual_time = time.time()
             actual_timer = time.time()
             start_timer = time.time()
@@ -417,7 +458,6 @@ if __name__ == "__main__":
                 ghost.dt = ghost.config['dt'][config['level']]
                 ghost.path_changed = False
             refresh_rate = 0.0125
-
 
         for pacgum in pacgums_sprites:
             if (pygame.sprite.collide_circle(pacman, pacgum) and
