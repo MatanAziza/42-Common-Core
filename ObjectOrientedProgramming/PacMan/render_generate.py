@@ -7,6 +7,7 @@ import pygame_textinput as py_text  # type: ignore[import-untyped]
 def create_fonts() -> tuple[pygame.font.Font,
                             pygame.font.Font,
                             pygame.font.Font]:
+    'Create different font size for rendering purposes'
     main_font = pygame.font.SysFont('Nimbus Mono PS', 70)
     reduced_font = pygame.font.SysFont('Nimbus Mono PS', 30)
     hs_font = pygame.font.SysFont('Nimbus Mono PS', 20)
@@ -18,8 +19,12 @@ def main_title_render(highscores: list[list[Any]]
                       ) -> tuple[pygame.surface.Surface,
                                  pygame.surface.Surface,
                                  pygame.surface.Surface,
+                                 pygame.surface.Surface,
                                  list[pygame.surface.Surface],
                                  list[pygame.surface.Surface]]:
+    '''Create all the Surfaces for the main title:
+    Name of the game, to play, to quit, leaderboard,
+    list of names and scores of the leaderboard'''
     main_font, reduced_font, hs_font = create_fonts()
 
     names: list[str] = []
@@ -29,8 +34,13 @@ def main_title_render(highscores: list[list[Any]]
         scores.append(x[1])
 
     mt_text = main_font.render('PAC-MAN', False, (255, 255, 0))
-    play_text = reduced_font.render('Press SPACE to play', False,
+    play_text = reduced_font.render('Press SPACE to play',
+                                    False,
                                     (255, 255, 0))
+    quit_text = reduced_font.render('Press Q to quit',
+                                    False,
+                                    (255, 255, 0))
+
     leaderboard_text = reduced_font.render('Leaderboard', False, (255, 255, 0))
 
     name_0 = hs_font.render(names[0], False, (255, 255, 0))
@@ -79,7 +89,7 @@ def main_title_render(highscores: list[list[Any]]
     list_scores_text.append(score_8)
     list_scores_text.append(score_9)
 
-    return (mt_text, play_text, leaderboard_text,
+    return (mt_text, play_text, quit_text, leaderboard_text,
             list_names_text, list_scores_text)
 
 
@@ -88,12 +98,15 @@ def main_title_generate(screen: pygame.surface.Surface,
                         list_scores: list[pygame.surface.Surface],
                         mt_text: pygame.surface.Surface,
                         play_text: pygame.surface.Surface,
+                        quit_text: pygame.surface.Surface,
                         leaderboard_text: pygame.surface.Surface) -> None:
-
+    'Generate all the elements of the main_title_render on screen'
     screen.fill('black')
 
     screen.blit(mt_text, (180, 50))
     screen.blit(play_text, (170, 800))
+    screen.blit(quit_text, (200, 850))
+
     screen.blit(leaderboard_text, (230, 150))
 
     screen.blit(list_names[0], (50, 250))
@@ -124,6 +137,7 @@ def main_title_generate(screen: pygame.surface.Surface,
 
 
 def l_s_render() -> pygame.surface.Surface:
+    'Create the "Loading" of the loading screen'
     main_font, _, _ = create_fonts()
 
     loading_text = main_font.render('Loading', False, (255, 255, 255))
@@ -133,6 +147,7 @@ def l_s_render() -> pygame.surface.Surface:
 
 def l_s_generate(screen: pygame.surface.Surface,
                  loading_text: pygame.surface.Surface) -> None:
+    'Render the loading screen'
     screen.fill('black')
     screen.blit(loading_text, (180, 500))
 
@@ -140,6 +155,8 @@ def l_s_generate(screen: pygame.surface.Surface,
 def ready_render() -> tuple[pygame.surface.Surface,
                             pygame.surface.Surface,
                             pygame.surface.Surface]:
+    '''Create the 'ready?' 'set' 'go!' text
+    at the beginning of a level'''
     main_font, _, _ = create_fonts()
 
     ready_text = main_font.render('Ready ?', False, (255, 255, 255))
@@ -152,7 +169,7 @@ def ready_render() -> tuple[pygame.surface.Surface,
 def ready_generate(screen: pygame.surface.Surface,
                    text: pygame.surface.Surface,
                    pos: int) -> None:
-
+    "Generate the 'ready?' 'set' 'go!' on screen"
     poss = [(187, 400), (270, 400), (260, 400)]
     surface = pygame.Surface((660, 990)).convert_alpha()
     surface.fill((0, 0, 0, 0))
@@ -166,6 +183,8 @@ def ready_generate(screen: pygame.surface.Surface,
 def pause_render() -> tuple[pygame.surface.Surface,
                             pygame.surface.Surface,
                             pygame.surface.Surface]:
+    '''Create the elements of the pause menu:
+    Pause, resume, back to title'''
     main_font, reduced_font, hs_font = create_fonts()
 
     pause_text = main_font.render('Pause', False, (255, 255, 255))
@@ -183,6 +202,7 @@ def pause_generate(screen: pygame.surface.Surface,
                    resume_text: pygame.surface.Surface,
                    back_text: pygame.surface.Surface) -> None:
 
+    'Generate the pause menu on screen'
     surface = pygame.Surface((660, 990)).convert_alpha()
     surface.fill((0, 0, 0, 0))
     screen.blit(surface, (0, 0))
@@ -200,6 +220,8 @@ def g_o_render(score: int) -> tuple[pygame.surface.Surface,
                                     pygame.surface.Surface,
                                     pygame.surface.Surface,
                                     py_text.TextInputVisualizer]:
+    '''Create all the element of the game over screen:
+    Game over, score, name input'''
     main_font, reduced_font, _ = create_fonts()
 
     g_o_text = main_font.render('Game Over', False, (255, 0, 0))
@@ -222,6 +244,7 @@ def g_o_generate(screen: pygame.surface.Surface,
                  g_o_text_input: py_text.pygame_textinput.TextInputVisualizer,
                  events: Event | list[Event]) -> None:
 
+    'Generate both game over and congrats screen on screen'
     screen.fill('black')
 
     screen.blit(g_o_text, (140, 100))
@@ -240,6 +263,8 @@ def won_render(score: int) -> tuple[pygame.surface.Surface,
                                     pygame.surface.Surface,
                                     pygame.surface.Surface,
                                     py_text.TextInputVisualizer]:
+    '''Generate all the elements of the congrats screen:
+    you won!, score, name input'''
     main_font, reduced_font, _ = create_fonts()
 
     g_o_text = main_font.render('You won !', False, (0, 255, 0))
@@ -256,12 +281,18 @@ def won_render(score: int) -> tuple[pygame.surface.Surface,
 
 def hud_render(score: int,
                highest_score: int,
-               timer: int) -> tuple[pygame.surface.Surface,
+               timer: int,
+               level: int) -> tuple[pygame.surface.Surface,
+                                    pygame.surface.Surface,
+                                    pygame.surface.Surface,
+                                    pygame.surface.Surface,
                                     pygame.surface.Surface,
                                     pygame.surface.Surface,
                                     pygame.surface.Surface,
                                     pygame.surface.Surface,
                                     pygame.surface.Surface]:
+    '''Generate all the elements of the in-game HUD:
+    Score, highest score, timer, level, lives'''
     _, reduced_font, _ = create_fonts()
 
     score_text = reduced_font.render('Score', False, (255, 255, 255))
@@ -273,31 +304,46 @@ def hud_render(score: int,
     timer_text = reduced_font.render('Timer', False, (255, 255, 255))
     timer_nb = reduced_font.render(str(timer), False, (255, 255, 255))
 
-    return (score_text, score_nb, h_s_text, h_s_nb, timer_text, timer_nb)
+    level_text = reduced_font.render('Level', False, (255, 255, 255))
+    level_nb = reduced_font.render(str(level), False, (255, 255, 255))
+
+    live_pacman = pygame.image.load('pacman/right_1.png')
+    live_pacman = pygame.transform.scale(live_pacman, (40, 40))
+
+    return (score_text, score_nb,
+            h_s_text, h_s_nb,
+            timer_text, timer_nb,
+            level_text, level_nb,
+            live_pacman)
 
 
 def hud_generate(screen: pygame.surface.Surface,
+                 lives: int,
                  score_text: pygame.surface.Surface,
                  score_nb: pygame.surface.Surface,
                  h_s_text: pygame.surface.Surface,
                  h_s_nb: pygame.surface.Surface,
                  timer_text: pygame.surface.Surface,
                  timer_nb: pygame.surface.Surface,
-                 lives: int) -> None:
-
+                 level_text: pygame.surface.Surface,
+                 level_nb: pygame.surface.Surface,
+                 live_pacman: pygame.surface.Surface) -> None:
+    'Generate the hud on screen'
     screen.blit(score_text, (500, 20))
     screen.blit(score_nb, (500, 50))
     screen.blit(h_s_text, (50, 20))
     screen.blit(h_s_nb, (50, 50))
     screen.blit(timer_text, (300, 20))
     screen.blit(timer_nb, (300, 50))
+    screen.blit(level_text, (500, 800))
+    screen.blit(level_nb, (600, 800))
 
     if lives >= 1:
-        pygame.draw.circle(screen, "yellow", (30, 820), 20)
+        screen.blit(live_pacman, (20, 800))
     if lives >= 2:
-        pygame.draw.circle(screen, "yellow", (80, 820), 20)
+        screen.blit(live_pacman, (70, 800))
     if lives == 3:
-        pygame.draw.circle(screen, "yellow", (130, 820), 20)
+        screen.blit(live_pacman, (120, 800))
 
 
 def instructions_render() -> tuple[pygame.surface.Surface,
@@ -305,6 +351,8 @@ def instructions_render() -> tuple[pygame.surface.Surface,
                                    pygame.surface.Surface,
                                    pygame.surface.Surface,
                                    pygame.surface.Surface]:
+    '''Create all the elements of the instructions screen:
+    Press to move, keys image, enter to play'''
     main_font, reduced_font, _ = create_fonts()
 
     keys = pygame.image.load('keys/keys.png')
@@ -328,7 +376,7 @@ def instructions_generate(screen: pygame.surface.Surface,
                           or_text: pygame.surface.Surface,
                           tomove_text: pygame.surface.Surface,
                           press_return: pygame.surface.Surface) -> None:
-
+    'Generate the instructions on screen'
     pygame.draw.rect(screen, (255, 255, 255), ((0, 50), (660, 600)))
     screen.blit(press_text, (220, 100))
     screen.blit(or_text, (290, 250))

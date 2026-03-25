@@ -9,6 +9,7 @@ from typing import Any
 
 
 class Sprite(pygame.sprite.Sprite, ABC):
+    "Sprite class"
     def __init__(self, config: dict[str, Any],
                  color: str,
                  radius: float) -> None:
@@ -32,6 +33,7 @@ class Sprite(pygame.sprite.Sprite, ABC):
                    maze: list[list[int]],
                    old_maze: list[list[int]],
                    pacman: Any) -> None:
+        "method determining where a ghost should go"
         pass
 
     def animate(self, config: dict[str, Any], timer: float) -> None:
@@ -65,10 +67,12 @@ class Walls(Sprite):
                    maze: list[list[int]],
                    old_maze: list[list[int]],
                    pacman: Any) -> None:
+        "method determining where a ghost should go. useless here"
         pass
 
 
 class Pacman(Sprite):
+    "Pacman class"
     def __init__(self,
                  config: dict[str, Any],
                  color: str,
@@ -95,6 +99,7 @@ class Pacman(Sprite):
              radius: float,
              pos: Vector2,
              cell: tuple[int, int], dt: int = 2) -> None:
+        "reproduces the __init__ method"
         self.rad = radius
         self.radius = radius/2.5
         self.color = color
@@ -110,6 +115,7 @@ class Pacman(Sprite):
         self.target = cell
 
     def animate(self, config: dict[str, Any], timer: float) -> None:
+        "changes the displayed sprite for a character to animate it"
         dir = ['up', 'right', 'down', 'left']
         tile_size = config['tile_size']
         f = 1 if self.distance % (tile_size/2) < tile_size/8 else 2
@@ -127,15 +133,18 @@ class Pacman(Sprite):
                                               tile_size/2-self.rad/2))
 
     def player_pos(self) -> tuple[int, int]:
+        "return the player position"
         return self.pos
 
     def ghost_move(self,
                    maze: list[list[int]],
                    old_maze: list[list[int]],
                    pacman: Any) -> None:
+        "method determining where a ghost should go. useless here"
         pass
 
     def player_target(self) -> tuple[int, int]:
+        "returns the player next position"
         x_axis = [0, 1, 0, -1]
         y_axis = [-1, 0, 1, 0]
         return (self.pos[0]+x_axis[self.direction],
@@ -143,6 +152,7 @@ class Pacman(Sprite):
 
     def player_move(self,
                     keys: ScancodeWrapper, maze: list[list[int]]) -> None:
+        "Makes the player move depending on his position and the keys pressed"
         x_axis = [0, 1, 0, -1]
         y_axis = [-1, 0, 1, 0]
         tile_size = self.config['tile_size']
@@ -208,6 +218,7 @@ class Pacman(Sprite):
             self.next_direction = 2
 
     def tp_ltr(self, radius: float) -> None:
+        "teleports the player from left to right"
         tile_size = self.config['tile_size']
         self.image = pygame.Surface([tile_size+660, tile_size])
         self.image.set_colorkey('black')
@@ -219,6 +230,7 @@ class Pacman(Sprite):
         self.is_tping = True
 
     def tp_rtl(self, radius: float) -> None:
+        "teleports the player from right to left"
         assert self.rect is not None
         tile_size = self.config['tile_size']
         self.image = pygame.Surface([tile_size+660, tile_size])
@@ -233,6 +245,7 @@ class Pacman(Sprite):
 
 
 class Ghost(Sprite):
+    "Generic Ghost class"
     _ghosts: list[Sprite] = []
 
     def __init__(self,
@@ -286,6 +299,7 @@ class Ghost(Sprite):
              target: tuple[int, int],
              name: str,
              dt: int = 2) -> None:
+        "reproduces the __init__ method"
         assert self.rect is not None
         self.rad = radius
         self.radius = radius/2.1
@@ -319,6 +333,7 @@ class Ghost(Sprite):
         self.path_changed = False
 
     def animate(self, config: dict[str, Any], timer: float) -> None:
+        "changes the displayed sprite for a character to animate it"
         dir = ['up', 'right', 'down', 'left']
         tile_size = self.config['tile_size']
         f = 1 if self.distance % (tile_size/4) < tile_size/8 else 2
@@ -344,16 +359,20 @@ class Ghost(Sprite):
 
     @classmethod
     def ghosts(cls) -> list[Sprite]:
+        "returns a list of existing ghosts"
         return cls._ghosts
 
     @classmethod
     def clear_ghosts(cls) -> None:
+        "clears the list of existing ghosts"
         cls._ghosts.clear()
 
     def ghost_move(self,
                    maze: list[list[int]],
                    old_maze: list[list[int]],
                    pacman: Pacman) -> None:
+        """method determining where a ghost should go and how he moves
+        according to his corodinates and pixel position"""
         assert self.rect is not None
         config = self.config
         tile_size = config['tile_size']
@@ -391,12 +410,14 @@ class Ghost(Sprite):
     def where_to_go(self, pacman: Pacman,
                     old_maze: list[list[int]],
                     walls: list[int]) -> None:
+        "choses randomly a direction the ghost has to take (obsolete)"
         assert self.rect is not None
         self.direction = randint(0, 3)
         while (walls[self.direction] == 1):
             self.direction = randint(0, 3)
 
     def flee(self, maze: list[list[int]]) -> None:
+        "manage the flee state f all ghosts"
         scatter = {'red': (0, 1),
                    'cyan': (len(maze)-1, 1),
                    'orange': (0, len(maze)-2),

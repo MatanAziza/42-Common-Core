@@ -22,6 +22,7 @@ from pygame.mixer import Sound
 
 
 def quit(state: bool, running: bool) -> tuple[bool, bool]:
+    "checks if a quitting event has occured, and returns the game state."
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             return (False, False)
@@ -29,6 +30,7 @@ def quit(state: bool, running: bool) -> tuple[bool, bool]:
 
 
 def level_changer(keys: ScancodeWrapper) -> int:
+    "changes the level in cheat mode if a number is pressed"
     if keys[pygame.K_KP_0] or keys[pygame.K_0]:
         return 0
     elif keys[pygame.K_KP_1] or keys[pygame.K_1]:
@@ -56,6 +58,7 @@ def level_changer(keys: ScancodeWrapper) -> int:
 def back_to_title(config: dict[str, Any],
                   side: int,
                   player_coord: tuple[int, int]) -> tuple[bool, bool]:
+    "resets the game by setting all characters value to default"
     Ghost.clear_ghosts()
     tile_size = config['tile_size']
     top_offset = config['top_offset']
@@ -96,6 +99,7 @@ def back_to_title(config: dict[str, Any],
 def reset(config: dict[str, Any],
           side: int,
           player_coord: tuple[int, int]) -> None:
+    "resets the game by setting all characters value to default"
     tile_size = config['tile_size']
     top_offset = config['top_offset']
     pacman.init('yellow', config['radius'], player_pos, player_coord)
@@ -133,6 +137,7 @@ def reset(config: dict[str, Any],
 def maze_gen(config: dict[str, Any],
              maze: list[list[int]],
              walls_name: list[str]) -> list[Walls]:
+    "create a matrix of walls tiles to display for the entire game"
     walls: list[Walls] = []
     for y in range(config['side'][config['level']]+2):
         for x in range(config['side'][config['level']]+2):
@@ -145,6 +150,7 @@ def maze_gen(config: dict[str, Any],
 
 
 def between_42(maze: list[list[int]], i: int, j: int) -> bool:
+    "checks for the between 42 tile to put the player there is possible"
     a = maze[j][i] == 15
     b = maze[j][i+1] == 15
     c = maze[j][i+2] == 15
@@ -170,14 +176,7 @@ if __name__ == "__main__":
         )
         sys.exit(1)
     file = sys.argv[1]
-    try:
-        config = read_config(file)
-    except Exception:
-        print(
-            "Wrong config file syntax. Please provide one with "
-            "such syntax:\nKEY1=VALUE1\nKEY2=VALUE2\netc"
-        )
-        sys.exit(1)
+    config = read_config(file)
     pygame.init()
     pygame.mixer.init()
     pygame.mixer.pre_init()
@@ -222,7 +221,12 @@ if __name__ == "__main__":
             highscores = get_highscores('highscores.json')
             highest_score = highscores[0][1]
             z = main_title_render(highscores)
-            mt_text, play_text, leaderboard_text, names_text, scores_text = z
+            (mt_text,
+             play_text,
+             quit_text,
+             leaderboard_text,
+             names_text,
+             scores_text) = z
             score = 0
             lives = config['lives']
             last_timer = config['level_max_time']
@@ -239,6 +243,8 @@ if __name__ == "__main__":
 
             main_title, running = quit(main_title, running)
             keys = pygame.key.get_pressed()
+            if keys[pygame.K_q]:
+                sys.exit(0)
             if keys[pygame.K_SPACE] or next_level:
                 l_s_generate(screen, l_s_render())
                 pygame.display.flip()
@@ -301,7 +307,8 @@ if __name__ == "__main__":
                                       config['points_per_super_pacgum'],
                                       maze,
                                       player_coord,
-                                      config['top_offset'])
+                                      config['top_offset'],
+                                      walls_name)
                 pacman = Pacman(config,
                                 'yellow',
                                 config['radius'],
@@ -352,17 +359,18 @@ if __name__ == "__main__":
                                 config['side'][config['level']]-1),
                                player_coord,
                                'pinky')
-                s_time = time.time()
-                start_timer = time.time()
                 nb_of_pg_eaten = 0
                 next_level = False
+                s_time = time.time()
+                start_time = time.time()
+                start_timer = time.time()
             else:
                 main_title_generate(screen, names_text,
                                     scores_text, mt_text,
-                                    play_text, leaderboard_text)
+                                    play_text, quit_text, leaderboard_text)
             clock.tick(config['tick'])
 
-        if instructions:
+        if instructions and running:
             temp = instructions_render()
             wasd_arrows, press_text, or_text, tomove_text, press_return = temp
             screen.fill('black')
@@ -373,12 +381,14 @@ if __name__ == "__main__":
                                   tomove_text,
                                   press_return)
             pygame.display.flip()
-        while instructions:
+        while instructions and running:
             instructions, running = quit(instructions, running)
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_RETURN]:
+            if keys[pygame.K_RETURN] or keys[pygame.K_KP_ENTER]:
                 instructions = False
                 start_time = time.time()
+                s_time = time.time()
+                start_timer = time.time()
 
         _, running = quit(True, running)
         actual_timer = time.time()
@@ -403,28 +413,34 @@ if __name__ == "__main__":
         sprites_list.update()
 
         screen.fill('black')
-        if not game_over and not pause:
+        if not game_over and not pause and running:
             walls_sprites.draw(screen)
             pacgums_sprites.draw(screen)
             sprites_list.draw(screen)
 
-            x = hud_render(score, highest_score, timer)
+            x = hud_render(score, highest_score, timer, config['level'] + 1)
             score_text = x[0]
             score_nb = x[1]
             h_s_text = x[2]
             h_s_nb = x[3]
             timer_text = x[4]
             timer_nb = x[5]
-            hud_generate(screen, score_text,
-                         score_nb, h_s_text,
-                         h_s_nb, timer_text, timer_nb, lives)
+            level_text = x[6]
+            level_nb = x[7]
+            live_pacman = x[8]
+            hud_generate(screen, lives,
+                         score_text, score_nb,
+                         h_s_text, h_s_nb,
+                         timer_text, timer_nb,
+                         level_text, level_nb,
+                         live_pacman)
 
         actual_time = time.time()
-        if start:
+        if start and running:
             pygame.mixer.music.load('sounds/intro.mp3')
             pygame.mixer.music.play()
 
-        while start and actual_time - start_time < 4:
+        while start and running and actual_time - start_time < 4:
             start, running = quit(start, running)
             actual_time = time.time()
             actual_timer = time.time()
@@ -458,26 +474,6 @@ if __name__ == "__main__":
                 ghost.dt = ghost.config['dt'][config['level']]
                 ghost.path_changed = False
             refresh_rate = 0.0125
-
-        for pacgum in pacgums_sprites:
-            if (pygame.sprite.collide_circle(pacman, pacgum) and
-                    not pacgum.eaten):
-                eat.play()
-                score += pacgum.score
-                pacgum.radius = 0
-                pacgum.score = 0
-                pacgum.eaten = True
-                nb_of_pg_eaten += 1
-                pygame.draw.rect(pacgum.image,
-                                 'black',
-                                 ((0, 0),
-                                  (config['tile_size'],
-                                   config['tile_size'])))
-                pygame.display.flip()
-                if isinstance(pacgum, SuperPacgum):
-                    ghost_eatable = True
-                    eatable_timer = time.time()
-                    eatable_start = time.time()
 
         pacman.player_move(keys, maze)
         pacman.animate(config, 0)
@@ -546,14 +542,24 @@ if __name__ == "__main__":
             clock.tick(config['tick'])
             actual_time = time.time()
             start_timer = time.time()
-            txt = hud_render(score, highest_score, 90)
-            score_text, score_nb, h_s_text, h_s_nb, timer_text, timer_nb = txt
+            txt = hud_render(score, highest_score, timer, config['level'] + 1)
+            (score_text,
+             score_nb,
+             h_s_text,
+             h_s_nb,
+             timer_text,
+             timer_nb,
+             level_text,
+             level_nb,
+             live_pacman) = txt
             while actual_time - start_timer < 4 and lives != 0:
                 actual_time = time.time()
-                hud_generate(screen, score_text,
-                             score_nb, h_s_text,
-                             h_s_nb, timer_text,
-                             timer_nb, lives)
+                hud_generate(screen, lives,
+                             score_text, score_nb,
+                             h_s_text, h_s_nb,
+                             timer_text, timer_nb,
+                             level_text, level_nb,
+                             live_pacman)
                 if actual_time - start_timer < 2.2:
                     ready_generate(screen, ready, 0)
                 elif actual_time - start_timer < 3.4:
@@ -563,6 +569,27 @@ if __name__ == "__main__":
                 pygame.display.flip()
             last_timer = config['level_max_time']
             start_timer = time.time()
+
+        for pacgum in pacgums_sprites:
+            if (pygame.sprite.collide_circle(pacman, pacgum) and
+                    not pacgum.eaten):
+                eat.play()
+                score += pacgum.score
+                pacgum.radius = 0
+                pacgum.score = 0
+                pacgum.eaten = True
+                nb_of_pg_eaten += 1
+                pygame.draw.rect(pacgum.image,
+                                 'black',
+                                 ((0, 0),
+                                  (config['tile_size'],
+                                   config['tile_size'])))
+                pygame.display.flip()
+                if isinstance(pacgum, SuperPacgum):
+                    ghost_eatable = True
+                    eatable_timer = time.time()
+                    eatable_start = time.time()
+
         if lives == 0:
             game_over = True
         if timer <= 0:

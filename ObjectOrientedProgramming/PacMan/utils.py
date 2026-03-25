@@ -1,4 +1,6 @@
 def dec_to_bin(cell: int) -> list[int]:
+    """returns a binary list , used to get the 4 cell walls for ghosts/pacman
+    movements"""
     res = ''
     while cell > 0:
         res = str(cell % 2)+res

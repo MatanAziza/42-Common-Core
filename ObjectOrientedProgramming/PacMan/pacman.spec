@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['test.py'],
+    ['pacman.py', 'config.json'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -21,7 +21,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='test',
+    name='pacman',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -40,5 +40,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='test',
+    name='pacman',
 )

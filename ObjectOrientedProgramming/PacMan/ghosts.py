@@ -6,6 +6,7 @@ from typing import Any
 
 
 class Blinky(Ghost):
+    "Ghost subclass for Blinky and Inky ghosts (red and blue)"
     def __init__(self,
                  config: dict[str, Any],
                  color: str,
@@ -20,6 +21,8 @@ class Blinky(Ghost):
     def where_to_go(self, pacman: Pacman,
                     old_maze: list[list[int]],
                     walls: list[int]) -> None:
+        """Changes the direction a ghost can take in the maze based on
+        its coordinates. They basically always aim at Pacman"""
         new_pos = pacman.player_pos()
         if not pacman.can_change and 0 < new_pos[0] <= len(old_maze):
             new_pos = pacman.player_target()
@@ -40,6 +43,7 @@ class Blinky(Ghost):
 
 
 class Pinky(Ghost):
+    "Ghost subclass for Pinky (pink ghost)"
     def __init__(self,
                  config: dict[str, Any],
                  color: str,
@@ -54,6 +58,9 @@ class Pinky(Ghost):
     def where_to_go(self, pacman: Pacman,
                     old_maze: list[list[int]],
                     walls: list[int]) -> None:
+        """Changes the direction a ghost can take in the maze based on
+        its coordinates. Pinky always aim 2 tiles after Pacman direction,
+        if possible, blocking his way"""
         new_pos = pacman.player_pos()
         p_dir = pacman.direction
         x_axis = [0, 1, 0, -1]
@@ -85,6 +92,7 @@ class Pinky(Ghost):
 
 
 class Clyde(Ghost):
+    "Ghost subclass for Clyde (orange ghost)"
     def __init__(self,
                  config: dict[str, Any],
                  color: str,
@@ -99,6 +107,9 @@ class Clyde(Ghost):
     def where_to_go(self, pacman: Pacman,
                     old_maze: list[list[int]],
                     walls: list[int]) -> None:
+        """Changes the direction a ghost can take in the maze based on
+        its coordinates. Pinky always aim at Pacman, but flees whenever he's
+        too close to Pacman (radius of 2 tiles)"""
         new_pos = pacman.player_pos()
         if not pacman.can_change and 0 < new_pos[0] <= len(old_maze):
             new_pos = pacman.player_target()
