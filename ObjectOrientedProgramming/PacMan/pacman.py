@@ -193,8 +193,11 @@ if __name__ == "__main__":
                                                   False)
     refresh_rate = 0.0125
     flee = Sound('sounds/flee.mp3')
+    flee.set_volume(0.3)
     chase = Sound('sounds/purchase.mp3')
+    chase.set_volume(0.4)
     eat = Sound('sounds/eat.mp3')
+    eat.set_volume(0.4)
 
     walls_name = [
         'no_walls',
