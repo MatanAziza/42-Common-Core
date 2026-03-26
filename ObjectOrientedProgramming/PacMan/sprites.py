@@ -429,4 +429,3 @@ class Ghost(Sprite):
             self.path_changed = True
         self.direction = self.path[0] if self.path else -1
         self.path.pop(0) if self.path else 0
-        self.last_dir = self.path[0]
