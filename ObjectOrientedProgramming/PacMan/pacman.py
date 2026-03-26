@@ -552,8 +552,9 @@ if __name__ == "__main__":
              level_text,
              level_nb,
              live_pacman) = txt
-            while actual_time - start_timer < 4 and lives != 0:
+            while running and actual_time - start_timer < 4 and lives != 0:
                 actual_time = time.time()
+                _, running = quit(False, running)
                 hud_generate(screen, lives,
                              score_text, score_nb,
                              h_s_text, h_s_nb,

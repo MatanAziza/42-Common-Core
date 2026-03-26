@@ -130,6 +130,8 @@ and a small evolution timelapse
 
 [Original game](https://freepacman.org/)
 
+[Pygame doc](https://www.pygame.org/docs/)
+
 [Ghost behavior inspiration](https://pacman.fandom.com/wiki/Maze_Ghost_AI_Behaviors)
 
 [Graph maker](https://online.visual-paradigm.com/)
