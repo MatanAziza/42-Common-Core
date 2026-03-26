@@ -62,7 +62,8 @@ def back_to_title(config: dict[str, Any],
     Ghost.clear_ghosts()
     tile_size = config['tile_size']
     top_offset = config['top_offset']
-    pacman.init('yellow', config['radius'], player_pos, player_coord)
+    pacman.init('yellow', config['radius'], player_pos, player_coord,
+                config['dt'][config['level']])
     red_g.init('red',
                config['radius'],
                Vector2(tile_size, top_offset + 2*tile_size),
@@ -102,7 +103,8 @@ def reset(config: dict[str, Any],
     "resets the game by setting all characters value to default"
     tile_size = config['tile_size']
     top_offset = config['top_offset']
-    pacman.init('yellow', config['radius'], player_pos, player_coord)
+    pacman.init('yellow', config['radius'], player_pos, player_coord,
+                config['dt'][config['level']])
     red_g.init('red',
                config['radius'],
                Vector2(tile_size, top_offset + 2*tile_size),

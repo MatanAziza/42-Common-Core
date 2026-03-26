@@ -331,6 +331,7 @@ class Ghost(Sprite):
         self.eatable = False
         self.eaten = False
         self.path_changed = False
+        self.last_dir = 0
 
     def animate(self, config: dict[str, Any], timer: float) -> None:
         "changes the displayed sprite for a character to animate it"
@@ -428,3 +429,4 @@ class Ghost(Sprite):
             self.path_changed = True
         self.direction = self.path[0] if self.path else -1
         self.path.pop(0) if self.path else 0
+        self.last_dir = self.path[0]
