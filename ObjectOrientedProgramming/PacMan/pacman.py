@@ -533,6 +533,7 @@ if __name__ == "__main__":
             else:
                 lst.append(False)
         for ghost in eaten:
+            score += 200
             ghost.eaten = True
             ghost.dt = 10
         if True in lst:
