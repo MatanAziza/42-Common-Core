@@ -263,9 +263,10 @@ if __name__ == "__main__":
                                      ((config['side'][config['level']]//2+2) *
                                       config['tile_size'] +
                                       config['top_offset']))
+                seed = 42 if config['level'] == 0 else random.randint(1, 99)
                 gen = MazeGenerator(size=(config['side'][config['level']],
                                           config['side'][config['level']]),
-                                    seed=random.randint(1, 99))
+                                    seed=seed)
                 maze = gen.maze
                 old_maze = [[nb for nb in row] for row in maze]
                 new_maze = ([([15] *
