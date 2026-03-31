@@ -25,7 +25,7 @@ def quit(state: bool, running: bool) -> tuple[bool, bool]:
     "checks if a quitting event has occured, and returns the game state."
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            return (False, False)
+            sys.exit(0)
     return (state, running)
 
 
@@ -525,7 +525,10 @@ if __name__ == "__main__":
         lst = []
         eaten = []
         for ghost in ghosts:
-            if pygame.sprite.collide_circle(pacman, ghost) and ghost.eatable:
+            if (pygame.sprite.collide_circle(pacman, ghost) and
+               ghost.eatable and
+               not ghost.eaten):
+                score += 200
                 eaten.append(ghost)
             elif (pygame.sprite.collide_circle(pacman, ghost) and
                     not ghost.eatable) and not cheat_mode:
@@ -533,7 +536,6 @@ if __name__ == "__main__":
             else:
                 lst.append(False)
         for ghost in eaten:
-            score += 200
             ghost.eaten = True
             ghost.dt = 10
         if True in lst:

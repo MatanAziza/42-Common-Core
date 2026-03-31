@@ -1,7 +1,7 @@
 *This activity has been created as part of
 the 42 curriculum by maziza, fvalota*
 
-# Pacman <img src="/assets/pacman.png" width="20" height="20"> <img src="/assets/pacgum.png" width="20" height="20">  <img src="/assets/pacgum.png" width="20" height="20"> <img src="/assets/pacgum.png" width="20" height="20"> <img src="/assets/eatable.png" width="20" height="20"> 
+# Pacman <img src="/assets/pacman.png" width="20" height="20"> <img src="/assets/pacgum.png" width="20" height="20">  <img src="/assets/pacgum.png" width="20" height="20"> <img src="/assets/pacgum.png" width="20" height="20"> <img src="/assets/eatable.png" width="20" height="20">
 
 ## Description
 
@@ -17,23 +17,21 @@ To install and play the game, you must follow these steps:
 
 - Download the latest **.zip** release, and extract it
 
-- If you're on Linux, go in the directory, then run the following commands:
-
 ```bash
 make install
 make run
 ```
 
-This will create a virtual environment, install all needed dependencies for this game to work (`make install`), then run the game with its configuration file (`make run`).
-
-- If you're on Windows, run the following commands:
+or
 
 ```powershell
 python -m venv env
 source env/bin/activate
 python -m pip install -r requirements.txt
-python3 main.py config.json
+python3 pacman.py config.json
 ```
+
+This will create a virtual environment, install all needed dependencies for this game to work (`make install`), then run the game with its configuration file (`make run`).
 
 ## Others
 
@@ -75,13 +73,13 @@ Once the maze is generated, we implemented different things:
 
 - As for the ghosts, we wanted to match a basic behavior found on a wiki (see **Resources**). Here's how:
 
-    - For Blinky <img src="/assets/blinky.png" width="20" height="20"> (the red one), he's an aggressive spirit and always aim at Pacman's position.
+  - For Blinky <img src="/assets/blinky.png" width="20" height="20"> (the red one), he's an aggressive spirit and always aim at Pacman's position.
 
-    - For Pinky <img src="/assets/pinky.png" width="20" height="20"> (the pink one), she aims (if possible) two tiles in front of Pacman off guard. This aims to put Pacman in a sandwich position between Blinky and Pinky.
+  - For Pinky <img src="/assets/pinky.png" width="20" height="20"> (the pink one), she aims (if possible) two tiles in front of Pacman off guard. This aims to put Pacman in a sandwich position between Blinky and Pinky.
 
-    - For Clyde <img src="/assets/clyde.png" width="20" height="20"> (the orange one), he's the odd one out. He's doing the same as Blinky, except that he flees Pacman whenever he's in a 2 tiles radius from him.
+  - For Clyde <img src="/assets/clyde.png" width="20" height="20"> (the orange one), he's the odd one out. He's doing the same as Blinky, except that he flees Pacman whenever he's in a 2 tiles radius from him.
 
-    - As for Inky <img src="/assets/inky.png" width="20" height="20"> (the blue one), his original behavior is to copy the vector between Blinky and Pinky's target, and aim at the 180° rotated vector to flank Pacman. Because this aiming pattern was too difficult for us at the moment, we decided to give him a behavior similar to Blinky (might change in the future). 
+  - As for Inky <img src="/assets/inky.png" width="20" height="20"> (the blue one), his original behavior is to copy the vector between Blinky and Pinky's target, and aim at the 180° rotated vector to flank Pacman. Because this aiming pattern was too difficult for us at the moment, we decided to give him a behavior similar to Blinky (might change in the future).
 
 - As a bonus and immersion choice, we decided to implement sounds from the original game (such as eating the pacgums, the intro, and so on)
 
@@ -96,9 +94,9 @@ Once the maze is generated, we implemented different things:
   
   - <kbd> M </kbd> key / <kbd> L-Ctrl </kbd> + <kbd> M </kbd> keys: Enable/Disable ghosts movement.
   - <kbd> E </kbd> key: Enable the ghosts "Flee" state.
-  - <kbd> G </kbd> key: Automatically win the game. 
-  - <kbd> - </kbd> keypad key: Automatically lose the game. 
-  - <kbd> 0 - 9 </kbd> keypad keys / <kbd> 1 - 0 </kbd> keys : switch to the desired level (0 being the first and 9 the last. 
+  - <kbd> G </kbd> key: Automatically win the game.
+  - <kbd> - </kbd> keypad key: Automatically lose the game.
+  - <kbd> 0 - 9 </kbd> keypad keys / <kbd> 1 - 0 </kbd> keys : switch to the desired level (0 being the first and 9 the last.
 
 ### Architecture
 
@@ -111,6 +109,7 @@ Once the maze is generated (as a matrix), a Wall class handle displaying them on
 Following this, a Pacgum Class handle placing the Pacgums and SuperPacgums in the maze, while not placing them where Pacman, the ghosts or the 42 walls are.
 
 Then, a Pacman Class, a Ghost class and its children (Blinky, Pinky and Clyde), all inheriting from a pygame Sprite class, handle the game objects, where they spawn, and how the behave in the maze. For instance, They all store their maze coordinates (in a tuple form (x, y) where the maximum x and y are the size of the maze, and their screen coordinates (in pixels).\
+
 - Their maze coordinates allow to handle the 'walls collisions', which are checked by comparing a maze cell and the object coordinate.\
 - Their pixel coordinate allow to handle their movement throughout the game.
 

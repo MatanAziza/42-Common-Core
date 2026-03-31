@@ -83,6 +83,12 @@ def get_highscores(filename: str) -> list[list[Any]]:
         with open(filename, "r") as f:
             highscores = f.read()
         highscores_list = list(json.loads(highscores))
+        for score in highscores_list:
+            if score[1] < 0:
+                raise ValueError
+    except ValueError:
+        print(f'Negative score found in {filename}')
+        sys.exit(1)
     except FileNotFoundError:
         print('Creating "highscores.json"')
         highscores_list = [["Mario", 5000],
