@@ -1,4 +1,4 @@
-containers: nginx mariadb wordpress
+all: build
 
 build:
 	docker compose -f srcs/docker-compose.yml up
@@ -12,7 +12,7 @@ mariadb:
 wordpress:
 	docker build -t wordpress srcs/requirements/wordpress
 
-clear:
+clean:
 	docker image ls --filter=reference='*mariadb*'\
 					--filter=reference='*nginx*'\
 					--filter=reference='*wordpress*'\
