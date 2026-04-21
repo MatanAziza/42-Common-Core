@@ -44,4 +44,7 @@ else
 fi
 
 echo "=== Setup COMPLETE ==="
+chown -R www-data:www-data /var/www/wordpress
+echo "Starting PHP-FPM..."
+exec php-fpm8.2 -F
 exec php-fpm8.2

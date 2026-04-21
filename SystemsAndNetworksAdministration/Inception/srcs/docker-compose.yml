@@ -49,7 +49,7 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
-    restart: unless-stopped
+    restart: on-failure
     expose:
       - "9000"
 
