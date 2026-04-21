@@ -2,22 +2,28 @@ version: '3'
 
 services:
   mariadb:
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     container_name: mariadb
     networks:
       - inception
     build:
       context: requirements/mariadb
       dockerfile: Dockerfile
-    env_file:
-      - .env
+    env_file: .env
     volumes:
       - mariadb:/var/lib/mysql
     restart: unless-stopped
     expose:
-      - "3306"
+    - "3306"
 
   nginx:
     container_name: nginx
+    volumes:
+      - wordpress:/var/www/wordpress
     networks:
       - inception
     depends_on:
@@ -25,26 +31,25 @@ services:
     build:
       context: requirements/nginx
       dockerfile: Dockerfile
-    env_file:
-      - .env
+    env_file: .env
     ports:
       - "443:443"
     restart: on-failure
 
   wordpress:
     container_name: wordpress
+    volumes:
+      - wordpress:/var/www/wordpress
     networks:
       - inception
     build:
       context: requirements/wordpress
       dockerfile: Dockerfile
-    env_file:
-      - .env
+    env_file: .env
     depends_on:
-      - mariadb
-    volumes:
-      - wordpress:/var/www/wordpress
-    restart: on-failure
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
     expose:
       - "9000"
 
