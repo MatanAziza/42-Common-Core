@@ -72,8 +72,8 @@ Voilà !!
 
 ## Resources
 
-AI (Perplexity, Claude, ...) Was used to understand basic docker concepts and \
-find sources to learn about such concepts. Ai was also used to understand errors, \
+AI (Perplexity, Claude, ...) Was used to understand basic docker concepts,\
+find sources to learn about such concepts and make the DEV and USER DOC markdown. Ai was also used to understand errors, \
 in addition to StackOverflow forum posts.
 
 [Docker secrets understanding](https://docs.docker.com/compose/how-tos/use-secrets/)
