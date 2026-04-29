@@ -1,4 +1,4 @@
-from structs.drone import Drone
+from drone import Drone
 from enum import Enum
 from pydantic import BaseModel, Field, model_validator, ValidationError
 
@@ -16,7 +16,7 @@ class Hub(BaseModel):
     color: str = Field(default="none")
     max_drones: int = Field(default=1)
     next_hubs: dict[str, dict[str, int | Zones]] = Field(default=dict())
-    drones: list[Drone]
+    drones: list[Drone] = Field(default=[])
 
     @model_validator(mode='after')
     def validate_color(self):
