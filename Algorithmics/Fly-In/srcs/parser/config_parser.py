@@ -1,5 +1,6 @@
 from typing import Any
 
+
 def graph_maker(couples: list[list[str]]) -> dict[str, dict[str, int]]:
     graph: dict[str, dict[str, int]] = dict()
     for line in couples:
@@ -7,8 +8,8 @@ def graph_maker(couples: list[list[str]]) -> dict[str, dict[str, int]]:
             {line[1][:line[1].index(" ")]: dict()}
                     ) if "hub" in line[0] else 0
     connections = [connection[1]
-                for connection in couples
-                if "connection" in connection[0]]
+                   for connection in couples
+                   if "connection" in connection[0]]
     for connection in connections:
         data = connection.split(" ")
         data.append("[max_link_capacity=1]") if len(data) == 1 else 0
@@ -16,6 +17,7 @@ def graph_maker(couples: list[list[str]]) -> dict[str, dict[str, int]]:
         graph[nodes[0]].update({nodes[1]: int(data[1].split("=")[1][:-1])})
         graph[nodes[1]].update({nodes[0]: int(data[1].split("=")[1][:-1])})
     return graph
+
 
 def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, Any]]:
     infos: dict[str, dict[str, Any]] = dict()
@@ -34,9 +36,10 @@ def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, Any]]:
         infos[key].update({k: v for k, v in metadata})
     return infos
 
+
 def config_parser(filename: str) -> tuple[
-                                        dict[str, dict[str, int]],
-                                        dict[str, dict[str, Any]]]:
+                                          dict[str, dict[str, int]],
+                                          dict[str, dict[str, Any]]]:
     graph: dict[str, dict[str, int]] = dict()
     infos: dict[str, dict[str, Any]] = dict()
 
@@ -48,11 +51,3 @@ def config_parser(filename: str) -> tuple[
         graph = graph_maker(couples)
         infos = nodes_params(couples)
     return (graph, infos)
-
-if __name__ == "__main__":
-    graph, infos = config_parser("01_linear_path.txt")
-    # graph, infos = config_parser("03_ultimate_challenge.txt")
-    from graph_operations import graph_cleaner, graph_find_useless
-    to_remove = graph_find_useless("start", "goal", graph)
-    final = graph_cleaner("start", "goal", graph, to_remove)
-    print(f"Useless paths: {set(graph.keys()) - set(final.keys()) != set()}")

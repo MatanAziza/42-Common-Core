@@ -8,3 +8,6 @@ if __name__ == "__main__":
     final = graph_cleaner("start", "goal", graph, to_remove)
     print(f"Useless paths: {set(graph.keys()) - set(final.keys()) != set()}")
     g = Graph(graph, infos)
+    # for hub in g.nodes:
+    #     print(hub.name, hub.zone, hub.next_hubs)
+    #     print(graph[hub.name])

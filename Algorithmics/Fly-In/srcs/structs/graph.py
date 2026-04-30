@@ -1,16 +1,17 @@
 from typing import Any
 from .hub import Hub, Zones
 
+
 class Graph:
     def __init__(self,
-                 graph: dict[str, set[str]],
+                 graph: dict[str, dict[str, int]],
                  infos: dict[str, dict[str, Any]]):
         self.nodes: list[Hub] = self._create_hubs(infos)
-        self.test = self._narc_nodes(graph, infos)
+        self._narc_nodes(graph, infos)
         # for node in self.nodes:
         #     print(node.name, node.zone, node.color)
 
-    def _create_hubs(self, graph: dict[str, dict[str, Any]]) -> list[Hub]:
+    def _create_hubs(self, graph: dict[str, dict[str, int]]) -> list[Hub]:
         nodes: list[Hub] = []
         for key, value in graph.items():
             typ: Zones = Zones.NORMAL
@@ -20,24 +21,26 @@ class Graph:
                     break
             nodes.append(Hub(name=key,
                              zone=typ,
-                             color=value.get("color", "white"),
+                             color=str(value.get("color", "white")),
                              max_drones=value.get("max_drones", 1))
                          )
         return nodes
 
     def _narc_nodes(self,
-                    graph: dict[str, set[str]],
+                    graph: dict[str, dict[str, int]],
                     infos: dict[str, dict[str, Any]]) -> None:
-        for hub in self.nodes:
-            next_hubs : dict[str, dict[str, int | Zones]] = dict()
-            connected: set[str] = graph[hub.name]
-            for node in connected:
-                hub = self.get_node(node)
+        for node in self.nodes:
+            next_hubs: dict[str, dict[str, int | Zones]] = dict()
+            connected: dict[str, int] = graph[node.name]
+            for name, path in connected.items():
+                hub = self.get_node(name)
                 next_hubs.update(
-                    {node:
-                     {"max_drones": hub.max_drones}}
+                    {name:
+                     {"max_drones": hub.max_drones,
+                      "max_link_capacity": path,
+                      "priority": hub.zone}}
                 )
-            print(next_hubs)
+            node.next_hubs = next_hubs
 
     def get_node(self, name: str) -> Hub:
         return [hub for hub in self.nodes if hub.name == name][0]
