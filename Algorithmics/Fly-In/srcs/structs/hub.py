@@ -1,5 +1,6 @@
-from drone import Drone
+from .drone import Drone
 from enum import Enum
+from typing import Self
 from pydantic import BaseModel, Field, model_validator, ValidationError
 
 
@@ -12,14 +13,14 @@ class Zones(Enum):
 
 class Hub(BaseModel):
     name: str = Field()
-    zones: Zones = Field(default=Zones.NORMAL)
+    zone: Zones = Field(default=Zones.NORMAL)
     color: str = Field(default="none")
     max_drones: int = Field(default=1)
     next_hubs: dict[str, dict[str, int | Zones]] = Field(default=dict())
-    drones: list[Drone] = Field(default=[])
+    drones: list[Drone] = Field(default=[Drone()])
 
     @model_validator(mode='after')
-    def validate_color(self):
+    def validate_color(self) -> Self:
         if len(self.color.split(" ")) > 1:
             raise ValidationError("Color is made of more than 2 words."
                                   "Please use one")

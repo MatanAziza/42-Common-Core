@@ -1,24 +1,24 @@
-from typing import TextIO
+from typing import Any
 
-def graph_maker(couples: list[list[str]]) -> dict[str, set[str]]:
-    graph: dict[str, set[str]] = dict()
+def graph_maker(couples: list[list[str]]) -> dict[str, dict[str, int]]:
+    graph: dict[str, dict[str, int]] = dict()
     for line in couples:
         graph.update(
-            {line[1][:line[1].index(" ")]: set()}
+            {line[1][:line[1].index(" ")]: dict()}
                     ) if "hub" in line[0] else 0
     connections = [connection[1]
                 for connection in couples
                 if "connection" in connection[0]]
     for connection in connections:
-        nodes = connection.split("-")
-        graph.update(
-            {nodes[0]: graph[nodes[0]] | {nodes[1]},
-            nodes[1]: graph[nodes[1]] | {nodes[0]}}
-                        )
+        data = connection.split(" ")
+        data.append("[max_link_capacity=1]") if len(data) == 1 else 0
+        nodes = data[0].split("-")
+        graph[nodes[0]].update({nodes[1]: int(data[1].split("=")[1][:-1])})
+        graph[nodes[1]].update({nodes[0]: int(data[1].split("=")[1][:-1])})
     return graph
-            
-def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, any]]:
-    infos: dict[str, dict[str, any]] = dict()
+
+def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, Any]]:
+    infos: dict[str, dict[str, Any]] = dict()
     alpha: dict[str, list[str]] = dict()
     for line in couples:
         alpha.update(
@@ -35,10 +35,10 @@ def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, any]]:
     return infos
 
 def config_parser(filename: str) -> tuple[
-                                        dict[str, set[str]],
-                                        dict[str, dict[str, any]]]:
-    graph: dict[str, set[str]] = dict()
-    infos: dict[str, dict[str, any]] = dict()
+                                        dict[str, dict[str, int]],
+                                        dict[str, dict[str, Any]]]:
+    graph: dict[str, dict[str, int]] = dict()
+    infos: dict[str, dict[str, Any]] = dict()
 
     with open(filename, "r") as file:
         lines = file.read().split("\n")
