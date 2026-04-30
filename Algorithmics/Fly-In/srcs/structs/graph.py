@@ -6,6 +6,7 @@ class Graph:
                  graph: dict[str, set[str]],
                  infos: dict[str, dict[str, Any]]):
         self.nodes: list[Hub] = self._create_hubs(infos)
+        self.test = self._narc_nodes(graph, infos)
         # for node in self.nodes:
         #     print(node.name, node.zone, node.color)
 
@@ -36,6 +37,7 @@ class Graph:
                     {node:
                      {"max_drones": hub.max_drones}}
                 )
+            print(next_hubs)
 
     def get_node(self, name: str) -> Hub:
         return [hub for hub in self.nodes if hub.name == name][0]
