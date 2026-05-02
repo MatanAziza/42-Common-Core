@@ -3,10 +3,12 @@ from .hub import Hub, Zones
 
 
 class Graph:
+    nodes:list[Hub] = []
+
     def __init__(self,
                  graph: dict[str, dict[str, int]],
                  infos: dict[str, dict[str, Any]]):
-        self.nodes: list[Hub] = self._create_hubs(infos)
+        Graph.nodes = self._create_hubs(infos)
         self._narc_nodes(graph, infos)
         # for node in self.nodes:
         #     print(node.name, node.zone, node.color)
@@ -29,7 +31,7 @@ class Graph:
     def _narc_nodes(self,
                     graph: dict[str, dict[str, int]],
                     infos: dict[str, dict[str, Any]]) -> None:
-        for node in self.nodes:
+        for node in Graph.nodes:
             next_hubs: dict[str, dict[str, int | Zones]] = dict()
             connected: dict[str, int] = graph[node.name]
             for name, path in connected.items():
@@ -41,6 +43,7 @@ class Graph:
                       "priority": hub.zone}}
                 )
             node.next_hubs = next_hubs
-
-    def get_node(self, name: str) -> Hub:
-        return [hub for hub in self.nodes if hub.name == name][0]
+    
+    @staticmethod
+    def get_node(name: str) -> Hub:
+        return [hub for hub in Graph.nodes if hub.name == name][0]

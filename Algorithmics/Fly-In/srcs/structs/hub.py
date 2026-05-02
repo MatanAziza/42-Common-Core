@@ -6,10 +6,10 @@ from pydantic import ValidationError, ConfigDict
 
 
 class Zones(Enum):
-    NORMAL = {"type": "normal", "cost": 1, "priority": False}
-    BLOCKED = {"type": "blocked", "cost": -1, "priority": False}
-    RESTRICTED = {"type": "restricted", "cost": 2, "priority": False}
-    PRIORITY = {"type": "priority", "cost": 0, "priority": True}
+    NORMAL = {"type": "normal", "cost": 1}
+    BLOCKED = {"type": "blocked", "cost": -1}
+    RESTRICTED = {"type": "restricted", "cost": 2}
+    PRIORITY = {"type": "priority", "cost": 1}
 
 
 class Hub(BaseModel):
