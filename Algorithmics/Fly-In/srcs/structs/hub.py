@@ -1,7 +1,8 @@
 from .drone import Drone
 from enum import Enum
 from typing import Self
-from pydantic import BaseModel, Field, model_validator, ValidationError
+from pydantic import BaseModel, Field, model_validator
+from pydantic import ValidationError, ConfigDict
 
 
 class Zones(Enum):
@@ -12,12 +13,13 @@ class Zones(Enum):
 
 
 class Hub(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     name: str = Field()
     zone: Zones = Field(default=Zones.NORMAL)
     color: str = Field(default="none")
     max_drones: int = Field(default=1)
     next_hubs: dict[str, dict[str, int | Zones]] = Field(default=dict())
-    drones: list[Drone] = Field(default=[Drone()])
+    drones: list[Drone] = Field(default=[])
 
     @model_validator(mode='after')
     def validate_color(self) -> Self:

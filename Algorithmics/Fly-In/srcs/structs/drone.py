@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
+class Drone:
+    drones: list["Drone"] = []
 
-
-class Drone(BaseModel):
-    number: int = Field(default=0)
+    def __init__(self, number: int, start: str):
+        self.number: int = number
+        self.path: list[str] = [start]
+        Drone.drones.append(self)

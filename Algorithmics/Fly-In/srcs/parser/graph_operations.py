@@ -1,30 +1,46 @@
+from typing import Any
+
+
 def graph_cleaner(start: str,
                   end: str,
                   nodes: dict[str, dict[str, int]],
+                  infos: dict[str, dict[str, Any]],
                   to_remove: set[str] = set()
-                  ) -> dict[str, set[str]]:
+                  ) -> tuple[dict[str, dict[str, int]],
+                             dict[str, dict[str, Any]]]:
     nodes = nodes.copy()
-    graph = dict({key: set(value.keys()) for key, value in nodes.items()})
+    graph = dict({key: {link: nodes[key][link]
+                        for link in value.keys()}
+                  for key, value in nodes.items()})
     for node in to_remove:
         graph.pop(node)
     for key, value in graph.items():
-        graph.update({key: set(value)-to_remove})
+        for elem in to_remove:
+            value.pop(elem) if elem in value else 0
+        graph.update({key: value})
     while True:
-        removed = set([node for node in graph if (len(graph[node]) < 2
-                                                  and node != start
-                                                  and node != end)])
-        if removed == set():
+        removed = {node: value
+                   for node, value in graph.items()
+                   if (len(graph[node]) < 2
+                       and node != start
+                       and node != end)}
+        if removed == dict():
             break
-        for node in graph:
-            graph.update({node: set(graph[node]) - removed})
+        for key, value in graph.items():
+            for elem in removed:
+                value.pop(elem) if elem in value else 0
         for node in removed:
             graph.pop(node)
-    return graph
+        infos = {key: value
+                 for key, value in infos.copy().items()
+                 if key in graph.keys()}
+    return graph, infos
 
 
 def graph_find_useless(start: str,
                        goal: str,
-                       graph: dict[str, dict[str, int]]) -> set[str]:
+                       graph: dict[str, dict[str, int]],
+                       infos: dict[str, dict[str, Any]]) -> set[str]:
     useless: list[str] = []
     for node in graph[start]:
         points = set(graph[node])
@@ -37,4 +53,6 @@ def graph_find_useless(start: str,
                     useless.extend(points)
                 break
             points |= news
-    return set(useless)-set([start])
+    blocked: set[str] = {node for node in graph
+                         if infos[node].get("zone", "error") == "blocked"}
+    return ((set(useless)-set([start])) | blocked)
