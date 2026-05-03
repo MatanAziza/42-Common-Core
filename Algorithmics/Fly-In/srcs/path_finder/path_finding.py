@@ -1,4 +1,5 @@
-from srcs.structs import Graph, Hub, Zones
+from srcs.structs import Graph
+
 
 def path_finding(start: list[str],
                  goal: str,
@@ -15,12 +16,17 @@ def path_finding(start: list[str],
                  if len(path) >= len(start) + i or goal in path]
     return [path for path in paths if goal in path]
 
+
 def path_priorities(path: list[str]) -> int:
-    nb_priorities: int = len([h for h in path if Graph.get_node(h).zone.value == "priority"])
+    nb_priorities: int = 0
+    for i in range(len(path)):
+        is_prio: bool = "p" == Graph.get_node(path[i]).zone.value["type"][0]
+        nb_priorities += is_prio * 2 ** (len(path) - i)
     return nb_priorities
 
-def path_time(path: list[str]) -> float:
-    time: float = 0
+
+def path_time(path: list[str]) -> int:
+    nb_ops: int = 0
     for hub in path:
-        pass
-    return 0
+        nb_ops += Graph.get_node(hub).zone.value["cost"]
+    return nb_ops

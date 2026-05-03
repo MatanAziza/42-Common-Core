@@ -3,7 +3,7 @@ from .hub import Hub, Zones
 
 
 class Graph:
-    nodes:list[Hub] = []
+    nodes: list[Hub] = []
 
     def __init__(self,
                  graph: dict[str, dict[str, int]],
@@ -43,7 +43,7 @@ class Graph:
                       "priority": hub.zone}}
                 )
             node.next_hubs = next_hubs
-    
+
     @staticmethod
     def get_node(name: str) -> Hub:
         return [hub for hub in Graph.nodes if hub.name == name][0]
