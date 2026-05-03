@@ -1,8 +1,7 @@
 from srcs.parser import config_parser, graph_cleaner, graph_find_useless
 from srcs.structs import Graph
 from srcs.path_finder import path_finding, path_priorities, path_time
-from functools import partial
-import random
+
 
 def main() -> None:
     path_to_files = "maps/maps/medium/"
@@ -13,9 +12,10 @@ def main() -> None:
     graph, infos = graph_cleaner(start, goal, graph, infos, to_remove)
     g = Graph(graph, infos)
     paths = path_finding([start], goal, graph)
+    paths.sort(key=path_time, reverse=True)
     paths.sort(key=path_priorities, reverse=True)
-    paths.sort(key=path_time)
     print([lst for lst in paths])
+
 
 if __name__ == "__main__":
     main()

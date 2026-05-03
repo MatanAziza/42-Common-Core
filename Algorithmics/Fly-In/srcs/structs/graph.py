@@ -35,7 +35,7 @@ class Graph:
             next_hubs: dict[str, dict[str, int | Zones]] = dict()
             connected: dict[str, int] = graph[node.name]
             for name, path in connected.items():
-                hub = self.get_node(name)
+                hub = Graph.get_node(name)
                 next_hubs.update(
                     {name:
                      {"max_drones": hub.max_drones,
@@ -43,6 +43,7 @@ class Graph:
                       "priority": hub.zone}}
                 )
             node.next_hubs = next_hubs
+            # print(node.name, next_hubs)
 
     @staticmethod
     def get_node(name: str) -> Hub:

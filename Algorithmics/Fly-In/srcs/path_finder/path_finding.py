@@ -1,4 +1,5 @@
-from srcs.structs import Graph
+from srcs.structs import Graph, Zones
+from math import sqrt
 
 
 def path_finding(start: list[str],
@@ -25,8 +26,20 @@ def path_priorities(path: list[str]) -> int:
     return nb_priorities
 
 
-def path_time(path: list[str]) -> int:
-    nb_ops: int = 0
-    for hub in path:
-        nb_ops += Graph.get_node(hub).zone.value["cost"]
-    return nb_ops
+def path_time(path: list[str]) -> float:
+    mean: int
+    variance: float
+    print(path)
+    lesser_capacity: list[int] = []
+    for i in range(0, len(path) - 1):
+        hub = Graph.get_node(path[i])
+        next: dict[str, dict[str, int | Zones]] = hub.next_hubs[path[i+1]]
+        lesser_drone = min([next["max_drones"], next["max_link_capacity"]])
+        lesser_capacity.append(lesser_drone)
+    mean = sum(lesser_capacity)/len(lesser_capacity)
+    list_apart: list[float] = []
+    for lesser in lesser_capacity:
+        list_apart.append(abs(lesser - mean))
+    variance = sum(list_apart)/len(list_apart)
+    print(mean, sqrt(variance))
+    return (abs(mean-sqrt(variance))//0.01)/100

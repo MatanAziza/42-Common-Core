@@ -28,7 +28,7 @@ def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, Any]]:
              line[1][line[1].index(" "):].strip().split(" ")}
                     ) if "hub" in line[0] else 0
     for key, value in alpha.items():
-        meta = value[2].strip("[]").split(" ")
+        meta = [v.strip("[]") for v in value[2:]]
         metadata = [(data.split("=")[0], data.split("=")[1]) for data in meta]
         infos[key] = {
             "coordinates": (value[0], value[1]),
