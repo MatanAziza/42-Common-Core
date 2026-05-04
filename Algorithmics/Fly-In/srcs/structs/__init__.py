@@ -1,5 +1,5 @@
 from .drone import Drone
-from .hub import Hub, Zones
+from .hub import NextHubInfos, Hub, Zones
 from .graph import Graph
 
-__all__ = ["Drone", "Hub", "Graph", "Zones"]
+__all__ = ["Drone", "NextHubInfos", "Hub", "Graph", "Zones"]
