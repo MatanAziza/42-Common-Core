@@ -4,9 +4,9 @@ from math import sqrt
 from functools import partial
 
 
-def path_cost(way: list[str]) -> int:
-    """Returns a binary translated number based on whether a zone
-    is prioritary, normal or restricted""
+def path_turns(way: list[str]) -> int:
+    """Returns a binary translated number based on whether getting
+    to a zone cost 1 or 2 turns
 
     Args:
         max_length (int):
@@ -19,13 +19,12 @@ def path_cost(way: list[str]) -> int:
     for i in range(len(way) - 1):
         is_res: bool = Graph.get_node(way[i + 1]).zone.value == 1 # Restricted
         nb_priorities += is_res * 2 + (not is_res) * 1
-    print(nb_priorities, way)
     return nb_priorities
 
 
 def path_priorities(max_length: int, way: list[str]) -> int:
     """Returns a binary translated number based on whether a zone
-    is prioritary, normal or restricted""
+    is prioritary or not
 
     Args:
         max_length (int):
@@ -38,11 +37,10 @@ def path_priorities(max_length: int, way: list[str]) -> int:
     for i in range(len(way)):
         is_prio: bool = Graph.get_node(way[i]).zone.value == 3 # Priority zone
         nb_priorities += is_prio * 2 ** (max_length - i)
-    print(nb_priorities, way)
     return nb_priorities
 
 
-def path_time(path: list[str]) -> float:
+def path_avg_drone(path: list[str]) -> float:
     """Returns a value based on variance and
     mean value of drones travelling through the path,
     higher number meaning better path
@@ -66,7 +64,6 @@ def path_time(path: list[str]) -> float:
     for lesser in lesser_capacity:
         list_apart.append(abs(lesser - mean))
     variance = sum(list_apart)/len(list_apart)
-    print(mean, variance, path)
     return (abs(mean-sqrt(variance))//0.01)/100
 
 
@@ -123,10 +120,11 @@ def path_finding(start: list[str],
         paths = [path for path in paths
                  if len(path) >= len(start) + i or goal in path]
     path_prio = partial(path_priorities, max([len(path) for path in paths]))
-    sorter = paths_sorter(path_prio, path_cost, path_time)
-    paths.sort(key=path_time, reverse=True)
-    print(paths, '\n')
+    sorter = paths_sorter(path_prio, path_turns, path_avg_drone)
+    paths.sort(key=path_avg_drone, reverse=True)
+    print("time", paths, '\n')
     paths.sort(key=path_prio, reverse=True)
-    print(paths, '\n')
-    paths.sort(key=path_cost)
+    print("prio", paths, '\n')
+    paths.sort(key=path_turns)
+    print("cost", paths, '\n')
     return [path for path in paths if goal in path]

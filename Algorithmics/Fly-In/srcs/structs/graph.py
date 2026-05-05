@@ -1,5 +1,6 @@
 from typing import Any
 from .hub import NextHubInfos, Hub, Zones
+from srcs.parser import graph_find_useless, graph_cleaner
 
 
 class Graph:
@@ -8,8 +9,14 @@ class Graph:
     def __init__(self,
                  graph: dict[str, dict[str, int]],
                  infos: dict[str, dict[str, Any]]):
+        from srcs.path_finder import path_finding
+        start: str = [n for n in graph if "start" in n][0]
+        goal: str = [n for n in graph if "goal" in n][0]
+        to_remove = graph_find_useless(start, goal, graph, infos)
+        graph, infos = graph_cleaner(start, goal, graph, infos, to_remove)
         Graph.nodes = self._create_hubs(infos)
-        self._narc_nodes(graph, infos)
+        self._narc_nodes(graph)
+        self._paths: list[list[str]] = path_finding([start], goal, graph)
         # for node in self.nodes:
         #     print(node.name, node.zone, node.color)
 
@@ -37,8 +44,7 @@ class Graph:
         return nodes
 
     def _narc_nodes(self,
-                    graph: dict[str, dict[str, int]],
-                    infos: dict[str, dict[str, Any]]) -> None:
+                    graph: dict[str, dict[str, int]]) -> None:
         """For each hub/node, looks for connected noddes infos,
         filling a NextHubInfo class.
 
@@ -71,3 +77,16 @@ class Graph:
             Hub:
         """
         return [hub for hub in Graph.nodes if hub.name == name][0]
+
+    def get_paths(self, start: list[str]) -> list[list[str]]:
+        valid_paths: list[list[str]] = []
+        for path in self._paths:
+            is_valid: bool = True
+            for i, node in enumerate(start):
+                if node != path[i]:
+                    is_valid = not is_valid
+                    break
+            if is_valid:
+                valid_paths.append(path)
+        return valid_paths.copy()
+

@@ -1,6 +1,27 @@
 from typing import Any
 
 
+def graph_find_useless(start: str,
+                       goal: str,
+                       graph: dict[str, dict[str, int]],
+                       infos: dict[str, dict[str, Any]]) -> set[str]:
+    useless: list[str] = []
+    for node in graph[start]:
+        points = set(graph[node])
+        while True:
+            news: set[str] = set()
+            for point in points:
+                news.update(graph[point]) if point != start else 0
+            if not news - points:
+                if goal not in points:
+                    useless.extend(points)
+                break
+            points |= news
+    blocked: set[str] = {node for node in graph
+                         if infos[node].get("zone", "error") == "blocked"}
+    return ((set(useless)-set([start])) | blocked)
+
+
 def graph_cleaner(start: str,
                   end: str,
                   nodes: dict[str, dict[str, int]],
@@ -35,24 +56,3 @@ def graph_cleaner(start: str,
                  for key, value in infos.copy().items()
                  if key in graph.keys()}
     return graph, infos
-
-
-def graph_find_useless(start: str,
-                       goal: str,
-                       graph: dict[str, dict[str, int]],
-                       infos: dict[str, dict[str, Any]]) -> set[str]:
-    useless: list[str] = []
-    for node in graph[start]:
-        points = set(graph[node])
-        while True:
-            news: set[str] = set()
-            for point in points:
-                news.update(graph[point]) if point != start else 0
-            if not news - points:
-                if goal not in points:
-                    useless.extend(points)
-                break
-            points |= news
-    blocked: set[str] = {node for node in graph
-                         if infos[node].get("zone", "error") == "blocked"}
-    return ((set(useless)-set([start])) | blocked)
