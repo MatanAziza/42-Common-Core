@@ -89,4 +89,3 @@ class Graph:
             if is_valid:
                 valid_paths.append(path)
         return valid_paths.copy()
-

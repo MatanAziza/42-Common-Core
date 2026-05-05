@@ -36,9 +36,9 @@ class Drone:
                                             current_hub.max_drones))
         if old_hub[0] < old_hub[1] and old_path[0] < old_path[1]:
             Drone.max_paths.update({couple_linked: (old_path[0] + 1,
-                                                     old_path[1])})
+                                                    old_path[1])})
             Drone.max_hubs.update({next_hub.name: (current_tuple[0] - 1,
-                                                     current_tuple[1])})
+                                                   current_tuple[1])})
             next_hub.drones.append(self)
             current_hub.drones.remove(self)
             self.path.append(next_hub.name)
@@ -48,6 +48,3 @@ class Drone:
             for key, value in Drone.max_hubs.items():
                 hub = Graph.get_node(key)
                 Drone.max_hubs.update({key: (len(hub.drones), value[1])})
-
-
-

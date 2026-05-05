@@ -17,7 +17,7 @@ def path_turns(way: list[str]) -> int:
     """
     nb_priorities: int = 0
     for i in range(len(way) - 1):
-        is_res: bool = Graph.get_node(way[i + 1]).zone.value == 1 # Restricted
+        is_res: bool = Graph.get_node(way[i + 1]).zone.value == 1  # Restricted
         nb_priorities += is_res * 2 + (not is_res) * 1
     return nb_priorities
 
@@ -35,7 +35,7 @@ def path_priorities(max_length: int, way: list[str]) -> int:
     """
     nb_priorities: int = 0
     for i in range(len(way)):
-        is_prio: bool = Graph.get_node(way[i]).zone.value == 3 # Priority zone
+        is_prio: bool = Graph.get_node(way[i]).zone.value == 3  # Priority zone
         nb_priorities += is_prio * 2 ** (max_length - i)
     return nb_priorities
 
@@ -120,7 +120,7 @@ def path_finding(start: list[str],
         paths = [path for path in paths
                  if len(path) >= len(start) + i or goal in path]
     path_prio = partial(path_priorities, max([len(path) for path in paths]))
-    sorter = paths_sorter(path_prio, path_turns, path_avg_drone)
+    # sorter = paths_sorter(path_prio, path_turns, path_avg_drone)
     paths.sort(key=path_avg_drone, reverse=True)
     print("time", paths, '\n')
     paths.sort(key=path_prio, reverse=True)
