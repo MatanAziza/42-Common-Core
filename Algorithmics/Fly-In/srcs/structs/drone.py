@@ -14,16 +14,15 @@ class Drone:
         """
         self.number: int = number
         self.path: list[str] = [start]
-        self.arrived = False
         self.restricted = False
+        self.turns: int = 0
         Drone.drones.append(self)
 
-    def move(self, valid_paths: list[list[str]]) -> None:
+    def move(self, to_avoid: list[str] = []) -> None:
         from srcs.structs import Graph, NextHubInfos
-        if "goal" in self.path[-1]:
-            self.arrived = True
+        if Graph.goal == self.path[-1]:
             return
-        current_path = valid_paths[0]
+        current_path = Graph.get_paths(self.path, to_avoid)[0]
         current_hub = Graph.get_node(self.path[-1])
         next_index = current_path.index(self.path[-1]) + 1
         next_hub = Graph.get_node(current_path[next_index])
@@ -35,9 +34,21 @@ class Drone:
         current_tuple = Drone.max_hubs.get(current_hub.name,
                                            (len(current_hub.drones),
                                             current_hub.max_drones))
+        real_next = current_hub.next_hubs.copy()
+        for hub in self.path:
+            if hub in real_next.keys():
+                real_next.pop(hub)
+        if ((old_hub[0] >= old_hub[1] or
+           old_path[0] >= old_path[1] or
+           len(next_hub.drones) >= next_hub.max_drones) and
+           len(real_next) > len(to_avoid) + 1 and
+           next_hub.name != Graph.goal):
+            self.move(to_avoid + [next_hub.name])
+            return
         if (old_hub[0] < old_hub[1] and
-            old_path[0] < old_path[1] and
-            not self.restricted):
+           old_path[0] < old_path[1] and
+           not self.restricted):
+            self.turns += 2 if next.zone == 1 else 1
             Drone.max_paths.update({couple_linked: (old_path[0] + 1,
                                                     old_path[1])})
             Drone.max_hubs.update({next_hub.name: (current_tuple[0] - 1,
@@ -52,5 +63,21 @@ class Drone:
             for key, value in Drone.max_paths.items():
                 Drone.max_paths.update({key: (0, value[1])})
             for key, value in Drone.max_hubs.items():
-                hub = Graph.get_node(key)
-                Drone.max_hubs.update({key: (len(hub.drones), value[1])})
+                new_hub = Graph.get_node(key)
+                Drone.max_hubs.update({key: (len(new_hub.drones), value[1])})
+
+    def worth_changing_path(self,
+                            current_path: list[str],
+                            nexts: list[str]) -> str:
+        from srcs.structs import Graph
+        from srcs.path_finder import path_turns, path_avg_drone
+        paths = Graph.get_paths(self.path, nexts)
+        better_path = paths[0]
+        turns_left = path_turns(better_path) - self.turns
+        last_drone = Drone.drones[-1].number
+        gap_drone = (last_drone - self.number)
+        gap_drone *= int(self.turns / (int(path_avg_drone(self.path) + 1)))
+        turns_last_drone = path_turns(current_path)
+        if turns_last_drone + gap_drone >= turns_left:
+            return better_path[len(current_path):][0]
+        return ""

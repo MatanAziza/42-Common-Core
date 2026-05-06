@@ -1,0 +1,20 @@
+nb_drones: 5
+
+start_hub: start 0 0 [color=green max_drones=100]
+hub: middle1 0 1 [color=yellow]
+hub: middle2 0 2 [color=red]
+hub: right1 1 1 [color=blue]
+hub: right2 1 2 [color=blue]
+hub: left1 -1 1 [color=red]
+hub: left2 -2 2 [color=yellow]
+end_hub: goal 0 3 [color=green max_drones=100]
+
+connection: start-middle1
+connection: middle1-middle2
+connection: middle2-goal
+connection: middle1-right1
+connection: right1-right2
+connection: right2-goal
+connection: start-left1
+connection: left1-left2
+connection: left2-middle2
