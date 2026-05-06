@@ -22,7 +22,10 @@ def graph_maker(couples: list[list[str]]) -> dict[str, dict[str, int]]:
 def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, Any]]:
     infos: dict[str, dict[str, Any]] = dict()
     alpha: dict[str, list[str]] = dict()
+    start_drone: int = 1
     for line in couples:
+        if line[0] == "nb_drones":
+            start_drone = int(line[1])
         alpha.update(
             {line[1][:line[1].index(" ")]:
              line[1][line[1].index(" "):].strip().split(" ")}
@@ -33,6 +36,7 @@ def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, Any]]:
         infos[key] = {
             "coordinates": (value[0], value[1]),
                       }
+        infos[key].update({"max_drones": start_drone}) if "start" in key else 0
         infos[key].update({k: v for k, v in metadata})
     return infos
 

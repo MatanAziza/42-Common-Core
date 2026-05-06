@@ -1,0 +1,20 @@
+# Two paths, fast and slow
+nb_drones: 100
+
+start_hub: start 0 0 [color=green max_drones=10]
+hub: slow_path1 1 -1 [zone=restricted max_drones=3]
+hub: slow_path2 2 -1 [zone=restricted max_drones=3]
+hub: slow_path3 3 -1 [zone=restricted max_drones=3]
+hub: fast_junction 1 0 [zone=priority max_drones=2]
+hub: fast_path 2 0 [zone=priority max_drones=2]
+hub: merge_point 3 0 [color=yellow max_drones=5]
+end_hub: goal 4 0 [color=green max_drones=10]
+
+connection: start-slow_path1 [max_link_capacity=3]
+connection: start-fast_junction [max_link_capacity=2]
+connection: slow_path1-slow_path2 [max_link_capacity=3]
+connection: slow_path2-slow_path3 [max_link_capacity=3]
+connection: slow_path3-merge_point [max_link_capacity=3]
+connection: fast_junction-fast_path [max_link_capacity=2]
+connection: fast_path-merge_point [max_link_capacity=2]
+connection: merge_point-goal [max_link_capacity=5]

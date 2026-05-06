@@ -1,10 +1,12 @@
 from srcs.parser import config_parser
 from srcs.structs import Graph, Drone
+from os import system
 
 
 def main() -> None:
-    path_to_files = "maps/maps/medium/"
-    graph, infos = config_parser(f"{path_to_files}03_priority_puzzle.txt")
+    path_to_files = "maps/maps/challenger/01_the_impossible_dream.txt"
+    graph, infos = config_parser(path_to_files)
+    system(f"cat {path_to_files}")
     start: str = [n for n in graph if "start" in n][0]
     goal: str = [n for n in graph if "goal" in n][0]
     g = Graph(graph, infos)

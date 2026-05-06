@@ -122,9 +122,9 @@ def path_finding(start: list[str],
     path_prio = partial(path_priorities, max([len(path) for path in paths]))
     # sorter = paths_sorter(path_prio, path_turns, path_avg_drone)
     paths.sort(key=path_avg_drone, reverse=True)
-    print("time", paths, '\n')
+    # print("time", paths, '\n')
     paths.sort(key=path_prio, reverse=True)
-    print("prio", paths, '\n')
+    # print("prio", paths, '\n')
     paths.sort(key=path_turns)
-    print("cost", paths, '\n')
+    # print("cost", paths, '\n')
     return [path for path in paths if goal in path]
