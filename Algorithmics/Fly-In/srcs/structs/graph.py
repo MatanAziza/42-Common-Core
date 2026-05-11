@@ -88,8 +88,7 @@ class Graph:
         return [hub for hub in Graph.nodes if hub.name == name][0]
 
     @classmethod
-    def get_paths(cls, start: list[str],
-                  not_wanted: list[str] = []) -> list[list[str]]:
+    def get_paths(cls, start: list[str]) -> list[list[str]]:
         valid_paths: list[list[str]] = []
         for path in cls._paths:
             index: int = 0
@@ -97,10 +96,6 @@ class Graph:
             for i, node in enumerate(start):
                 index += 1
                 if node != path[i]:
-                    is_valid = not is_valid
-                    break
-            for node in not_wanted:
-                if path[index] == node:
                     is_valid = not is_valid
                     break
             if is_valid:
@@ -120,5 +115,5 @@ class Graph:
             print("\nTurn", nb_turns)
             for hub in Graph.nodes:
                 print(f"{hub.name}: "
-                      f"[{[drone.number for drone in hub.drones]}]")
+                      f"{[drone.number for drone in hub.drones]}")
         return nb_turns

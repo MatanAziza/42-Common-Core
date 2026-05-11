@@ -1,4 +1,4 @@
-nb_drones: 5
+nb_drones: 4
 
 start_hub: start 0 0 [color=green max_drones=100]
 hub: middle1 0 1 [color=yellow]
