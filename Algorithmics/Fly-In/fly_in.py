@@ -1,26 +1,12 @@
 from srcs.parser import config_parser
-from srcs.structs import Graph, Drone
-from os import system
+from srcs.structs import Graph
 
 
 def main() -> None:
-    path_to_files = "maps/maps/challenger/01_the_impossible_dream.txt"
-    graph, infos = config_parser(path_to_files)
-    system(f"cat {path_to_files}")
-    start: str = [n for n in graph if "start" in n][0]
-    goal: str = [n for n in graph if "goal" in n][0]
-    g = Graph(graph, infos)
-    S = Graph.get_node(start)
-    for i in range(S.max_drones):
-        S.drones.append(Drone(i, start))
-    drones = Drone.drones
-    goal_hub = Graph.get_node(goal)
-    nb_turns: int = 0
-    while len(goal_hub.drones) < goal_hub.max_drones:
-        nb_turns += 1
-        for drone in drones:
-            drone.move(g.get_paths(drone.path))
-            print(f"{drone.number}: {drone.path}")
+    path_to_files = "maps/custom.txt"
+    graph, infos, couple = config_parser(path_to_files)
+    network = Graph(graph, infos, couple)
+    nb_turns = network.solve_network()
     print(f"Number of turns: {nb_turns}")
 
 
