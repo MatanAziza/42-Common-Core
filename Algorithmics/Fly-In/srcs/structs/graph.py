@@ -107,13 +107,15 @@ class Graph:
         drones = Drone.drones
         goal_hub = Graph.get_node(goal)
         nb_turns: int = 0
-        while len(goal_hub.drones) < len(Drone.drones):
-            nb_turns += 1
-            for drone in drones:
-                drone.move()
-                # print(f"{drone.number}: {drone.path}")
-            print("\nTurn", nb_turns)
-            for hub in Graph.nodes:
-                print(f"{hub.name}: "
-                      f"{[drone.number for drone in hub.drones]}")
+        with open("output.txt", "w") as file:
+            while len(goal_hub.drones) < len(Drone.drones):
+                nb_turns += 1
+                turn_string: str = ""
+                for drone in drones:
+                    turn_string += drone.move()
+                file.write(turn_string+'\n')
+                print("\nTurn", nb_turns)
+                for hub in Graph.nodes:
+                    print(f"{hub.name}: "
+                        f"{[drone.number for drone in hub.drones]}")
         return nb_turns

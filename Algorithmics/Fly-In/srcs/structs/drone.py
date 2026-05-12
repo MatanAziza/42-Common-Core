@@ -18,10 +18,11 @@ class Drone:
         self.turns: int = 0
         Drone.drones.append(self)
 
-    def move(self) -> None:
+    def move(self) -> str:
         from srcs.structs import Graph, NextHubInfos
+        return_string = ""
         if self.path[-1] == Graph.goal:
-            return
+            return return_string
         better_path = self.better_path()
         next_index = better_path.index(self.path[-1]) + 1
 
@@ -53,6 +54,7 @@ class Drone:
             next_hub.drones.append(self)
             self.path.append(next_hub.name)
             current_hub = next_hub
+            return_string += f"D{self.number}-{current_hub.name} "
         if current_hub.zone.value == 1:
             self.restricted = not self.restricted
         if self.number == Graph.get_node(self.path[0]).max_drones - 1:
@@ -61,6 +63,7 @@ class Drone:
             for key, value in Drone.max_hubs.items():
                 new_hub = Graph.get_node(key)
                 Drone.max_hubs.update({key: (len(new_hub.drones), value[1])})
+        return return_string
 
     def better_path(self) -> list[str]:
         from srcs.structs import Graph

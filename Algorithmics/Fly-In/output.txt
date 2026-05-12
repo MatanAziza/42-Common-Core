@@ -1,0 +1,5 @@
+D0-middle1 D1-left1 
+D0-middle2 D1-left2 D2-middle1 
+D0-goal D1-middle2 D2-right1 D3-middle1 
+D1-goal D2-right2 D3-middle2 
+D2-goal D3-goal 
