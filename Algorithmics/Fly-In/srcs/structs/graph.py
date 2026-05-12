@@ -1,24 +1,33 @@
 from typing import Any
 from .hub import NextHubInfos, Hub, Zones
+from .drone import Drone
 from srcs.parser import graph_find_useless, graph_cleaner
-
+from time import sleep
 
 class Graph:
     nodes: list[Hub] = []
+    _paths: list[list[str]]
+    start: str = ""
+    goal: str = ""
 
     def __init__(self,
                  graph: dict[str, dict[str, int]],
-                 infos: dict[str, dict[str, Any]]):
+                 infos: dict[str, dict[str, Any]],
+                 couple: tuple[str, str]):
         from srcs.path_finder import path_finding
-        start: str = [n for n in graph if "start" in n][0]
-        goal: str = [n for n in graph if "goal" in n][0]
-        to_remove = graph_find_useless(start, goal, graph, infos)
-        graph, infos = graph_cleaner(start, goal, graph, infos, to_remove)
+        self.start, self.goal = couple
+        Graph.start, Graph.goal = couple
+        to_remove = graph_find_useless(self.start, self.goal, graph, infos)
+        graph, infos = graph_cleaner(self.start, self.goal,
+                                     graph, infos, to_remove)
         Graph.nodes = self._create_hubs(infos)
         self._narc_nodes(graph)
-        self._paths: list[list[str]] = path_finding([start], goal, graph)
-        # for node in self.nodes:
-        #     print(node.name, node.zone, node.color)
+        Graph._paths = path_finding([self.start], self.goal, graph)
+        S = Graph.get_node(self.start)
+        for i in range(S.max_drones):
+            S.drones.append(Drone(i, self.start))
+        self._graph = graph
+        self._infos = infos
 
     def _create_hubs(self, graph: dict[str, dict[str, int]]) -> list[Hub]:
         """Based on the graph list, creates each Hub and add them to a list
@@ -78,14 +87,33 @@ class Graph:
         """
         return [hub for hub in Graph.nodes if hub.name == name][0]
 
-    def get_paths(self, start: list[str]) -> list[list[str]]:
+    @classmethod
+    def get_paths(cls, start: list[str]) -> list[list[str]]:
         valid_paths: list[list[str]] = []
-        for path in self._paths:
+        for path in cls._paths:
+            index: int = 0
             is_valid: bool = True
             for i, node in enumerate(start):
+                index += 1
                 if node != path[i]:
                     is_valid = not is_valid
                     break
             if is_valid:
                 valid_paths.append(path)
         return valid_paths.copy()
+
+    def solve_network(self) -> int:
+        goal: str = [n for n in self._graph if self.goal in n][0]
+        drones = Drone.drones
+        goal_hub = Graph.get_node(goal)
+        nb_turns: int = 0
+        with open("output.txt", "w") as file:
+            while len(goal_hub.drones) < len(Drone.drones):
+                nb_turns += 1
+                turn_string: str = ""
+                for drone in drones:
+                    turn_string += drone.move()
+                file.write(turn_string+'\n') if "D" in turn_string else 0
+                print(f"Turn {nb_turns}: {turn_string}")
+                sleep(1)
+        return nb_turns

@@ -14,43 +14,112 @@ class Drone:
         """
         self.number: int = number
         self.path: list[str] = [start]
-        self.arrived = False
         self.restricted = False
+        self.turns: int = 0
         Drone.drones.append(self)
 
-    def move(self, valid_paths: list[list[str]]) -> None:
+    def move(self) -> str:
         from srcs.structs import Graph, NextHubInfos
-        if "goal" in self.path[-1]:
-            self.arrived = True
-            return
-        current_path = valid_paths[0]
+        return_string = ""
+        if self.path[-1] == Graph.goal:
+            return return_string
+        better_path = self.better_path()
+        next_index = better_path.index(self.path[-1]) + 1
+
         current_hub = Graph.get_node(self.path[-1])
-        next_index = current_path.index(self.path[-1]) + 1
-        next_hub = Graph.get_node(current_path[next_index])
+        next_hub = Graph.get_node(better_path[next_index])
+        # Hubs from one to another the drone goes
+
         next: NextHubInfos = current_hub.next_hubs[next_hub.name]
         lesser_drone = [next.max_drones, next.max_link_capacity]
-        couple_linked: str = f"{current_hub.name}-{next_hub.name}"
-        old_path = Drone.max_paths.get(couple_linked, (0, min(lesser_drone)))
-        old_hub = Drone.max_hubs.get(next_hub.name, (0, next.max_drones))
-        current_tuple = Drone.max_hubs.get(current_hub.name,
-                                           (len(current_hub.drones),
-                                            current_hub.max_drones))
-        if (old_hub[0] < old_hub[1] and
-            old_path[0] < old_path[1] and
-            not self.restricted):
-            Drone.max_paths.update({couple_linked: (old_path[0] + 1,
-                                                    old_path[1])})
-            Drone.max_hubs.update({next_hub.name: (current_tuple[0] - 1,
-                                                   current_tuple[1])})
-            next_hub.drones.append(self)
+        key_link: str = f"{current_hub.name}-{next_hub.name}"
+        old_path_max = Drone.max_paths.get(key_link, (0, min(lesser_drone)))
+        current_hub_max = Drone.max_hubs.get(current_hub.name,
+                                             (len(current_hub.drones),
+                                              current_hub.max_drones))
+        next_hub_max = Drone.max_hubs.get(next_hub.name, (0, next.max_drones))
+        # Get actual values of traffic through link and hubs
+
+        if (next_hub_max[0] < next_hub_max[1] and
+           old_path_max[0] < old_path_max[1] and
+           not self.restricted):
+            self.turns += 2 if next.zone == 1 else 1
+            Drone.max_paths.update({key_link: (old_path_max[0] + 1,
+                                               old_path_max[1])})
+            Drone.max_hubs.update({next_hub.name: (next_hub_max[0] + 1,
+                                                   next_hub_max[1])})
+            Drone.max_hubs.update({current_hub.name: (current_hub_max[0] - 1,
+                                                      current_hub_max[1])})
             current_hub.drones.remove(self)
+            next_hub.drones.append(self)
             self.path.append(next_hub.name)
             current_hub = next_hub
+            return_string += f"D{self.number}-{current_hub.name} "
         if current_hub.zone.value == 1:
             self.restricted = not self.restricted
         if self.number == Graph.get_node(self.path[0]).max_drones - 1:
             for key, value in Drone.max_paths.items():
                 Drone.max_paths.update({key: (0, value[1])})
             for key, value in Drone.max_hubs.items():
-                hub = Graph.get_node(key)
-                Drone.max_hubs.update({key: (len(hub.drones), value[1])})
+                new_hub = Graph.get_node(key)
+                Drone.max_hubs.update({key: (len(new_hub.drones), value[1])})
+        return return_string
+
+    def better_path(self) -> list[str]:
+        from srcs.structs import Graph
+        from srcs.path_finder import path_turns, path_avg_drone
+        from srcs.path_finder import path_priorities
+        from functools import partial
+        basic_path = Graph.get_paths(self.path)[0]
+        current_hub = Graph.get_node(self.path[-1])
+        better_paths: list[list[str]] = []
+        for next in current_hub.next_hubs.keys():
+            if next not in self.path:
+                graph = Graph.get_paths(self.path + [next])
+                if graph:
+                    better_paths.append(graph[0][len(self.path):])
+        # All paths starting with self.path
+        for path in better_paths.copy():
+            link = Drone.max_paths.get(f"{self.path[-1]}-{path[0]}",
+                                       (-1, -1))
+            hub = Drone.max_hubs.get(path[0], (-1, -1))
+            if link == (-1, -1) or hub == (-1, -1):
+                continue
+            if link[0] >= link[1] or hub[0] >= hub[1]:
+                better_paths.remove(path)
+        if not better_paths:
+            return basic_path
+        path_prio = partial(path_priorities,
+                            max([len(path) for path in better_paths]))
+        better_paths.sort(key=path_avg_drone, reverse=True)
+        better_paths.sort(key=path_prio, reverse=True)
+        better_paths.sort(key=path_turns)
+        # return self.path + better_paths[0]
+        turns_better = path_turns(better_paths[0]) - self.turns
+        d_index, after = self.get_drone_index(better_paths[0])
+        if (d_index + path_turns(basic_path[len(self.path):]) < turns_better
+           and after + path_turns(basic_path[len(self.path):]) < turns_better):
+        # if d_index == 0:
+            return basic_path
+        return self.path + better_paths[0]
+
+    def get_drone_index(self, basic_path: list[str]) -> tuple[int, int]:
+        from srcs.structs import Graph
+        next_hub = Graph.get_node(basic_path[0])
+        incoming_hubs = [connection
+                         for connection in Drone.max_paths
+                         if next_hub.name in connection
+                         and connection.index(next_hub.name) != 0]
+        incoming_hubs = [hub[:hub.index("-")] for hub in incoming_hubs]
+        incoming_hubs.append(self.path[-1]) if self.path[-1] not in incoming_hubs else 0
+        incoming_drones: list[int] = []
+        for hub in incoming_hubs:
+            obj = Graph.get_node(hub)
+            incoming_drones.extend([drone.number for drone in obj.drones])
+        incoming_drones.extend([drone.number for drone in next_hub.drones])
+        if not incoming_drones:
+            return 0, 0
+        incoming_drones.sort()
+        self_index = incoming_drones.index(self.number)
+        after_me = len(incoming_drones[self_index+1:])
+        return self_index, after_me

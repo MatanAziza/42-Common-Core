@@ -19,7 +19,8 @@ def graph_maker(couples: list[list[str]]) -> dict[str, dict[str, int]]:
     return graph
 
 
-def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, Any]]:
+def nodes_params(couples: list[list[str]],
+                 couple: tuple[str, str]) -> dict[str, dict[str, Any]]:
     infos: dict[str, dict[str, Any]] = dict()
     alpha: dict[str, list[str]] = dict()
     start_drone: int = 1
@@ -36,14 +37,27 @@ def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, Any]]:
         infos[key] = {
             "coordinates": (value[0], value[1]),
                       }
-        infos[key].update({"max_drones": start_drone}) if "start" in key else 0
         infos[key].update({k: v for k, v in metadata})
+        if key in couple:
+            infos[key].update({"max_drones": start_drone})
     return infos
+
+
+def start_end(couples: list[list[str]]) -> tuple[str, str]:
+    start: str = "start"
+    goal: str = "goal"
+    for line in couples:
+        if line[0] == "start_hub":
+            start = line[1].split(" ")[0]
+        if line[0] == "end_hub":
+            goal = line[1].split(" ")[0]
+    return (start, goal)
 
 
 def config_parser(filename: str) -> tuple[
                                           dict[str, dict[str, int]],
-                                          dict[str, dict[str, Any]]]:
+                                          dict[str, dict[str, Any]],
+                                          tuple[str, str]]:
     graph: dict[str, dict[str, int]] = dict()
     infos: dict[str, dict[str, Any]] = dict()
 
@@ -53,5 +67,6 @@ def config_parser(filename: str) -> tuple[
                    for line in lines
                    if not line.startswith("#") and line]
         graph = graph_maker(couples)
-        infos = nodes_params(couples)
-    return (graph, infos)
+        couple = start_end(couples)
+        infos = nodes_params(couples, couple)
+    return (graph, infos, couple)

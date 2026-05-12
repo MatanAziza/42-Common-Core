@@ -59,6 +59,8 @@ def path_avg_drone(path: list[str]) -> float:
         next: NextHubInfos = hub.next_hubs[path[i+1]]
         lesser_drone = min([next.max_drones, next.max_link_capacity])
         lesser_capacity.append(lesser_drone)
+    if not lesser_capacity:
+        return 0
     mean = sum(lesser_capacity)/len(lesser_capacity)
     list_apart: list[float] = []
     for lesser in lesser_capacity:

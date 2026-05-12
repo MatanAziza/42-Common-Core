@@ -1,26 +1,64 @@
 from srcs.parser import config_parser
-from srcs.structs import Graph, Drone
-from os import system
+from srcs.structs import Graph
+import sys
+from colorama import Fore
+from pynput import keyboard
+from pynput.keyboard import Key
+
+
+def on_key_release(key: Key) -> int:
+    if key == Key.down:
+        return 1
+    elif key == Key.up:
+        return -1
+    return 0
 
 
 def main() -> None:
-    path_to_files = "maps/maps/challenger/01_the_impossible_dream.txt"
-    graph, infos = config_parser(path_to_files)
-    system(f"cat {path_to_files}")
-    start: str = [n for n in graph if "start" in n][0]
-    goal: str = [n for n in graph if "goal" in n][0]
-    g = Graph(graph, infos)
-    S = Graph.get_node(start)
-    for i in range(S.max_drones):
-        S.drones.append(Drone(i, start))
-    drones = Drone.drones
-    goal_hub = Graph.get_node(goal)
-    nb_turns: int = 0
-    while len(goal_hub.drones) < goal_hub.max_drones:
-        nb_turns += 1
-        for drone in drones:
-            drone.move(g.get_paths(drone.path))
-            print(f"{drone.number}: {drone.path}")
+    if len(sys.argv) < 1:
+        print("Too much arguments.\nRun only python3 fly_in.py.")
+        sys.exit(1)
+    all_files = [
+                 "easy/01_linear_path.txt",
+                 "easy/02_simple_fork.txt",
+                 "easy/03_basic_capacity.txt",
+                 "medium/01_dead_end_trap.txt",
+                 "medium/02_circular_loop.txt",
+                 "medium/03_priority_puzzle.txt",
+                 "hard/01_maze_nightmare.txt",
+                 "hard/02_capacity_hell.txt",
+                 "hard/03_ultimate_challenge.txt",
+                 "challenger/01_the_impossible_dream.txt",
+                 "custom/easy2.txt",
+                 "custom/easy3.txt",
+                 "custom/hard1.txt",
+                 "custom/perso.txt"]
+    highlight = 0
+    to_use = -1
+    while True:
+        print("\033[2J")
+        print(Fore.GREEN + "Available drone networks:" + Fore.WHITE)
+        for file in all_files:
+            print(Fore.BLUE, end="") if all_files[highlight] == file else 0
+            print(file[file.index('/')+1:file.index('.')], end="")
+            print(" <==", end="") if all_files[highlight] == file else 0
+            print(Fore.WHITE)
+        while True:
+            if is_pressed("down arrow") and highlight < len(all_files):
+                highlight += 1
+                break
+            elif is_pressed("up arrow"):
+                highlight -= 1
+                break
+            elif is_pressed("enter"):
+                to_use = highlight
+                break
+        if to_use != -1:
+            break
+    path_to_file = f"maps/maps/{all_files[to_use]}"
+    graph, infos, couple = config_parser(path_to_file)
+    network = Graph(graph, infos, couple)
+    nb_turns = network.solve_network()
     print(f"Number of turns: {nb_turns}")
 
 
