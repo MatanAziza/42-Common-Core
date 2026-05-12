@@ -2,7 +2,7 @@ from typing import Any
 from .hub import NextHubInfos, Hub, Zones
 from .drone import Drone
 from srcs.parser import graph_find_useless, graph_cleaner
-
+from time import sleep
 
 class Graph:
     nodes: list[Hub] = []
@@ -113,9 +113,7 @@ class Graph:
                 turn_string: str = ""
                 for drone in drones:
                     turn_string += drone.move()
-                file.write(turn_string+'\n')
-                print("\nTurn", nb_turns)
-                for hub in Graph.nodes:
-                    print(f"{hub.name}: "
-                        f"{[drone.number for drone in hub.drones]}")
+                file.write(turn_string+'\n') if "D" in turn_string else 0
+                print(f"Turn {nb_turns}: {turn_string}")
+                sleep(1)
         return nb_turns

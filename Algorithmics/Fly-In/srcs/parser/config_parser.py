@@ -19,7 +19,8 @@ def graph_maker(couples: list[list[str]]) -> dict[str, dict[str, int]]:
     return graph
 
 
-def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, Any]]:
+def nodes_params(couples: list[list[str]],
+                 couple: tuple[str, str]) -> dict[str, dict[str, Any]]:
     infos: dict[str, dict[str, Any]] = dict()
     alpha: dict[str, list[str]] = dict()
     start_drone: int = 1
@@ -37,7 +38,8 @@ def nodes_params(couples: list[list[str]]) -> dict[str, dict[str, Any]]:
             "coordinates": (value[0], value[1]),
                       }
         infos[key].update({k: v for k, v in metadata})
-        infos[key].update({"max_drones": start_drone}) if "start" in key else 0
+        if key in couple:
+            infos[key].update({"max_drones": start_drone})
     return infos
 
 
@@ -65,6 +67,6 @@ def config_parser(filename: str) -> tuple[
                    for line in lines
                    if not line.startswith("#") and line]
         graph = graph_maker(couples)
-        infos = nodes_params(couples)
         couple = start_end(couples)
+        infos = nodes_params(couples, couple)
     return (graph, infos, couple)
