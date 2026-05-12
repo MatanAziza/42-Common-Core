@@ -93,12 +93,30 @@ class Drone:
         better_paths.sort(key=path_turns)
         # return self.path + better_paths[0]
         turns_better = path_turns(better_paths[0]) - self.turns
-        drone_index = self.get_drone_index(basic_path)
-        #FINISH GET INDEX
-        if drone_index + path_turns(basic_path[len(self.path):]) >= turns_better:
-            return self.path + better_paths[0]
-        return basic_path
+        d_index, after = self.get_drone_index(better_paths[0])
+        if (d_index + path_turns(basic_path[len(self.path):]) < turns_better
+           and after + path_turns(basic_path[len(self.path):]) < turns_better):
+        # if d_index == 0:
+            return basic_path
+        return self.path + better_paths[0]
 
-    def get_drone_index(self, basic_path: list[str]) -> int:
+    def get_drone_index(self, basic_path: list[str]) -> tuple[int, int]:
         from srcs.structs import Graph
-        return 0
+        next_hub = Graph.get_node(basic_path[0])
+        incoming_hubs = [connection
+                         for connection in Drone.max_paths
+                         if next_hub.name in connection
+                         and connection.index(next_hub.name) != 0]
+        incoming_hubs = [hub[:hub.index("-")] for hub in incoming_hubs]
+        incoming_hubs.append(self.path[-1]) if self.path[-1] not in incoming_hubs else 0
+        incoming_drones: list[int] = []
+        for hub in incoming_hubs:
+            obj = Graph.get_node(hub)
+            incoming_drones.extend([drone.number for drone in obj.drones])
+        incoming_drones.extend([drone.number for drone in next_hub.drones])
+        if not incoming_drones:
+            return 0, 0
+        incoming_drones.sort()
+        self_index = incoming_drones.index(self.number)
+        after_me = len(incoming_drones[self_index+1:])
+        return self_index, after_me
