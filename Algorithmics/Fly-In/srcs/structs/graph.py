@@ -1,12 +1,14 @@
 from typing import Any
+import pygame
+import time
 from .hub import NextHubInfos, Hub, Zones
 from .drone import Drone
 from srcs.parser import graph_find_useless, graph_cleaner
-from time import sleep
+
 
 class Graph:
     nodes: list[Hub] = []
-    _paths: list[list[str]]
+    paths: list[list[str]] = []
     start: str = ""
     goal: str = ""
 
@@ -22,12 +24,20 @@ class Graph:
                                      graph, infos, to_remove)
         Graph.nodes = self._create_hubs(infos)
         self._narc_nodes(graph)
-        Graph._paths = path_finding([self.start], self.goal, graph)
+        Graph.paths = path_finding([self.start], self.goal, graph)
         S = Graph.get_node(self.start)
+        Drone.drones.clear()
         for i in range(S.max_drones):
             S.drones.append(Drone(i, self.start))
         self._graph = graph
         self._infos = infos
+
+    @classmethod
+    def full_reset(cls) -> None:
+        cls.nodes.clear()
+        cls.paths.clear()
+        cls.start = ""
+        cls.goal = ""
 
     def _create_hubs(self, graph: dict[str, dict[str, int]]) -> list[Hub]:
         """Based on the graph list, creates each Hub and add them to a list
@@ -90,7 +100,7 @@ class Graph:
     @classmethod
     def get_paths(cls, start: list[str]) -> list[list[str]]:
         valid_paths: list[list[str]] = []
-        for path in cls._paths:
+        for path in cls.paths:
             index: int = 0
             is_valid: bool = True
             for i, node in enumerate(start):
@@ -112,8 +122,8 @@ class Graph:
                 nb_turns += 1
                 turn_string: str = ""
                 for drone in drones:
-                    turn_string += drone.move()
-                file.write(turn_string+'\n') if "D" in turn_string else 0
+                    turn_string += drone.best_choice()
+                Drone.reset_turn_dicts()
+                file.write(f"{turn_string[:-1]}\n") if "D" in turn_string else 0
                 print(f"Turn {nb_turns}: {turn_string}")
-                sleep(1)
         return nb_turns

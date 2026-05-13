@@ -2,12 +2,12 @@ all: install run
 
 install:
 	python3 -m venv venv_flyin;
-	source venv_flyin/bin/activate;
+	source venv_flyin/bin/activate &&\
 	pip install -r requirements.txt;
 
 run:
-	source venv_flyin/bin/activate;
-	python3 fly_in.py $(ARGS)
+	source venv_flyin/bin/activate &&\
+	python3 fly_in.py
 
 lint:
 	flake8 srcs;
@@ -17,6 +17,3 @@ lint:
 
 clean:
 	rm -rf venv_flyin
-
-test:
-	echo @$(PARAM)

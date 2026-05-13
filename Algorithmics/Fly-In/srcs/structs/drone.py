@@ -18,7 +18,14 @@ class Drone:
         self.turns: int = 0
         Drone.drones.append(self)
 
-    def move(self) -> str:
+    @classmethod
+    def full_reset(cls) -> None:
+        cls.drones.clear()
+        cls.max_hubs.clear()
+        cls.max_paths.clear()
+
+
+    def best_choice(self) -> str:
         from srcs.structs import Graph, NextHubInfos
         return_string = ""
         if self.path[-1] == Graph.goal:
@@ -57,13 +64,16 @@ class Drone:
             return_string += f"D{self.number}-{current_hub.name} "
         if current_hub.zone.value == 1:
             self.restricted = not self.restricted
-        if self.number == Graph.get_node(self.path[0]).max_drones - 1:
-            for key, value in Drone.max_paths.items():
-                Drone.max_paths.update({key: (0, value[1])})
-            for key, value in Drone.max_hubs.items():
-                new_hub = Graph.get_node(key)
-                Drone.max_hubs.update({key: (len(new_hub.drones), value[1])})
         return return_string
+
+    @classmethod
+    def reset_turn_dicts(cls) -> None:
+        from srcs.structs import Graph
+        for key, value in Drone.max_paths.items():
+            Drone.max_paths.update({key: (0, value[1])})
+        for key, value in Drone.max_hubs.items():
+            new_hub = Graph.get_node(key)
+            Drone.max_hubs.update({key: (len(new_hub.drones), value[1])})
 
     def better_path(self) -> list[str]:
         from srcs.structs import Graph
@@ -94,12 +104,10 @@ class Drone:
         better_paths.sort(key=path_avg_drone, reverse=True)
         better_paths.sort(key=path_prio, reverse=True)
         better_paths.sort(key=path_turns)
-        # return self.path + better_paths[0]
         turns_better = path_turns(better_paths[0]) - self.turns
         d_index, after = self.get_drone_index(better_paths[0])
         if (d_index + path_turns(basic_path[len(self.path):]) < turns_better
            and after + path_turns(basic_path[len(self.path):]) < turns_better):
-        # if d_index == 0:
             return basic_path
         return self.path + better_paths[0]
 
@@ -111,7 +119,8 @@ class Drone:
                          if next_hub.name in connection
                          and connection.index(next_hub.name) != 0]
         incoming_hubs = [hub[:hub.index("-")] for hub in incoming_hubs]
-        incoming_hubs.append(self.path[-1]) if self.path[-1] not in incoming_hubs else 0
+        if self.path[-1] not in incoming_hubs:
+            incoming_hubs.append(self.path[-1])
         incoming_drones: list[int] = []
         for hub in incoming_hubs:
             obj = Graph.get_node(hub)
