@@ -40,6 +40,8 @@ def nodes_params(couples: list[list[str]],
         infos[key].update({k: v for k, v in metadata})
         if key in couple:
             infos[key].update({"max_drones": start_drone})
+        if infos[key].get("color", "error") == "error":
+            infos[key].update({"color": "white"})
     return infos
 
 
@@ -70,3 +72,6 @@ def config_parser(filename: str) -> tuple[
         couple = start_end(couples)
         infos = nodes_params(couples, couple)
     return (graph, infos, couple)
+
+if __name__ == "__main__":
+    config_parser("maps/maps/hard/03_ultimate_challenge.txt")

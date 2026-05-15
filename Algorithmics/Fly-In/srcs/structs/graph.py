@@ -19,6 +19,7 @@ class Graph:
         from srcs.path_finder import path_finding
         self.start, self.goal = couple
         Graph.start, Graph.goal = couple
+        self._true_infos = infos
         to_remove = graph_find_useless(self.start, self.goal, graph, infos)
         graph, infos = graph_cleaner(self.start, self.goal,
                                      graph, infos, to_remove)
@@ -38,6 +39,9 @@ class Graph:
         cls.paths.clear()
         cls.start = ""
         cls.goal = ""
+
+    def infos(self):
+        return self._true_infos.copy()
 
     def _create_hubs(self, graph: dict[str, dict[str, int]]) -> list[Hub]:
         """Based on the graph list, creates each Hub and add them to a list

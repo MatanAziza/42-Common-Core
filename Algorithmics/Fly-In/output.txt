@@ -1,14 +1,4 @@
-D0-loop_a
-D0-loop_b D1-loop_a
-D0-exit_point D1-loop_b D2-loop_a
-D0-goal
-D1-exit_point D2-loop_b D3-loop_a
+D0-waypoint1
+D0-waypoint2 D1-waypoint1
+D0-goal D1-waypoint2
 D1-goal
-D2-exit_point D3-loop_b D4-loop_a
-D2-goal
-D3-exit_point D4-loop_b D5-loop_a
-D3-goal
-D4-exit_point D5-loop_b
-D4-goal
-D5-exit_point
-D5-goal
