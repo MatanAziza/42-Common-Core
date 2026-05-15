@@ -6,6 +6,7 @@ class GameEngine:
     screen: pygame.Surface
     status: str = "title"
     infos: dict[str, dict[str, str]] = dict()
+    graph: dict[str, dict[str, int]] = dict()
 
     def __init__(self, width: int, height: int) -> None:
         pygame.init()
@@ -16,26 +17,58 @@ class GameEngine:
 
     def game_loop(self) -> None:
         running = True
-        group = GameEngine.MenuScene()
+        group: GameEngine.Scene = GameEngine.MenuScene()
         while running:
             events = pygame.event.get()
+            keys = pygame.key.get_pressed()
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
                 if GameEngine.status != "load":
-                    self.screen.fill((50, 50, 151))
+                    self.screen.fill((50, 50, 101))
                     group.update()
                     group.draw(self.screen)
                     pygame.display.flip()
                 if GameEngine.status == "load":
-                    group = GameEngine.LevelScene(GameEngine.infos)
+                    group = GameEngine.LevelScene(GameEngine.infos,
+                                                  GameEngine.graph)
                     GameEngine.status = "level"
+                if keys[pygame.K_ESCAPE] and GameEngine.status == "level":
+                    group = GameEngine.MenuScene()
         pygame.quit()
 
+    class GameConnection(pygame.sprite.Sprite):
+        def __init__(self, hub_1: pygame.Rect, hub_2: pygame.Rect):
+            super().__init__()
+            x = abs(hub_1.x - hub_2.x) + 10
+            y = abs(hub_1.y - hub_2.y) + 10
+            print(x, y)
+            self.image = pygame.Surface((x, y))
+            self.image.set_colorkey('black')
+            self.image.convert_alpha()
+            self.image.fill((0, 0, 0))
+            rec_x = min(hub_1.x, hub_2.x)
+            rec_y = min(hub_1.y, hub_2.y)
+            self.rect = self.image.get_rect(topleft=(rec_x+100, rec_y +25))
+            start_x = 0 if hub_1.x < hub_2.x else x - 10
+            start_y = 0 if hub_1.y < hub_2.y else y - 10
+            end_x = 0 if hub_2.x < hub_1.x else x - 10
+            end_y = 0 if hub_2.y < hub_1.y else y - 10
+            pygame.draw.line(self.image, (1, 1, 1),
+                             (start_x, start_y),
+                             (end_x, end_y),
+                             10)
+            print(x, y, hub_1.x, hub_1.y)
+
+
     class GameHub(pygame.sprite.Sprite):
+        hubs: list["GameEngine.GameHub"] = []
 
         def __init__(self, coord: tuple[int, int],
-                        max_coord: tuple[int, int], color: str):
+                     max_coo: tuple[int, int],
+                     min_coo: tuple[int, int],
+                     color: str,
+                     name: str):
             super().__init__()
             self.colors: dict[str, tuple[int, int, int]] = {
                 "green": (0, 128, 0),
@@ -52,22 +85,44 @@ class GameEngine:
                 "white": (255, 255, 255),
                 "black": (0, 0, 0),
                 "maroon": (128, 0, 0),
-                "dark red": (139, 0, 0),
+                "darkred": (139, 0, 0),
                 "violet": (238, 130, 238),
-                "crimson": (220, 20, 60)
+                "crimson": (220, 20, 60),
+                "rainbow": (50, 50, 50)
                 }
-            self.image = pygame.Surface((50, 50))
+            self.image = pygame.Surface((200, 150))
+            self.font = pygame.font.SysFont("Comic Sans MS", 23)
             self.image.set_colorkey('black')
             self.image.convert_alpha()
             self.image.fill((0, 0, 0))
-            nb_abs = (max_coord[0] - coord[0]) + 1
-            nb_ord =(max_coord[1] - coord[1]) + 1
-            x = coord[0] * 1720 * nb_abs / (max_coord[0]+1)
-            y = coord[1] * 880 * nb_ord / (max_coord[1]+1)
-            self.rect = self.image.get_rect(topleft=(x, y))
-            pygame.draw.circle(self.image, self.colors[color], (x+25, y+25),
+            x = (coord[0]-min_coo[0]) * (1820/((max_coo[0]-min_coo[0])+1))
+            y = (coord[1]-min_coo[1]) * (880/((max_coo[1]-min_coo[1])+1))
+            self.rect = self.image.get_rect(topleft=(x, y + 75))
+            pygame.draw.circle(self.image, self.colors[color], (100, 25),
                             25)
-            print(self.rect)
+            if color == "rainbow":
+                pygame.draw.circle(self.image, self.colors["red"], (100, 25),
+                                   25, draw_top_right=True)
+                pygame.draw.circle(self.image, self.colors["cyan"], (100, 25),
+                                   25, draw_bottom_right=True)
+                pygame.draw.circle(self.image, self.colors["green"], (100, 25),
+                                   25, draw_top_left=True)
+                pygame.draw.circle(self.image, self.colors["magenta"],
+                                   (100, 25), 25, draw_bottom_left=True)
+            pygame.draw.circle(self.image, (1, 1, 1), (100, 25),
+                        25, 4)
+            self.textSurf = self.font.render(name, False, (1, 0, 0))
+            self.name = name
+            W, H = self.textSurf.get_width(), self.textSurf.get_height()
+            self.image.blit(self.textSurf, [100 - W/2, 75 - H/2])
+            GameEngine.GameHub.hubs.append(self)
+
+        @classmethod
+        def get_hub(cls, name: str) -> "GameEngine.GameHub":
+            for hub in cls.hubs:
+                if hub.name == name:
+                    return hub
+
 
     class Scene(ABC):
         def __init__(self):
@@ -78,17 +133,27 @@ class GameEngine:
             pass
 
     class LevelScene(Scene):
-        x_offset, y_offset = 100, 100
-
-        def __init__(self, infos: dict[str, dict[str, str]]):
+        def __init__(self, infos: dict[str, dict[str, str]],
+                     graph: dict[str, dict[str, int]]):
             coordinates = [key["coordinates"] for key in infos.values()]
             max_x = max([int(coord[0]) for coord in coordinates])
             max_y = max([int(coord[1]) for coord in coordinates])
-            list_hubs: list[GameEngine.GameHub] = []
-            for value in infos.values():
+            min_x = min([int(coord[0]) for coord in coordinates])
+            min_y = min([int(coord[1]) for coord in coordinates])
+            list_hubs: list[pygame.sprite.Sprite] = []
+            for key, value in infos.items():
                 str_coord = value["coordinates"]
                 coords = (int(str_coord[0]), int(str_coord[1]))
-                list_hubs.append(GameEngine.GameHub(coords, (max_x, max_y), value["color"]))
+                list_hubs.append(GameEngine.GameHub(coords,
+                                                    (max_x, max_y),
+                                                    (min_x, min_y),
+                                                    value["color"],
+                                                    key))
+            for key, value in graph.items():
+                hub_1 = GameEngine.GameHub.get_hub(key)
+                for hub in value:
+                    hub_2 = GameEngine.GameHub.get_hub(hub)
+                    list_hubs.append(GameEngine.GameConnection(hub_1.rect, hub_2.rect))
             self.group = pygame.sprite.Group(list_hubs)
 
         def update(self):
@@ -131,11 +196,6 @@ class GameEngine:
                      title: str) -> None:
             super().__init__()
             self.font = pygame.font.SysFont("Comic Sans MS", 30)
-            self.text = title
-            self.textSurf = self.font.render(
-                title[title.index("_") + 1:title.rindex(".")],
-                False, (1, 0, 0))
-            W, H = self.textSurf.get_width(), self.textSurf.get_height()
             self.image = pygame.Surface((width, height))
             self.image.set_colorkey('black')
             self.image.convert_alpha()
@@ -146,6 +206,11 @@ class GameEngine:
                              border_radius=20)
             pygame.draw.rect(self.image, (0, 0, 0), self.image.get_rect(),
                              2, 5)
+            self.text = title
+            self.textSurf = self.font.render(
+                title[title.index("_") + 1:title.rindex(".")],
+                False, (1, 0, 0))
+            W, H = self.textSurf.get_width(), self.textSurf.get_height()
             self.image.blit(self.textSurf, [width/2 - W/2, height/2 - H/2])
 
         def new_network(self) -> None:
@@ -158,10 +223,11 @@ class GameEngine:
             network = Graph(graph, infos, couple)
             # print("\033c")
             nb_turns = network.solve_network()
-            print([v["color"] for v in network.infos().values()])
+            print(network.graph())
             print(f"Number of turns: {nb_turns}")
             self.enable = not self.enable
             GameEngine.infos = network.infos()
+            GameEngine.graph = network.graph()
 
 
         def update(self) -> None:
