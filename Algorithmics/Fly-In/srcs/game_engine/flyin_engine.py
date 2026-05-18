@@ -1,10 +1,15 @@
+import time
 import pygame
 from abc import ABC, abstractmethod
+from srcs.structs import Graph
+from srcs.structs.drone import Drone
 
 
 class GameEngine:
     screen: pygame.Surface
+    network: Graph
     status: str = "title"
+    level: str = ""
     infos: dict[str, dict[str, str]] = dict()
     graph: dict[str, dict[str, int]] = dict()
 
@@ -13,6 +18,8 @@ class GameEngine:
         pygame.display.set_caption("Fly-In")
         self.clock = pygame.time.Clock()
         self.status = "title"
+        self.can_solve = True
+        self.timer_solve: float = 0
         GameEngine.screen = pygame.display.set_mode((width, height))
 
     def game_loop(self) -> None:
@@ -24,32 +31,73 @@ class GameEngine:
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
-                if GameEngine.status != "load":
-                    self.screen.fill((50, 50, 101))
-                    group.update()
-                    group.draw(self.screen)
-                    pygame.display.flip()
                 if GameEngine.status == "load":
+                    self.new_network()
                     group = GameEngine.LevelScene(GameEngine.infos,
                                                   GameEngine.graph)
+                    for drone in Drone.drones:
+                        drone.init_image()
+                        group.add(drone)
                     GameEngine.status = "level"
-                if keys[pygame.K_ESCAPE] and GameEngine.status == "level":
-                    group = GameEngine.MenuScene()
+                if GameEngine.status == "level":
+                    if keys[pygame.K_ESCAPE]:
+                        group = GameEngine.MenuScene()
+                        break
+                    if time.time() - self.timer_solve >= 1.5:
+                        self.can_solve = not self.can_solve
+                        self.timer_solve = 0
+                    if keys[pygame.K_SPACE] and self.can_solve:
+                        self.solve_turn()
+            if GameEngine.status != "load":
+                self.screen.fill((50, 50, 101))
+                group.update()
+                group.draw(self.screen)
+                pygame.display.flip()
+            moving = [drone
+                      for drone in Drone.drones
+                      if drone.has_moved]
+            for drone in moving:
+                drone.move(int((time.time() - self.timer_solve)*20))
         pygame.quit()
+
+    def solve_turn(self) -> None:
+        turn_string: str = ""
+        for drone in Drone.drones:
+            turn_string += drone.best_choice()
+        Drone.reset_turn_dicts()
+        print(f"{turn_string}")
+        self.can_solve = not self.can_solve
+        self.timer_solve = time.time()
+
+    def new_network(self) -> None:
+        from srcs.parser import config_parser
+        from srcs.structs import Graph, Drone
+        Graph.full_reset()
+        Drone.full_reset()
+        GameEngine.GameHub.clear_hubs()
+        path_to_file = f"maps/maps/{GameEngine.level}"
+        graph, infos, couple = config_parser(path_to_file)
+        network = Graph(graph, infos, couple)
+        GameEngine.network = network
+        # print("\033c")
+        # nb_turns = network.solve_network()
+        # print(f"Number of turns: {nb_turns}")
+        # self.enable = not self.enable
+        GameEngine.infos = network.infos()
+        GameEngine.graph = network.graph()
 
     class GameConnection(pygame.sprite.Sprite):
         def __init__(self, hub_1: pygame.Rect, hub_2: pygame.Rect):
             super().__init__()
             x = abs(hub_1.x - hub_2.x) + 10
             y = abs(hub_1.y - hub_2.y) + 10
-            print(x, y)
             self.image = pygame.Surface((x, y))
             self.image.set_colorkey('black')
             self.image.convert_alpha()
             self.image.fill((0, 0, 0))
             rec_x = min(hub_1.x, hub_2.x)
             rec_y = min(hub_1.y, hub_2.y)
-            self.rect = self.image.get_rect(topleft=(rec_x+100, rec_y +25))
+            self.rect = self.image.get_rect(topleft=(rec_x + 95, rec_y + 20))
             start_x = 0 if hub_1.x < hub_2.x else x - 10
             start_y = 0 if hub_1.y < hub_2.y else y - 10
             end_x = 0 if hub_2.x < hub_1.x else x - 10
@@ -58,8 +106,6 @@ class GameEngine:
                              (start_x, start_y),
                              (end_x, end_y),
                              10)
-            print(x, y, hub_1.x, hub_1.y)
-
 
     class GameHub(pygame.sprite.Sprite):
         hubs: list["GameEngine.GameHub"] = []
@@ -98,8 +144,7 @@ class GameEngine:
             x = (coord[0]-min_coo[0]) * (1820/((max_coo[0]-min_coo[0])+1))
             y = (coord[1]-min_coo[1]) * (880/((max_coo[1]-min_coo[1])+1))
             self.rect = self.image.get_rect(topleft=(x, y + 75))
-            pygame.draw.circle(self.image, self.colors[color], (100, 25),
-                            25)
+            pygame.draw.circle(self.image, self.colors[color], (100, 25), 25)
             if color == "rainbow":
                 pygame.draw.circle(self.image, self.colors["red"], (100, 25),
                                    25, draw_top_right=True)
@@ -109,9 +154,8 @@ class GameEngine:
                                    25, draw_top_left=True)
                 pygame.draw.circle(self.image, self.colors["magenta"],
                                    (100, 25), 25, draw_bottom_left=True)
-            pygame.draw.circle(self.image, (1, 1, 1), (100, 25),
-                        25, 4)
-            self.textSurf = self.font.render(name, False, (1, 0, 0))
+            pygame.draw.circle(self.image, (1, 1, 1), (100, 25), 25, 4)
+            self.textSurf = self.font.render(name, False, (255, 255, 255))
             self.name = name
             W, H = self.textSurf.get_width(), self.textSurf.get_height()
             self.image.blit(self.textSurf, [100 - W/2, 75 - H/2])
@@ -119,17 +163,26 @@ class GameEngine:
 
         @classmethod
         def get_hub(cls, name: str) -> "GameEngine.GameHub":
+            lst = []
             for hub in cls.hubs:
                 if hub.name == name:
-                    return hub
+                    lst.append(hub)
+            return lst[0]
 
+        @classmethod
+        def clear_hubs(cls) -> None:
+            cls.hubs.clear()
 
     class Scene(ABC):
-        def __init__(self):
+        def __init__(self) -> None:
             pass
 
         @abstractmethod
-        def update(self):
+        def update(self) -> None:
+            pass
+
+        @abstractmethod
+        def draw(self, screen: pygame.Surface) -> None:
             pass
 
     class LevelScene(Scene):
@@ -149,45 +202,65 @@ class GameEngine:
                                                     (min_x, min_y),
                                                     value["color"],
                                                     key))
-            for key, value in graph.items():
-                hub_1 = GameEngine.GameHub.get_hub(key)
-                for hub in value:
+            for key2, value2 in graph.items():
+                hub_1 = GameEngine.GameHub.get_hub(key2)
+                for hub in value2:
                     hub_2 = GameEngine.GameHub.get_hub(hub)
-                    list_hubs.append(GameEngine.GameConnection(hub_1.rect, hub_2.rect))
+                    list_hubs.insert(0,
+                                     GameEngine.GameConnection(hub_1.rect,
+                                                               hub_2.rect))
             self.group = pygame.sprite.Group(list_hubs)
 
-        def update(self):
+        def update(self) -> None:
             self.group.update()
 
-        def draw(self, screen: pygame.Surface):
+        def add(self, args: Drone) -> None:
+            self.group.add(args)
+
+        def draw(self, screen: pygame.Surface) -> None:
             self.group.draw(screen)
 
     class MenuScene(Scene):
-        def __init__(self):
+        def __init__(self) -> None:
             self.group = pygame.sprite.Group([
-            GameEngine.LevelTitle(180, 300, 250, 70, "easy/01_linear_path.txt"),
-            GameEngine.LevelTitle(180, 435, 250, 70, "easy/02_simple_fork.txt"),
-            GameEngine.LevelTitle(180, 570, 250, 70, "easy/03_basic_capacity.txt"),
-            GameEngine.LevelTitle(510, 300, 250, 70, "medium/01_dead_end_trap.txt"),
-            GameEngine.LevelTitle(510, 435, 250, 70, "medium/02_circular_loop.txt"),
-            GameEngine.LevelTitle(510, 570, 250, 70, "medium/03_priority_puzzle.txt"),
-            GameEngine.LevelTitle(840, 300, 250, 70, "hard/01_maze_nightmare.txt"),
-            GameEngine.LevelTitle(840, 435, 250, 70, "hard/02_capacity_hell.txt"),
-            GameEngine.LevelTitle(840, 570, 250, 70, "hard/03_ultimate_challenge.txt"),
-            GameEngine.LevelTitle(1170, 300, 250, 70,"challenger/01_the_impossible_dream.txt"),
-            GameEngine.LevelTitle(1500, 300, 250, 70,"custom/01_easy_1.txt"),
-            GameEngine.LevelTitle(1500, 435, 250, 70,"custom/02_easy_2.txt"),
-            GameEngine.LevelTitle(1500, 570, 250, 70,"custom/03_easy_3.txt"),
-            GameEngine.LevelTitle(1500, 705, 250, 70,"custom/04_medium_1.txt"),
-            GameEngine.LevelTitle(1500, 840, 250, 70,"custom/05_hard_1.txt")
-        ])
+                GameEngine.LevelTitle(
+                    180, 300, 250, 70, "easy/01_linear_path.txt"),
+                GameEngine.LevelTitle(
+                    180, 435, 250, 70, "easy/02_simple_fork.txt"),
+                GameEngine.LevelTitle(
+                    180, 570, 250, 70, "easy/03_basic_capacity.txt"),
+                GameEngine.LevelTitle(
+                    510, 300, 250, 70, "medium/01_dead_end_trap.txt"),
+                GameEngine.LevelTitle(
+                    510, 435, 250, 70, "medium/02_circular_loop.txt"),
+                GameEngine.LevelTitle(
+                    510, 570, 250, 70, "medium/03_priority_puzzle.txt"),
+                GameEngine.LevelTitle(
+                    840, 300, 250, 70, "hard/01_maze_nightmare.txt"),
+                GameEngine.LevelTitle(
+                    840, 435, 250, 70, "hard/02_capacity_hell.txt"),
+                GameEngine.LevelTitle(
+                    840, 570, 250, 70, "hard/03_ultimate_challenge.txt"),
+                GameEngine.LevelTitle(
+                    1170, 300, 250, 70,
+                    "challenger/01_the_impossible_dream.txt"),
+                GameEngine.LevelTitle(
+                    1500, 300, 250, 70, "custom/01_easy_1.txt"),
+                GameEngine.LevelTitle(
+                    1500, 435, 250, 70, "custom/02_easy_2.txt"),
+                GameEngine.LevelTitle(
+                    1500, 570, 250, 70, "custom/03_easy_3.txt"),
+                GameEngine.LevelTitle(
+                    1500, 705, 250, 70, "custom/04_medium_1.txt"),
+                GameEngine.LevelTitle(
+                    1500, 840, 250, 70, "custom/05_hard_1.txt")
+                                                ])
 
-        def update(self):
+        def update(self) -> None:
             self.group.update()
 
-        def draw(self, screen: pygame.Surface):
+        def draw(self, screen: pygame.Surface) -> None:
             self.group.draw(screen)
-
 
     class LevelTitle(pygame.sprite.Sprite):
         def __init__(self,
@@ -213,30 +286,13 @@ class GameEngine:
             W, H = self.textSurf.get_width(), self.textSurf.get_height()
             self.image.blit(self.textSurf, [width/2 - W/2, height/2 - H/2])
 
-        def new_network(self) -> None:
-            from srcs.parser import config_parser
-            from srcs.structs import Graph, Drone
-            Graph.full_reset()
-            Drone.full_reset()
-            path_to_file = f"maps/maps/{self.text}"
-            graph, infos, couple = config_parser(path_to_file)
-            network = Graph(graph, infos, couple)
-            # print("\033c")
-            nb_turns = network.solve_network()
-            print(network.graph())
-            print(f"Number of turns: {nb_turns}")
-            self.enable = not self.enable
-            GameEngine.infos = network.infos()
-            GameEngine.graph = network.graph()
-
-
         def update(self) -> None:
             width, height = self.image.get_width(), self.image.get_height()
             W, H = self.textSurf.get_width(), self.textSurf.get_height()
             if self.rect.collidepoint(pygame.mouse.get_pos()):
                 if pygame.mouse.get_pressed()[0] and not self.enable:
-                    self.new_network()
                     GameEngine.status = "load"
+                    GameEngine.level = self.text
                 pygame.draw.rect(self.image, (50, 201, 0),
                                  self.image.get_rect(),
                                  border_radius=20)
@@ -247,9 +303,9 @@ class GameEngine:
             else:
                 self.enable = False
                 pygame.draw.rect(self.image, (201, 50, 0),
-                                    self.image.get_rect(),
-                                    border_radius=20)
+                                 self.image.get_rect(),
+                                 border_radius=20)
                 pygame.draw.rect(self.image, (1, 0, 0),
-                                    self.image.get_rect(),
-                                    2, border_radius=20)
+                                 self.image.get_rect(),
+                                 2, border_radius=20)
                 self.image.blit(self.textSurf, [width/2 - W/2, height/2 - H/2])

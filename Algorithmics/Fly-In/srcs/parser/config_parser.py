@@ -73,5 +73,6 @@ def config_parser(filename: str) -> tuple[
         infos = nodes_params(couples, couple)
     return (graph, infos, couple)
 
+
 if __name__ == "__main__":
     config_parser("maps/maps/hard/03_ultimate_challenge.txt")

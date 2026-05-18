@@ -1,7 +1,11 @@
-class Drone:
+import pygame
+
+
+class Drone(pygame.sprite.Sprite):
     """Drone Docstring
     """
     drones: list["Drone"] = []
+    moving_drones: list["Drone"] = []
     max_paths: dict[str, tuple[int, int]] = dict()
     max_hubs: dict[str, tuple[int, int]] = dict()
 
@@ -12,11 +16,22 @@ class Drone:
             number (int): _description_
             start (str): _description_
         """
+        super().__init__()
         self.number: int = number
         self.path: list[str] = [start]
         self.restricted = False
         self.turns: int = 0
+        self.has_moved = False
         Drone.drones.append(self)
+
+    def init_image(self) -> None:
+        from srcs.game_engine import GameEngine
+        start = self.path[0]
+        self.image = pygame.image.load("srcs/drone.png")
+        start_gamehub = GameEngine.GameHub.get_hub(start)
+        rect = start_gamehub.rect
+        self.rect = (rect[0]+75, rect[1], rect[2], rect[3])
+        self.pos = (self.rect[0], self.rect[1])
 
     @classmethod
     def full_reset(cls) -> None:
@@ -24,6 +39,18 @@ class Drone:
         cls.max_hubs.clear()
         cls.max_paths.clear()
 
+    def move(self, number: int) -> None:
+        from srcs.game_engine.flyin_engine import GameEngine
+        previous_hub = GameEngine.GameHub.get_hub(self.path[-2])
+        current_hub = GameEngine.GameHub.get_hub(self.path[-1])
+        prev_rect = previous_hub.rect
+        curr_rect = current_hub.rect
+        x = int(self.pos[0] + ((curr_rect[0] - prev_rect[0]) * number) / 30)
+        y = int(self.pos[1] + ((curr_rect[1] - prev_rect[1]) * number) / 30)
+        self.rect = (x, y, self.rect[2], self.rect[3])
+        if number == 30:
+            self.has_moved = not self.has_moved
+            self.pos = (x, y)
 
     def best_choice(self) -> str:
         from srcs.structs import Graph, NextHubInfos
@@ -62,9 +89,14 @@ class Drone:
             self.path.append(next_hub.name)
             current_hub = next_hub
             return_string += f"D{self.number}-{current_hub.name} "
+            self.has_moved = True
         if current_hub.zone.value == 1:
             self.restricted = not self.restricted
         return return_string
+
+    @classmethod
+    def moving(cls) -> list["Drone"]:
+        return cls.moving_drones
 
     @classmethod
     def reset_turn_dicts(cls) -> None:

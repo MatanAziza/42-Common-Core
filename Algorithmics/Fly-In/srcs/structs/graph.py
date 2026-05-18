@@ -1,6 +1,4 @@
 from typing import Any
-import pygame
-import time
 from .hub import NextHubInfos, Hub, Zones
 from .drone import Drone
 from srcs.parser import graph_find_useless, graph_cleaner
@@ -41,10 +39,10 @@ class Graph:
         cls.start = ""
         cls.goal = ""
 
-    def infos(self):
+    def infos(self) -> dict[str, dict[str, Any]]:
         return self._true_infos.copy()
 
-    def graph(self):
+    def graph(self) -> dict[str, dict[str, int]]:
         return self._true_graph.copy()
 
     def _create_hubs(self, graph: dict[str, dict[str, int]]) -> list[Hub]:
@@ -119,19 +117,3 @@ class Graph:
             if is_valid:
                 valid_paths.append(path)
         return valid_paths.copy()
-
-    def solve_network(self) -> int:
-        goal: str = [n for n in self._graph if self.goal in n][0]
-        drones = Drone.drones
-        goal_hub = Graph.get_node(goal)
-        nb_turns: int = 0
-        with open("output.txt", "w") as file:
-            while len(goal_hub.drones) < len(Drone.drones):
-                nb_turns += 1
-                turn_string: str = ""
-                for drone in drones:
-                    turn_string += drone.best_choice()
-                Drone.reset_turn_dicts()
-                file.write(f"{turn_string[:-1]}\n") if "D" in turn_string else 0
-                print(f"Turn {nb_turns}: {turn_string}")
-        return nb_turns
