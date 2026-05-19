@@ -22,15 +22,21 @@ class Drone(pygame.sprite.Sprite):
         self.restricted = False
         self.turns: int = 0
         self.has_moved = False
+        self.purge = 2
         Drone.drones.append(self)
 
     def init_image(self) -> None:
         from srcs.game_engine import GameEngine
         start = self.path[0]
         self.image = pygame.image.load("srcs/drone.png")
+        self.font = pygame.font.SysFont("Comic Sans MS", 23)
         start_gamehub = GameEngine.GameHub.get_hub(start)
         rect = start_gamehub.rect
         self.rect = (rect[0]+75, rect[1], rect[2], rect[3])
+        self.textSurf = self.font.render(str(self.number),
+                                         False, (255, 255, 255))
+        W, H = self.textSurf.get_width(), self.textSurf.get_height()
+        self.image.blit(self.textSurf, [15 - W/2, 15 - H/2])
         self.pos = (self.rect[0], self.rect[1])
 
     @classmethod
@@ -90,8 +96,10 @@ class Drone(pygame.sprite.Sprite):
             current_hub = next_hub
             return_string += f"D{self.number}-{current_hub.name} "
             self.has_moved = True
-        if current_hub.zone.value == 1:
+            self.purge = 2
+        if current_hub.zone.value == 1 and self.purge > 0:
             self.restricted = not self.restricted
+            self.purge -= 1
         return return_string
 
     @classmethod

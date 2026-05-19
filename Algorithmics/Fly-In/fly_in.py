@@ -9,5 +9,6 @@ def main() -> None:
     game_engine = GameEngine(1920, 1080)
     game_engine.game_loop()
 
+
 if __name__ == "__main__":
     main()

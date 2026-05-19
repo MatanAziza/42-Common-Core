@@ -19,7 +19,9 @@ class GameEngine:
         self.clock = pygame.time.Clock()
         self.status = "title"
         self.can_solve = True
+        self.solved = False
         self.timer_solve: float = 0
+        self.turns = 0
         GameEngine.screen = pygame.display.set_mode((width, height))
 
     def game_loop(self) -> None:
@@ -38,15 +40,19 @@ class GameEngine:
                     for drone in Drone.drones:
                         drone.init_image()
                         group.add(drone)
+                    group.add(GameEngine.Turns())
                     GameEngine.status = "level"
                 if GameEngine.status == "level":
-                    if keys[pygame.K_ESCAPE]:
+                    if keys[pygame.K_ESCAPE] or self.solved:
                         group = GameEngine.MenuScene()
+                        GameEngine.Turns.turn = 0
+                        self.solved = False
                         break
                     if time.time() - self.timer_solve >= 1.5:
                         self.can_solve = not self.can_solve
                         self.timer_solve = 0
                     if keys[pygame.K_SPACE] and self.can_solve:
+                        GameEngine.Turns.turn += 1
                         self.solve_turn()
             if GameEngine.status != "load":
                 self.screen.fill((50, 50, 101))
@@ -56,8 +62,9 @@ class GameEngine:
             moving = [drone
                       for drone in Drone.drones
                       if drone.has_moved]
-            for drone in moving:
-                drone.move(int((time.time() - self.timer_solve)*20))
+            if moving:
+                for drone in moving:
+                    drone.move(int((time.time() - self.timer_solve)*20))
         pygame.quit()
 
     def solve_turn(self) -> None:
@@ -66,6 +73,8 @@ class GameEngine:
             turn_string += drone.best_choice()
         Drone.reset_turn_dicts()
         print(f"{turn_string}")
+        if not turn_string:
+            self.solved = True
         self.can_solve = not self.can_solve
         self.timer_solve = time.time()
 
@@ -106,6 +115,29 @@ class GameEngine:
                              (start_x, start_y),
                              (end_x, end_y),
                              10)
+
+    class Turns(pygame.sprite.Sprite):
+        turn = 0
+
+        def __init__(self):
+            super().__init__()
+            self.image = pygame.Surface((200, 150))
+            self.image.set_colorkey('black')
+            self.image.convert_alpha()
+            self.image.fill((0, 0, 0))
+            self.rect = self.image.get_rect()
+            self.font = pygame.font.SysFont("Comic Sans MS", 50)
+            self.textSurf = self.font.render(f"Turn: {GameEngine.Turns.turn}",
+                                             False, (255, 255, 255))
+            W, H = self.textSurf.get_width(), self.textSurf.get_height()
+            self.image.blit(self.textSurf, [W/2, H/2])
+
+        def update(self) -> None:
+            self.image.fill((0, 0, 0))
+            self.textSurf = self.font.render(f"Turn: {GameEngine.Turns.turn}",
+                                             False, (255, 255, 255))
+            W, H = self.textSurf.get_width(), self.textSurf.get_height()
+            self.image.blit(self.textSurf, [W/2, H/2])
 
     class GameHub(pygame.sprite.Sprite):
         hubs: list["GameEngine.GameHub"] = []
@@ -209,7 +241,7 @@ class GameEngine:
                     list_hubs.insert(0,
                                      GameEngine.GameConnection(hub_1.rect,
                                                                hub_2.rect))
-            self.group = pygame.sprite.Group(list_hubs)
+            self.group = pygame.sprite.Group(list_hubs)  # type: ignore
 
         def update(self) -> None:
             self.group.update()
