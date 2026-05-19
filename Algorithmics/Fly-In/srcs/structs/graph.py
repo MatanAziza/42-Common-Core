@@ -24,13 +24,14 @@ class Graph:
                                      graph, infos, to_remove)
         Graph.nodes = self._create_hubs(infos)
         self._narc_nodes(graph)
-        Graph.paths = path_finding([self.start], self.goal, graph)
-        S = Graph.get_node(self.start)
-        Drone.drones.clear()
-        for i in range(S.max_drones):
-            S.drones.append(Drone(i, self.start))
-        self._graph = graph
-        self._infos = infos
+        if graph:
+            Graph.paths = path_finding([self.start], self.goal, graph)
+            S = Graph.get_node(self.start)
+            Drone.drones.clear()
+            for i in range(S.max_drones):
+                S.drones.append(Drone(i, self.start))
+            self._graph = graph
+            self._infos = infos
 
     @classmethod
     def full_reset(cls) -> None:

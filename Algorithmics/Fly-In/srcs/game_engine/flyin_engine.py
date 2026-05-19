@@ -28,27 +28,38 @@ class GameEngine:
         running = True
         group: GameEngine.Scene = GameEngine.MenuScene()
         while running:
+            moving = [drone
+                      for drone in Drone.drones
+                      if drone.has_moved]
+            if moving:
+                for drone in moving:
+                    drone.move(int((time.time() - self.timer_solve)*20))
             events = pygame.event.get()
             keys = pygame.key.get_pressed()
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
-                if GameEngine.status == "load":
-                    self.new_network()
-                    group = GameEngine.LevelScene(GameEngine.infos,
-                                                  GameEngine.graph)
-                    for drone in Drone.drones:
-                        drone.init_image()
-                        group.add(drone)
-                    group.add(GameEngine.Turns())
-                    GameEngine.status = "level"
+                try:
+                    if GameEngine.status == "load":
+                        self.new_network()
+                        group = GameEngine.LevelScene(GameEngine.infos,
+                                                    GameEngine.graph)
+                        for drone in Drone.drones:
+                            drone.init_image()
+                            group.add(drone)
+                        group.add(GameEngine.Turns())
+                        GameEngine.status = "level"
+                except ValueError:
+                    print("Config file not valid. Please try another file"
+                      " or fix this one.")
+                    GameEngine.status = "title"
                 if GameEngine.status == "level":
                     if keys[pygame.K_ESCAPE] or self.solved:
                         group = GameEngine.MenuScene()
                         GameEngine.Turns.turn = 0
                         self.solved = False
                         break
-                    if time.time() - self.timer_solve >= 1.5:
+                    if time.time() - self.timer_solve >= 1:
                         self.can_solve = not self.can_solve
                         self.timer_solve = 0
                     if keys[pygame.K_SPACE] and self.can_solve:
@@ -59,12 +70,6 @@ class GameEngine:
                 group.update()
                 group.draw(self.screen)
                 pygame.display.flip()
-            moving = [drone
-                      for drone in Drone.drones
-                      if drone.has_moved]
-            if moving:
-                for drone in moving:
-                    drone.move(int((time.time() - self.timer_solve)*20))
         pygame.quit()
 
     def solve_turn(self) -> None:
@@ -119,7 +124,7 @@ class GameEngine:
     class Turns(pygame.sprite.Sprite):
         turn = 0
 
-        def __init__(self):
+        def __init__(self) -> None:
             super().__init__()
             self.image = pygame.Surface((200, 150))
             self.image.set_colorkey('black')
@@ -246,7 +251,7 @@ class GameEngine:
         def update(self) -> None:
             self.group.update()
 
-        def add(self, args: Drone) -> None:
+        def add(self, args: pygame.sprite.Sprite) -> None:
             self.group.add(args)
 
         def draw(self, screen: pygame.Surface) -> None:

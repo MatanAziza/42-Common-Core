@@ -51,10 +51,10 @@ class Drone(pygame.sprite.Sprite):
         current_hub = GameEngine.GameHub.get_hub(self.path[-1])
         prev_rect = previous_hub.rect
         curr_rect = current_hub.rect
-        x = int(self.pos[0] + ((curr_rect[0] - prev_rect[0]) * number) / 30)
-        y = int(self.pos[1] + ((curr_rect[1] - prev_rect[1]) * number) / 30)
+        x = int(self.pos[0] + ((curr_rect[0] - prev_rect[0]) * number) / 15)
+        y = int(self.pos[1] + ((curr_rect[1] - prev_rect[1]) * number) / 15)
         self.rect = (x, y, self.rect[2], self.rect[3])
-        if number == 30:
+        if number == 15:
             self.has_moved = not self.has_moved
             self.pos = (x, y)
 

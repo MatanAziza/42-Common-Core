@@ -6,6 +6,8 @@ def graph_find_useless(start: str,
                        graph: dict[str, dict[str, int]],
                        infos: dict[str, dict[str, Any]]) -> set[str]:
     useless: list[str] = []
+    if not graph:
+        return set()
     for node in graph[start]:
         points = set(graph[node])
         while True:
