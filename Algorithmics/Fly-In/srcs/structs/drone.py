@@ -26,6 +26,8 @@ class Drone(pygame.sprite.Sprite):
         Drone.drones.append(self)
 
     def init_image(self) -> None:
+        """Creates the sprite for the drone to move in the engine
+        """
         from srcs.game_engine import GameEngine
         start = self.path[0]
         self.image = pygame.image.load("srcs/drone.png")
@@ -41,11 +43,18 @@ class Drone(pygame.sprite.Sprite):
 
     @classmethod
     def full_reset(cls) -> None:
+        """Deletes all drones/infos to reset for a new graph
+        """
         cls.drones.clear()
         cls.max_hubs.clear()
         cls.max_paths.clear()
 
     def move(self, number: int) -> None:
+        """Moves the drone according to the turn it in and the frame it's in
+
+        Args:
+            number (int): _description_
+        """
         from srcs.game_engine.flyin_engine import GameEngine
         previous_hub = GameEngine.GameHub.get_hub(self.path[-2])
         current_hub = GameEngine.GameHub.get_hub(self.path[-1])
@@ -59,6 +68,12 @@ class Drone(pygame.sprite.Sprite):
             self.pos = (x, y)
 
     def best_choice(self) -> str:
+        """Returns the hub the drone went to if it moved, and choose
+        either to stay put, go as intended or change path
+
+        Returns:
+            str: _description_
+        """
         from srcs.structs import Graph, NextHubInfos
         return_string = ""
         if self.path[-1] == Graph.goal:
@@ -104,10 +119,18 @@ class Drone(pygame.sprite.Sprite):
 
     @classmethod
     def moving(cls) -> list["Drone"]:
+        """returns all moving drones
+
+        Returns:
+            _type_: _description_
+        """
         return cls.moving_drones
 
     @classmethod
     def reset_turn_dicts(cls) -> None:
+        """when all drones moved, is called to reset path limits
+        and update hubs storage
+        """
         from srcs.structs import Graph
         for key, value in Drone.max_paths.items():
             Drone.max_paths.update({key: (0, value[1])})
@@ -116,6 +139,12 @@ class Drone(pygame.sprite.Sprite):
             Drone.max_hubs.update({key: (len(new_hub.drones), value[1])})
 
     def better_path(self) -> list[str]:
+        """Calculates if waiting is worth or if its better
+        to change path
+
+        Returns:
+            list[str]: _description_
+        """
         from srcs.structs import Graph
         from srcs.path_finder import path_turns, path_avg_drone
         from srcs.path_finder import path_priorities
@@ -152,6 +181,15 @@ class Drone(pygame.sprite.Sprite):
         return self.path + better_paths[0]
 
     def get_drone_index(self, basic_path: list[str]) -> tuple[int, int]:
+        """Returns position of drone based on how much are in front of it
+        on its current path, and how many are going after it.
+
+        Args:
+            basic_path (list[str]): _description_
+
+        Returns:
+            tuple[int, int]: _description_
+        """
         from srcs.structs import Graph
         next_hub = Graph.get_node(basic_path[0])
         incoming_hubs = [connection

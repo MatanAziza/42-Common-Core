@@ -3,6 +3,8 @@ import sys
 
 
 def main() -> None:
+    """Main function
+    """
     if len(sys.argv) > 2:
         print("Too much arguments.\nRun only python3 fly_in.py.")
         sys.exit(1)

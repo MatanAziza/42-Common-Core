@@ -5,6 +5,11 @@ from srcs.parser import graph_find_useless, graph_cleaner
 
 
 class Graph:
+    """Create a graph storing all its hubs
+
+    Returns:
+        _type_: _description_
+    """
     nodes: list[Hub] = []
     paths: list[list[str]] = []
     start: str = ""
@@ -14,6 +19,13 @@ class Graph:
                  graph: dict[str, dict[str, int]],
                  infos: dict[str, dict[str, Any]],
                  couple: tuple[str, str]):
+        """instantiates a graph
+
+        Args:
+            graph (dict[str, dict[str, int]]): _description_
+            infos (dict[str, dict[str, Any]]): _description_
+            couple (tuple[str, str]): _description_
+        """
         from srcs.path_finder import path_finding
         self.start, self.goal = couple
         Graph.start, Graph.goal = couple
@@ -35,15 +47,27 @@ class Graph:
 
     @classmethod
     def full_reset(cls) -> None:
+        """Reset all that is contained in a graph
+        """
         cls.nodes.clear()
         cls.paths.clear()
         cls.start = ""
         cls.goal = ""
 
     def infos(self) -> dict[str, dict[str, Any]]:
+        """returns original infos for flyin engine
+
+        Returns:
+            dict[str, dict[str, Any]]: _description_
+        """
         return self._true_infos.copy()
 
     def graph(self) -> dict[str, dict[str, int]]:
+        """returns original graph for flyin engine
+
+        Returns:
+            dict[str, dict[str, int]]: _description_
+        """
         return self._true_graph.copy()
 
     def _create_hubs(self, graph: dict[str, dict[str, int]]) -> list[Hub]:
@@ -106,6 +130,14 @@ class Graph:
 
     @classmethod
     def get_paths(cls, start: list[str]) -> list[list[str]]:
+        """returns a list of path starting with start parameter
+
+        Args:
+            start (list[str]): _description_
+
+        Returns:
+            list[list[str]]: _description_
+        """
         valid_paths: list[list[str]] = []
         for path in cls.paths:
             index: int = 0

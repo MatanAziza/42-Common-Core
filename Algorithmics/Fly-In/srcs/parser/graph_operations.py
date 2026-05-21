@@ -5,6 +5,17 @@ def graph_find_useless(start: str,
                        goal: str,
                        graph: dict[str, dict[str, int]],
                        infos: dict[str, dict[str, Any]]) -> set[str]:
+    """Returns all useless hubs (not leading to the goal)
+
+    Args:
+        start (str): _description_
+        goal (str): _description_
+        graph (dict[str, dict[str, int]]): _description_
+        infos (dict[str, dict[str, Any]]): _description_
+
+    Returns:
+        set[str]: _description_
+    """
     useless: list[str] = []
     if not graph:
         return set()
@@ -31,6 +42,19 @@ def graph_cleaner(start: str,
                   to_remove: set[str] = set()
                   ) -> tuple[dict[str, dict[str, int]],
                              dict[str, dict[str, Any]]]:
+    """Cleans the graph of all useless hubs (dead ends, hubs not
+    leading to the goal)
+
+    Args:
+        start (str): _description_
+        end (str): _description_
+        nodes (dict[str, dict[str, int]]): _description_
+        infos (dict[str, dict[str, Any]]): _description_
+        to_remove (set[str], optional): _description_. Defaults to set().
+
+    Returns:
+        tuple[dict[str, dict[str, int]], dict[str, dict[str, Any]]]:
+    """
     nodes = nodes.copy()
     graph = dict({key: {link: nodes[key][link]
                         for link in value.keys()}

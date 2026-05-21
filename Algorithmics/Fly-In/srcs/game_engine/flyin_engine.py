@@ -6,6 +6,11 @@ from srcs.structs.drone import Drone
 
 
 class GameEngine:
+    """Fly-In Engine, generate a pygame instance to visualize drone travels
+
+    Returns:
+        An instance of GameEngine
+    """
     screen: pygame.Surface
     network: Graph
     status: str = "title"
@@ -14,6 +19,12 @@ class GameEngine:
     graph: dict[str, dict[str, int]] = dict()
 
     def __init__(self, width: int, height: int) -> None:
+        """Initiates the GameEngine
+
+        Args:
+            width (int):
+            height (int):
+        """
         pygame.init()
         pygame.display.set_caption("Fly-In")
         self.clock = pygame.time.Clock()
@@ -25,6 +36,9 @@ class GameEngine:
         GameEngine.screen = pygame.display.set_mode((width, height))
 
     def game_loop(self) -> None:
+        """Manages the game loop by doing multiple status check and
+        updating the screen
+        """
         running = True
         group: GameEngine.Scene = GameEngine.MenuScene()
         while running:
@@ -43,7 +57,7 @@ class GameEngine:
                     if GameEngine.status == "load":
                         self.new_network()
                         group = GameEngine.LevelScene(GameEngine.infos,
-                                                    GameEngine.graph)
+                                                      GameEngine.graph)
                         for drone in Drone.drones:
                             drone.init_image()
                             group.add(drone)
@@ -51,7 +65,7 @@ class GameEngine:
                         GameEngine.status = "level"
                 except ValueError:
                     print("Config file not valid. Please try another file"
-                      " or fix this one.")
+                          " or fix this one.")
                     GameEngine.status = "title"
                 if GameEngine.status == "level":
                     if keys[pygame.K_ESCAPE] or self.solved:
@@ -73,6 +87,8 @@ class GameEngine:
         pygame.quit()
 
     def solve_turn(self) -> None:
+        """When space is pressed, makes all drones moves (if possible)
+        """
         turn_string: str = ""
         for drone in Drone.drones:
             turn_string += drone.best_choice()
@@ -84,6 +100,8 @@ class GameEngine:
         self.timer_solve = time.time()
 
     def new_network(self) -> None:
+        """When a level title is clocked, a new graph is created
+        """
         from srcs.parser import config_parser
         from srcs.structs import Graph, Drone
         Graph.full_reset()
@@ -101,7 +119,18 @@ class GameEngine:
         GameEngine.graph = network.graph()
 
     class GameConnection(pygame.sprite.Sprite):
+        """Pygame sprite representing a connection between 2 vertices
+
+        Args:
+            pygame (_type_):
+        """
         def __init__(self, hub_1: pygame.Rect, hub_2: pygame.Rect):
+            """Initiates a connection sprite
+
+            Args:
+                hub_1 (pygame.Rect):_description_
+                hub_2 (pygame.Rect):_description_
+            """
             super().__init__()
             x = abs(hub_1.x - hub_2.x) + 10
             y = abs(hub_1.y - hub_2.y) + 10
@@ -122,9 +151,16 @@ class GameEngine:
                              10)
 
     class Turns(pygame.sprite.Sprite):
+        """Manages the display of turns passed when drones move
+
+        Args:
+            pygame (_type_):
+        """
         turn = 0
 
         def __init__(self) -> None:
+            """Initiates the turn display
+            """
             super().__init__()
             self.image = pygame.Surface((200, 150))
             self.image.set_colorkey('black')
@@ -138,6 +174,8 @@ class GameEngine:
             self.image.blit(self.textSurf, [W/2, H/2])
 
         def update(self) -> None:
+            """Updates the number of turns when space is pressed
+            """
             self.image.fill((0, 0, 0))
             self.textSurf = self.font.render(f"Turn: {GameEngine.Turns.turn}",
                                              False, (255, 255, 255))
@@ -145,6 +183,14 @@ class GameEngine:
             self.image.blit(self.textSurf, [W/2, H/2])
 
     class GameHub(pygame.sprite.Sprite):
+        """Pygame sprite representing a hub/vertex
+
+        Args:
+            pygame (_type_):
+
+        Returns:
+            _type_:
+        """
         hubs: list["GameEngine.GameHub"] = []
 
         def __init__(self, coord: tuple[int, int],
@@ -152,6 +198,15 @@ class GameEngine:
                      min_coo: tuple[int, int],
                      color: str,
                      name: str):
+            """Instantiates a vertex
+
+            Args:
+                coord (tuple[int, int]):_description_
+                max_coo (tuple[int, int]):_description_
+                min_coo (tuple[int, int]):_description_
+                color (str):_description_
+                name (str):_description_
+            """
             super().__init__()
             self.colors: dict[str, tuple[int, int, int]] = {
                 "green": (0, 128, 0),
@@ -200,6 +255,14 @@ class GameEngine:
 
         @classmethod
         def get_hub(cls, name: str) -> "GameEngine.GameHub":
+            """Returns a hub to get its position for drone movements
+
+            Args:
+                name (str):
+
+            Returns:
+                GameEngine.GameHub:
+            """
             lst = []
             for hub in cls.hubs:
                 if hub.name == name:
@@ -208,23 +271,45 @@ class GameEngine:
 
         @classmethod
         def clear_hubs(cls) -> None:
+            """Destroys all hubs existing
+            """
             cls.hubs.clear()
 
     class Scene(ABC):
         def __init__(self) -> None:
+            """instantiates a scene
+            """
             pass
 
         @abstractmethod
         def update(self) -> None:
+            """abstract
+            """
             pass
 
         @abstractmethod
         def draw(self, screen: pygame.Surface) -> None:
+            """abstract
+
+            Args:
+                screen (pygame.Surface):_description_
+            """
             pass
 
     class LevelScene(Scene):
+        """Manage a scene with all GameConnection and GameHub
+
+        Args:
+            Scene (_type_):
+        """
         def __init__(self, infos: dict[str, dict[str, str]],
                      graph: dict[str, dict[str, int]]):
+            """instantiates a scene
+
+            Args:
+                infos (dict[str, dict[str, str]]):
+                graph (dict[str, dict[str, int]]):
+            """
             coordinates = [key["coordinates"] for key in infos.values()]
             max_x = max([int(coord[0]) for coord in coordinates])
             max_y = max([int(coord[1]) for coord in coordinates])
@@ -249,16 +334,35 @@ class GameEngine:
             self.group = pygame.sprite.Group(list_hubs)  # type: ignore
 
         def update(self) -> None:
+            """update each element of the group
+            """
             self.group.update()
 
         def add(self, args: pygame.sprite.Sprite) -> None:
+            """adds one element to the group
+
+            Args:
+                args (pygame.sprite.Sprite):
+            """
             self.group.add(args)
 
         def draw(self, screen: pygame.Surface) -> None:
+            """draws the groupd on the screen
+
+            Args:
+                screen (pygame.Surface):
+            """
             self.group.draw(screen)
 
     class MenuScene(Scene):
+        """Manages the Menu scene with all levels clickable buttons
+
+        Args:
+            Scene (_type_):
+        """
         def __init__(self) -> None:
+            """instantiates the menu scene
+            """
             self.group = pygame.sprite.Group([
                 GameEngine.LevelTitle(
                     180, 300, 250, 70, "easy/01_linear_path.txt"),
@@ -294,16 +398,37 @@ class GameEngine:
                                                 ])
 
         def update(self) -> None:
+            """updates the menu if the mouse hover a button
+            """
             self.group.update()
 
         def draw(self, screen: pygame.Surface) -> None:
+            """draws the menu on the screen
+
+            Args:
+                screen (pygame.Surface):
+            """
             self.group.draw(screen)
 
     class LevelTitle(pygame.sprite.Sprite):
+        """A button for one level
+
+        Args:
+            pygame (_type_):
+        """
         def __init__(self,
                      x: int, y: int,
                      width: int, height: int,
                      title: str) -> None:
+            """Instantiates a button
+
+            Args:
+                x (int):
+                y (int):
+                width (int):
+                height (int):
+                title (str):
+            """
             super().__init__()
             self.font = pygame.font.SysFont("Comic Sans MS", 30)
             self.image = pygame.Surface((width, height))
@@ -324,6 +449,8 @@ class GameEngine:
             self.image.blit(self.textSurf, [width/2 - W/2, height/2 - H/2])
 
         def update(self) -> None:
+            """Update the button color/action if its hovered.clicked
+            """
             width, height = self.image.get_width(), self.image.get_height()
             W, H = self.textSurf.get_width(), self.textSurf.get_height()
             if self.rect.collidepoint(pygame.mouse.get_pos()):
