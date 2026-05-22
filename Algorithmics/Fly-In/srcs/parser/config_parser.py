@@ -89,7 +89,7 @@ class ParsingError(Exception):
     Args:
         Exception (_type_): _description_
     """
-    def __init__(self, message: str):
+    def __init__(self, message: str = ""):
         super().__init__(message)
 
 
@@ -102,18 +102,6 @@ def config_checker(filename: str) -> bool:
 
     Raises:
         ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
-        ParsingError: _description_
         IndexError: _description_
 
     Returns:
@@ -122,7 +110,8 @@ def config_checker(filename: str) -> bool:
     try:
         with open(filename, "r") as file:
             lines = file.read().split('\n')
-            lines = [line for line in lines if not line.startswith("#")]
+            lines = [line.strip() for line in lines
+                     if not line.startswith("#")]
             if not lines[0].startswith("nb_drones:"):
                 raise ParsingError("Config does not start with number"
                                    "of drones.")
@@ -164,9 +153,20 @@ def config_checker(filename: str) -> bool:
                 if "-".join(elems) in connections:
                     raise ParsingError("Connection already mentionned in "
                                        "the list. Please avoid repetitions")
+            meta_hubs: list[list[str]] = []
+            for hub in hubs_infos:
+                try:
+                    meta_hubs.append(
+                            hub.split(" [")[1].strip("]").split()
+                                            )
+                    if meta_hubs == [[]]:
+                        raise ParsingError()
+                except IndexError:
+                    if len(hub.split()) > 3:
+                        raise ParsingError()
+                except ParsingError:
+                    raise ParsingError("Empty metadata for hub")
             try:
-                meta_hubs = [hub.split(" [")[1].strip("]").split()
-                             for hub in hubs_infos]
                 for meta in meta_hubs:
                     for data in meta:
                         infos = data.split("=")
@@ -191,8 +191,24 @@ def config_checker(filename: str) -> bool:
                         if (infos[0] == "max_drones" and
                            "-" in infos[1]):
                             raise ParsingError("Max drone can't be negative")
-                meta_connections = [hub.split(" [")[1].strip("]").split()
-                                    for hub in connections_infos]
+            except IndexError:
+                raise IndexError("Missing metadata for 1 or more hubs.")
+            meta_connections: list[list[str]] = []
+            for hub in connections_infos:
+                try:
+                    meta_connections.append(
+                            hub.split(" [")[1].strip("]").split()
+                                            )
+                    if meta_connections == [[]]:
+                        raise ParsingError()
+                except IndexError:
+                    if len(hub.split()) > 1:
+                        raise ParsingError()
+                except ParsingError:
+                    raise ParsingError("Empty metadata for connection")
+            try:
+                if meta_connections == [["error"]]:
+                    raise IndexError
                 for meta in meta_connections:
                     for data in meta:
                         infos = data.split("=")
@@ -203,7 +219,7 @@ def config_checker(filename: str) -> bool:
                             raise ParsingError("Max link capacity can't"
                                                " be negative")
             except IndexError:
-                raise IndexError("Missing metadata for 1 or more hubs.")
+                raise IndexError("Missing metadata for 1 or more connection.")
             return True
     except FileNotFoundError:
         print("File does not exists. Please provide a valid file.")
@@ -235,6 +251,7 @@ def config_parser(filename: str) -> tuple[
         return ({}, {}, ("", ""))
     with open(filename, "r") as file:
         lines = file.read().split("\n")
+        lines = [line.strip() for line in lines]
         couples = [line.split(": ")
                    for line in lines
                    if not line.startswith("#") and line]
