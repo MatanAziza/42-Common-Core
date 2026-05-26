@@ -67,6 +67,9 @@ class GameEngine:
                     print("Config file not valid. Please try another file"
                           " or fix this one.")
                     GameEngine.status = "title"
+                except KeyError:
+                    print("Config file connection not leading to the goal.")
+                    GameEngine.status = "title"
                 if GameEngine.status == "level":
                     if keys[pygame.K_ESCAPE] or self.solved:
                         group = GameEngine.MenuScene()
@@ -94,7 +97,8 @@ class GameEngine:
             turn_string += drone.best_choice()
         Drone.reset_turn_dicts()
         print(f"{turn_string}")
-        if not turn_string:
+        goal = Graph.get_node(Graph.goal)
+        if not turn_string and len(goal.drones) >= goal.max_drones:
             self.solved = True
         self.can_solve = not self.can_solve
         self.timer_solve = time.time()
