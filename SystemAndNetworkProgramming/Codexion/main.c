@@ -11,34 +11,78 @@
 /* ************************************************************************** */
 
 #include "header.h"
+#include "structs.h"
+#include <pthread.h>
+#include <unistd.h>
 
 void	*print_name(void *arg){
-	int	*number;
+	t_coder	*coder;
+	int		max;
+	int		left;
+	int		right;
 
-	number = (int *)arg;
-	printf("I'm a process and my ID is %d\n", *number);
+	coder = (t_coder *)arg;
+	max = coder->nb_threads;
+	left = (coder->id + max - 1) % max;
+	right = coder->id;
+	if (right < left){
+		right += left;
+		left = right - left;
+		right -= left;
+	}
+	printf("I'm a process, my ID is %d, ", coder->id);
+	printf("I want dongles %d and ", right);
+	printf("%d.\n", left);
+	while (coder->nb_compile < coder->max_compile){
+		pthread_mutex_lock(&coder->dongles[left].mutexDongle);
+		pthread_mutex_lock(&coder->dongles[right].mutexDongle);
+		while (!coder->dongles[left].available)
+			pthread_cond_wait(&coder->dongles[left].condDongle, &coder->dongles[left].mutexDongle);
+		coder->dongles[left].available = 0;
+		while (!coder->dongles[right].available)
+			pthread_cond_wait(&coder->dongles[right].condDongle, &coder->dongles[right].mutexDongle);
+		coder->dongles[right].available = 0;
+		coder->nb_compile++;
+		printf("Nb of compiles for Thread %d: %d\n", coder->id, coder->nb_compile);
+		usleep(1000000);
+		coder->dongles[right].available = 1;
+		coder->dongles[left].available = 1;
+		pthread_cond_signal(&coder->dongles[left].condDongle);
+		pthread_cond_signal(&coder->dongles[right].condDongle);
+		pthread_mutex_unlock(&coder->dongles[left].mutexDongle);
+		pthread_mutex_unlock(&coder->dongles[right].mutexDongle);
+		usleep(1000000);
+	}
 	return NULL;
 }
 
 int	main(int argc, char **argv){
-	int			nb_thread;
+	t_data		data;
+	int			nb_threads;
 	pthread_t	*threads;
-	int			*ids;
-	int			i;
+	int		i;
 
-	nb_thread = atoi(argv[argc - 1]);
-	printf("Nb threads: %d\n", nb_thread);
-	threads = malloc(sizeof(pthread_t) * nb_thread);
-	ids = malloc(sizeof(int) * (nb_thread + 1));
+	if (argc != 9)
+		return (0 * printf("Wrong number of args.\n"));
+	if (parse_check(argv))
+		return (0 * printf("Wrong format of args.\n"));
+	nb_threads = atoi(argv[1]);
+	data.dongles = malloc(sizeof(struct s_dongle) * nb_threads);
+	data.coders = malloc(sizeof(struct s_coder) * nb_threads);
+	parser(argv, &data);
+	printf("Dongles créés: %d\n", nb_threads);
 	i = 0;
-	while (i < nb_thread){
-		ids[i] = i;
-		pthread_create(&threads[i], NULL, print_name, (void *)&ids[i]);
+	threads = malloc(sizeof(pthread_t) * nb_threads);
+	while (i < nb_threads){
+		data.coders[i].nb_threads = nb_threads;
+		pthread_create(&threads[i], NULL, print_name, &data.coders[i]);
 		i++;
 	}
 	i = 0;
-	usleep(1000000);
-	while (i < nb_thread)
-		pthread_join(threads[i++], NULL);
+	while (i < nb_threads){
+		pthread_join(threads[i], NULL);
+		i++;
+	}
+
 	return (0);
 }

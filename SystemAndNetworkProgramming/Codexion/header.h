@@ -20,6 +20,9 @@
 # include <string.h>
 # include "structs.h"
 
-int	free_atoied(int	*atoied);
+int		free_atoied(int	*atoied);
+void	parser(char **args, t_data	*p_data);
+int		parse_check(char **argv);
+void	fill_dongle(t_dongle *dongle, int id, int cd);
 
 #endif
