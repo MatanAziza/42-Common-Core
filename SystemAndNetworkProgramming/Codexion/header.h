@@ -23,6 +23,7 @@
 int		free_atoied(int	*atoied);
 void	parser(char **args, t_data	*p_data);
 int		parse_check(char **argv);
-void	fill_dongle(t_dongle *dongle, int id, int cd);
+void	fill_dongle(t_dongle *dongle, int cd);
+void	free_data(t_data data);
 
 #endif

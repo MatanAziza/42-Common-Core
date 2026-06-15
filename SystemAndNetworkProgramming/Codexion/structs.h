@@ -14,7 +14,8 @@
 # define STRUCTS_H
 
 # include <bits/pthreadtypes.h>
-enum					CoderState
+
+enum					e_CoderState
 {
 	COMPILING,
 	DEBUGGING,
@@ -25,7 +26,7 @@ enum					CoderState
 typedef struct s_coder
 {
 	int					id;
-	enum CoderState		state;
+	enum e_CoderState	state;
 	int					burnout_time;
 	int					compile_time;
 	int					debug_time;
@@ -36,13 +37,26 @@ typedef struct s_coder
 	struct s_dongle		*dongles;
 }						t_coder;
 
+typedef struct s_node
+{
+	int					thread_id;
+	int					last_compile;
+	int					burnout_time;
+	struct s_node		*next;
+}						t_node;
+
+typedef struct s_queue
+{
+	struct s_node		*head;
+}						t_queue;
+
 typedef struct s_dongle
 {
 	int					available;
 	int					cooldown;
 	int					timer;
-	pthread_mutex_t		mutexDongle;
-	pthread_cond_t		condDongle;
+	pthread_mutex_t		mutex_dongle;
+	pthread_cond_t		cond_dongle;
 }						t_dongle;
 
 typedef struct s_data

@@ -12,7 +12,14 @@
 
 #include "header.h"
 
-int	free_atoied(int	*atoied){
+int	free_atoied(int *atoied)
+{
 	free(atoied);
 	return (1);
+}
+
+void	free_data(t_data data)
+{
+	free(data.coders);
+	free(data.dongles);
 }
