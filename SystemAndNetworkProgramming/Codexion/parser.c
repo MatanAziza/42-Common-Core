@@ -43,11 +43,13 @@ void	fill_coder(t_coder *coder, int id, int *values)
 void	fill_dongle(t_dongle *dongle, int cd)
 {
 	dongle->available = 1;
+	dongle->to_who = -1;
 	dongle->cooldown = cd;
 	dongle->timer = 0;
 	pthread_mutex_init(&dongle->mutex_dongle, NULL);
 	pthread_cond_init(&dongle->cond_dongle, NULL);
 }
+
 
 int	parse_check(char **argv)
 {
@@ -65,7 +67,7 @@ int	parse_check(char **argv)
 	return (0);
 }
 
-void	parser(char **args, t_data *data)
+void	filler(char **args, t_data *data)
 {
 	int	*atoied;
 	int	i;
@@ -80,11 +82,14 @@ void	parser(char **args, t_data *data)
 	i = 0;
 	data->dongles = malloc(sizeof(struct s_dongle) * atoied[0]);
 	data->coders = malloc(sizeof(struct s_coder) * atoied[0]);
+	data->queues = malloc(sizeof(struct s_queue) * atoied[0]);
 	while (i < atoied[0])
 	{
 		fill_dongle(&data->dongles[i], atoied[6]);
 		fill_coder(&data->coders[i], i, atoied);
+		data->queues->head = NULL;
 		data->coders[i].dongles = &data->dongles[0];
+		data->coders[i].queues = &data->queues[0];
 		i++;
 	}
 	free(atoied);

@@ -35,6 +35,7 @@ typedef struct s_coder
 	int					nb_threads;
 	int					max_compile;
 	struct s_dongle		*dongles;
+	struct s_queue		*queues;
 }						t_coder;
 
 typedef struct s_node
@@ -53,6 +54,7 @@ typedef struct s_queue
 typedef struct s_dongle
 {
 	int					available;
+	int					to_who;
 	int					cooldown;
 	int					timer;
 	pthread_mutex_t		mutex_dongle;
@@ -63,6 +65,7 @@ typedef struct s_data
 {
 	struct s_coder		*coders;
 	struct s_dongle		*dongles;
+	struct s_queue		*queues;
 }						t_data;
 
 #endif

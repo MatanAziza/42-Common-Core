@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 16:44:23 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/12 18:30:03 by maziza           ###   ########.fr       */
+/*   Updated: 2026/06/21 11:47:35 by matan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,10 @@
 #include <pthread.h>
 #include <unistd.h>
 
-void	swap(int *a, int *b)
+void	swap(int *a, int *b, int cond)
 {
+	if (cond)
+		return;
 	int	swap;
 
 	swap = *b;
@@ -27,24 +29,21 @@ void	swap(int *a, int *b)
 void	*print_name(void *arg)
 {
 	t_coder	*coder;
-	int		max;
 	int		left;
 	int		right;
 
 	coder = (t_coder *)arg;
-	max = coder->nb_threads;
-	left = (coder->id + max - 1) % max;
+	left = (coder->id + coder->nb_threads - 1) % coder->nb_threads;
 	right = coder->id;
-	if (right < left)
-		swap(&right, &left);
+	swap(&right, &left, right < left);
 	while (coder->nb_compile < coder->max_compile)
 	{
 		pthread_mutex_lock(&coder->dongles[left].mutex_dongle);
-		pthread_mutex_lock(&coder->dongles[right].mutex_dongle);
 		while (!coder->dongles[left].available)
 			pthread_cond_wait(&coder->dongles[left].cond_dongle,
 				&coder->dongles[left].mutex_dongle);
 		coder->dongles[left].available = 0;
+		pthread_mutex_lock(&coder->dongles[right].mutex_dongle);
 		while (!coder->dongles[right].available)
 			pthread_cond_wait(&coder->dongles[right].cond_dongle,
 				&coder->dongles[right].mutex_dongle);
@@ -76,7 +75,7 @@ int	main(int argc, char **argv)
 	if (parse_check(argv))
 		return (0 * printf("Wrong format of args.\n"));
 	nb_threads = atoi(argv[1]);
-	parser(argv, &data);
+	filler(argv, &data);
 	i = 0;
 	threads = malloc(sizeof(pthread_t) * nb_threads);
 	while (i < nb_threads)
