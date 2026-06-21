@@ -34,6 +34,7 @@ typedef struct s_coder
 	int					nb_compile;
 	int					nb_threads;
 	int					max_compile;
+	int					last_compile;
 	struct s_dongle		*dongles;
 	struct s_queue		*queues;
 }						t_coder;
@@ -42,7 +43,6 @@ typedef struct s_node
 {
 	int					thread_id;
 	int					last_compile;
-	int					burnout_time;
 	struct s_node		*next;
 }						t_node;
 
