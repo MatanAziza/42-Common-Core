@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 16:44:23 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/21 11:47:35 by matan            ###   ########.fr       */
+/*   Updated: 2026/06/22 17:30:37 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,37 @@ void	swap(int *a, int *b, int cond)
 	*a = swap;
 }
 
+int	GETTIMEOFDAY=10;
+
+int	is_dongle_ready(t_dongle dongle, t_coder *coder)
+{
+	int	is_for_me;
+	int	is_cd_done;
+
+	is_cd_done = (GETTIMEOFDAY - dongle.last_use) >= dongle.cooldown;
+	is_cd_done = 1;
+	is_for_me = (dongle.to_who == coder->id || dongle.to_who == -1);
+	return (is_cd_done && is_for_me);
+}
+
+void	gather_resources(t_coder *coder, int left, int right)
+{
+	pthread_mutex_lock(&coder->dongles[left].mutex_dongle);
+	while (!is_dongle_ready(coder->dongles[left], coder))
+	{
+		printf("a");
+		pthread_cond_wait(&coder->dongles[left].cond_dongle,
+			&coder->dongles[left].mutex_dongle);
+	}
+	// coder->dongles[left].to_who = coder->id;
+	pthread_mutex_lock(&coder->dongles[right].mutex_dongle);
+	while (!is_dongle_ready(coder->dongles[right], coder))
+		pthread_cond_wait(&coder->dongles[right].cond_dongle,
+			&coder->dongles[right].mutex_dongle);
+	// coder->dongles[right].to_who = coder->id;
+	printf("%d, %d\n", coder->dongles[left].to_who, coder->dongles[right].to_who);
+}
+
 void	*print_name(void *arg)
 {
 	t_coder	*coder;
@@ -38,27 +69,17 @@ void	*print_name(void *arg)
 	swap(&right, &left, right < left);
 	while (coder->nb_compile < coder->max_compile)
 	{
-		pthread_mutex_lock(&coder->dongles[left].mutex_dongle);
-		while (!coder->dongles[left].available)
-			pthread_cond_wait(&coder->dongles[left].cond_dongle,
-				&coder->dongles[left].mutex_dongle);
-		coder->dongles[left].available = 0;
-		pthread_mutex_lock(&coder->dongles[right].mutex_dongle);
-		while (!coder->dongles[right].available)
-			pthread_cond_wait(&coder->dongles[right].cond_dongle,
-				&coder->dongles[right].mutex_dongle);
-		coder->dongles[right].available = 0;
+		add_to_queues(coder);
+		gather_resources(coder, left, right);
 		coder->nb_compile++;
 		printf("Nb of compiles for Thread %d: %d\n", coder->id,
 			coder->nb_compile);
-		usleep(50000);
-		coder->dongles[right].available = 1;
-		coder->dongles[left].available = 1;
+		usleep(500000);
 		pthread_cond_signal(&coder->dongles[left].cond_dongle);
 		pthread_cond_signal(&coder->dongles[right].cond_dongle);
 		pthread_mutex_unlock(&coder->dongles[left].mutex_dongle);
 		pthread_mutex_unlock(&coder->dongles[right].mutex_dongle);
-		usleep(50000);
+		usleep(500000);
 	}
 	return (NULL);
 }

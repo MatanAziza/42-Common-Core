@@ -3,16 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   queue.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: matan </var/spool/mail/matan>              +#+  +:+       +#+        */
+/*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/21 11:39:31 by matan             #+#    #+#             */
-/*   Updated: 2026/06/21 11:47:33 by matan            ###   ########.fr       */
+/*   Created: 2026/06/22 16:34:47 by maziza            #+#    #+#             */
+/*   Updated: 2026/06/22 17:32:11 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "header.h"
 #include "structs.h"
-
 
 void	remove_from_queue(t_queue *queue, int coder_id)
 {
@@ -37,8 +36,6 @@ int		fifo(t_queue *queue)
 int		edf(t_queue *queue)
 {
 	int		to_who;
-	int		n1_values;
-	int		n2_values;
 	t_node	*node;
 
 
@@ -46,25 +43,25 @@ int		edf(t_queue *queue)
 	if (node)
 		to_who = node->thread_id;
 	if (node->next){
-		if (node->burnout_time > node->next->last_compile)
+		if (node->last_compile > node->next->last_compile)
 			to_who = node->next->thread_id;
 	}
 	remove_from_queue(queue, to_who);
 	return (to_who);
 }
 
-void	add_queue(t_queue *queue, t_coder coder)
+void	add_queue(t_queue *queue, t_coder *coder)
 {
 	t_node *node;
 
 	node = queue->head;
 	if (node)
 		node = node->next;
-	node->thread_id = coder.id;
-	node->last_compile = coder.last_compile;
+	node->thread_id = coder->id;
+	node->last_compile = coder->last_compile;
 }
 
-void	add_to_queues(struct s_coder coder)
+void	add_to_queues(t_coder *coder)
 {
 	t_queue *queues;
 	t_queue queue_l;
@@ -72,9 +69,9 @@ void	add_to_queues(struct s_coder coder)
 	int		left;
 	int		right;
 
-	queues = coder.queues;
-	left = (coder.id + coder.nb_threads - 1) % coder.nb_threads;
-	right = coder.id;
+	queues = coder->queues;
+	left = (coder->id + coder->nb_threads - 1) % coder->nb_threads;
+	right = coder->id;
 	queue_l = queues[left];
 	queue_r = queues[right];
 	add_queue(&queue_l, coder);

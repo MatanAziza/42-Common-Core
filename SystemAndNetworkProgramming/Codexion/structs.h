@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 20:39:06 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/12 18:30:01 by maziza           ###   ########.fr       */
+/*   Updated: 2026/06/22 17:36:42 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,9 @@ typedef struct s_queue
 
 typedef struct s_dongle
 {
-	int					available;
 	int					to_who;
 	int					cooldown;
-	int					timer;
+	int					last_use;
 	pthread_mutex_t		mutex_dongle;
 	pthread_cond_t		cond_dongle;
 }						t_dongle;

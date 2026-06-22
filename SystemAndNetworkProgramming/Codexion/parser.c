@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 16:18:59 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/12 18:30:04 by maziza           ###   ########.fr       */
+/*   Updated: 2026/06/22 17:36:40 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,9 @@ void	fill_coder(t_coder *coder, int id, int *values)
 
 void	fill_dongle(t_dongle *dongle, int cd)
 {
-	dongle->available = 1;
 	dongle->to_who = -1;
 	dongle->cooldown = cd;
-	dongle->timer = 0;
+	dongle->last_use = 0;
 	pthread_mutex_init(&dongle->mutex_dongle, NULL);
 	pthread_cond_init(&dongle->cond_dongle, NULL);
 }
@@ -87,7 +86,7 @@ void	filler(char **args, t_data *data)
 	{
 		fill_dongle(&data->dongles[i], atoied[6]);
 		fill_coder(&data->coders[i], i, atoied);
-		data->queues->head = NULL;
+		data->queues->head = malloc(sizeof(struct s_node));
 		data->coders[i].dongles = &data->dongles[0];
 		data->coders[i].queues = &data->queues[0];
 		i++;
