@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 17:34:10 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/22 17:30:43 by maziza           ###   ########.fr       */
+/*   Updated: 2026/06/25 14:22:42 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,23 @@
 # define HEADER_H
 
 # include <pthread.h>
-# include <stdlib.h>
-# include <stdio.h>
-# include <unistd.h>
-# include <string.h>
 # include "structs.h"
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <sys/time.h>
+# include <unistd.h>
 
-void	filler(char **args, t_data	*p_data);
-int		parse_check(char **argv);
+int		filler(char **args, t_data *p_data);
+void	*print_name(void *arg);
+void	*thread_function(void *arg);
 void	fill_dongle(t_dongle *dongle, int cd);
-void	free_data(t_data data);
-int		free_atoied(int	*atoied);
-void	add_to_queues(t_coder *coder);
-int		fifo(t_queue *queue);
-int		edf(t_queue *queue);
+t_coder	fill_coder(t_data *data, int id);
+int		check_arg_int(char *arg);
+int		fifo(t_coder coder);
+int		edf(t_coder coder);
+void	swap(int *a, int *b, int cond);
+int		free_all(pthread_t **threads, t_data *data);
+int		free_values(int *values);
 
 #endif

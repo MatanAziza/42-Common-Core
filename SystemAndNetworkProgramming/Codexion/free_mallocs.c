@@ -12,14 +12,17 @@
 
 #include "header.h"
 
-int	free_atoied(int *atoied)
+int	free_values(int *values)
 {
-	free(atoied);
+	free(values);
 	return (1);
 }
 
-void	free_data(t_data data)
+int	free_all(pthread_t **threads, t_data *data)
 {
-	free(data.coders);
-	free(data.dongles);
+	free(*threads);
+	free(data->dongles);
+	free(data->states);
+	free(data->coders);
+	return (1);
 }

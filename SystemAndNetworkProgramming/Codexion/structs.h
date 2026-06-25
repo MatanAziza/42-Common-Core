@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 20:39:06 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/22 17:36:42 by maziza           ###   ########.fr       */
+/*   Updated: 2026/06/25 14:22:41 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,20 @@
 # define STRUCTS_H
 
 # include <bits/pthreadtypes.h>
+# include <bits/types/struct_timeval.h>
 
 enum					e_CoderState
 {
 	COMPILING,
 	DEBUGGING,
 	REFACTORING,
-	WAITING
+	WAITING,
+	FAILURE,
+	SUCCESS
 };
 
-typedef struct s_coder
+typedef struct s_params
 {
-	int					id;
-	enum e_CoderState	state;
 	int					burnout_time;
 	int					compile_time;
 	int					debug_time;
@@ -34,28 +35,21 @@ typedef struct s_coder
 	int					nb_compile;
 	int					nb_threads;
 	int					max_compile;
-	int					last_compile;
-	struct s_dongle		*dongles;
-	struct s_queue		*queues;
-}						t_coder;
+	char				*mode;
+}						t_params;
 
 typedef struct s_node
 {
 	int					thread_id;
-	int					last_compile;
-	struct s_node		*next;
+	struct timeval		time;
 }						t_node;
-
-typedef struct s_queue
-{
-	struct s_node		*head;
-}						t_queue;
 
 typedef struct s_dongle
 {
 	int					to_who;
 	int					cooldown;
-	int					last_use;
+	struct timeval		last_use;
+	struct s_node		*queue;
 	pthread_mutex_t		mutex_dongle;
 	pthread_cond_t		cond_dongle;
 }						t_dongle;
@@ -64,7 +58,18 @@ typedef struct s_data
 {
 	struct s_coder		*coders;
 	struct s_dongle		*dongles;
-	struct s_queue		*queues;
+	struct s_params		params;
+	int					start;
+	enum e_CoderState	*states;
+
 }						t_data;
 
+typedef struct s_coder
+{
+	int					id;
+	struct timeval		time;
+	enum e_CoderState	state;
+	struct s_params		params;
+	struct s_data		*data;
+}						t_coder;
 #endif

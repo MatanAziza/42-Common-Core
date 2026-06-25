@@ -6,49 +6,13 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 16:18:59 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/22 17:36:40 by maziza           ###   ########.fr       */
+/*   Updated: 2026/06/25 14:22:41 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "header.h"
 #include "structs.h"
 #include <pthread.h>
-
-int	check_arg_int(char *arg)
-{
-	int	i;
-
-	i = 0;
-	while (arg[i])
-	{
-		if ('0' > arg[i] || arg[i] > '9')
-			return (1);
-		i++;
-	}
-	return (0);
-}
-
-void	fill_coder(t_coder *coder, int id, int *values)
-{
-	coder->id = id;
-	coder->state = WAITING;
-	coder->burnout_time = values[0];
-	coder->compile_time = values[1];
-	coder->debug_time = values[2];
-	coder->refactor_time = values[3];
-	coder->max_compile = values[4];
-	coder->nb_compile = 0;
-}
-
-void	fill_dongle(t_dongle *dongle, int cd)
-{
-	dongle->to_who = -1;
-	dongle->cooldown = cd;
-	dongle->last_use = 0;
-	pthread_mutex_init(&dongle->mutex_dongle, NULL);
-	pthread_cond_init(&dongle->cond_dongle, NULL);
-}
-
 
 int	parse_check(char **argv)
 {
@@ -66,30 +30,69 @@ int	parse_check(char **argv)
 	return (0);
 }
 
-void	filler(char **args, t_data *data)
+void	fill_params(int *values, char *mode, t_params *params)
 {
-	int	*atoied;
+	params->nb_threads = values[0];
+	params->burnout_time = values[1];
+	params->compile_time = values[2];
+	params->debug_time = values[3];
+	params->refactor_time = values[4];
+	params->max_compile = values[5];
+	params->mode = mode;
+	params->nb_compile = 0;
+}
+
+void	fill_dongle(t_dongle *dongle, int cd)
+{
+	dongle->to_who = -1;
+	dongle->cooldown = cd;
+	pthread_mutex_init(&dongle->mutex_dongle, NULL);
+	pthread_cond_init(&dongle->cond_dongle, NULL);
+}
+
+int	mallocs(t_data *data, int *values)
+{
+	if (!(data->dongles = malloc(sizeof(t_dongle) * values[0])))
+		return (free_values(values));
+	if (!(data->states = malloc(sizeof(int) * values[0])))
+	{
+		free(data->dongles);
+		return (free_values(values));
+	}
+	if (!(data->coders = malloc(sizeof(t_coder) * values[0])))
+	{
+		free(data->dongles);
+		free(data->states);
+		return (free_values(values));
+	}
+	return (0);
+}
+
+int	filler(char **args, t_data *data)
+{
+	int	*values;
 	int	i;
 
-	i = 1;
-	atoied = malloc(sizeof(int) * 7);
-	while (i < 8)
+	i = 0;
+	if (!(values = malloc(sizeof(int) * 7)))
+		return (1);
+	if (parse_check(args))
+		return (free_values(values));
+	while (i < 7)
 	{
-		atoied[i - 1] = atoi(args[i]);
+		values[i] = atoi(args[i + 1]);
 		i++;
 	}
 	i = 0;
-	data->dongles = malloc(sizeof(struct s_dongle) * atoied[0]);
-	data->coders = malloc(sizeof(struct s_coder) * atoied[0]);
-	data->queues = malloc(sizeof(struct s_queue) * atoied[0]);
-	while (i < atoied[0])
+	if (mallocs(data, values))
+		return (1);
+	fill_params(values, args[8], &data->params);
+	while (i < values[0])
 	{
-		fill_dongle(&data->dongles[i], atoied[6]);
-		fill_coder(&data->coders[i], i, atoied);
-		data->queues->head = malloc(sizeof(struct s_node));
-		data->coders[i].dongles = &data->dongles[0];
-		data->coders[i].queues = &data->queues[0];
+		fill_dongle(&data->dongles[i], values[6]);
+		data->coders[i] = fill_coder(data, i);
 		i++;
 	}
-	free(atoied);
+	free(values);
+	return (0);
 }
