@@ -49,15 +49,6 @@ void	gather_resources(t_coder *coder, int left, int right)
 	}
 }
 
-void	*print_name(void *arg)
-{
-	t_coder	*coder;
-
-	coder = (t_coder *)arg;
-	printf("I am coder n %d\n", coder->id);
-	return (NULL);
-}
-
 void	*thread_function(void *arg)
 {
 	t_coder	*coder;

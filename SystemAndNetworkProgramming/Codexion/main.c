@@ -63,6 +63,11 @@ int	error_management(t_data data)
 	}
 }
 
+int	values_check(t_data *data)
+{
+	return (0);
+}
+
 int	main(int argc, char **argv)
 {
 	t_data		data;
@@ -75,6 +80,8 @@ int	main(int argc, char **argv)
 	threads = malloc(sizeof(pthread_t) * data.params.nb_threads);
 	if (!threads)
 		return (1);
+	if (values_check(&data))
+		return (free_all(&threads, &data));
 	create_threads(&threads, &data);
 	if (error_management(data))
 		return (free_all(&threads, &data));

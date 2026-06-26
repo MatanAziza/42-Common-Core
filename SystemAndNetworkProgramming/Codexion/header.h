@@ -21,19 +21,27 @@
 # include <sys/time.h>
 # include <unistd.h>
 
+// Parsing
+int		check_arg_int(char *arg);
 int		filler(char **args, t_data *p_data);
-void	*print_name(void *arg);
-void	*thread_function(void *arg);
 void	fill_dongle(t_dongle *dongle, int cd);
 t_coder	fill_coder(t_data *data, int id);
-int		check_arg_int(char *arg);
-int		fifo(t_coder coder);
-int		edf(t_coder coder);
-void	swap(int *a, int *b, int cond);
+
+//Free values
 int		free_all(pthread_t **threads, t_data *data);
 int		free_values(int *values);
 int		free_dongles(t_data *data);
 int		free_coders(t_data *data);
 int		free_states(t_data *data);
+
+//Thread Management
+void	*thread_function(void *arg);
+int		fifo(t_coder coder);
+int		edf(t_coder coder);
+void	swap(int *a, int *b, int cond);
+
+//Queue
+
+//Cooldowns
 
 #endif
