@@ -18,6 +18,24 @@ int	free_values(int *values)
 	return (1);
 }
 
+int	free_dongles(t_data *data)
+{
+	free(data->dongles);
+	return (1);
+}
+
+int	free_coders(t_data *data)
+{
+	free(data->coders);
+	return (1);
+}
+
+int	free_states(t_data *data)
+{
+	free(data->states);
+	return (1);
+}
+
 int	free_all(pthread_t **threads, t_data *data)
 {
 	free(*threads);

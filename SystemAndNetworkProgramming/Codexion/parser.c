@@ -52,18 +52,17 @@ void	fill_dongle(t_dongle *dongle, int cd)
 
 int	mallocs(t_data *data, int *values)
 {
-	if (!(data->dongles = malloc(sizeof(t_dongle) * values[0])))
-		return (free_values(values));
-	if (!(data->states = malloc(sizeof(int) * values[0])))
+	data->dongles = malloc(sizeof(t_dongle) * values[0]);
+	if (!data->dongles)
+		return (1);
+	data->states = malloc(sizeof(int) * values[0]);
+	if (!data->states)
+		return (free_dongles(data));
+	data->coders = malloc(sizeof(t_coder) * values[0]);
+	if (!data->coders)
 	{
-		free(data->dongles);
-		return (free_values(values));
-	}
-	if (!(data->coders = malloc(sizeof(t_coder) * values[0])))
-	{
-		free(data->dongles);
-		free(data->states);
-		return (free_values(values));
+		free_dongles(data);
+		return (free_states(data));
 	}
 	return (0);
 }
@@ -74,7 +73,8 @@ int	filler(char **args, t_data *data)
 	int	i;
 
 	i = 0;
-	if (!(values = malloc(sizeof(int) * 7)))
+	values = malloc(sizeof(int) * 7);
+	if (!values)
 		return (1);
 	if (parse_check(args))
 		return (free_values(values));
@@ -85,13 +85,12 @@ int	filler(char **args, t_data *data)
 	}
 	i = 0;
 	if (mallocs(data, values))
-		return (1);
+		return (free_values(values));
 	fill_params(values, args[8], &data->params);
 	while (i < values[0])
 	{
-		fill_dongle(&data->dongles[i], values[6]);
 		data->coders[i] = fill_coder(data, i);
-		i++;
+		fill_dongle(&data->dongles[i++], values[6]);
 	}
 	free(values);
 	return (0);

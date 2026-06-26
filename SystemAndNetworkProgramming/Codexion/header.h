@@ -32,5 +32,8 @@ int		edf(t_coder coder);
 void	swap(int *a, int *b, int cond);
 int		free_all(pthread_t **threads, t_data *data);
 int		free_values(int *values);
+int		free_dongles(t_data *data);
+int		free_coders(t_data *data);
+int		free_states(t_data *data);
 
 #endif

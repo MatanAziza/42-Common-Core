@@ -45,6 +45,7 @@ int	error_management(t_data data)
 	int	i;
 	int	count;
 
+	return (0);
 	while (1)
 	{
 		i = 0;
@@ -69,17 +70,14 @@ int	main(int argc, char **argv)
 
 	if (argc != 9)
 		return (0 * printf("Wrong number of args.\n"));
-	printf("test\n");
 	if (filler(argv, &data))
 		return (1);
-	printf("test2\n");
-	if (!(threads = malloc(sizeof(pthread_t) * data.params.nb_threads)))
+	threads = malloc(sizeof(pthread_t) * data.params.nb_threads);
+	if (!threads)
 		return (1);
-	printf("test3\n");
 	create_threads(&threads, &data);
-	printf("test4\n");
-	// if (error_management(data))
-	// 	return (free_all(&threads, &data));
+	if (error_management(data))
+		return (free_all(&threads, &data));
 	end_threads(&threads, data);
 	free_all(&threads, &data);
 	return (0);
