@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 16:44:23 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/25 14:22:44 by maziza           ###   ########.fr       */
+/*   Updated: 2026/06/28 11:46:44 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ void	create_threads(pthread_t **p_threads, t_data *data)
 		pthread_create(&threads[i], NULL, thread_function, &data->coders[i]);
 		i++;
 	}
+	usleep(1000);
 }
 
 void	end_threads(pthread_t **p_threads, t_data data)
@@ -65,6 +66,7 @@ int	error_management(t_data data)
 
 int	values_check(t_data *data)
 {
+	printf("%p\n", data);
 	return (0);
 }
 
@@ -82,7 +84,10 @@ int	main(int argc, char **argv)
 		return (1);
 	if (values_check(&data))
 		return (free_all(&threads, &data));
+	data.start = 0;
 	create_threads(&threads, &data);
+	gettimeofday(&data.start_time, NULL);
+	data.start = 1;
 	if (error_management(data))
 		return (free_all(&threads, &data));
 	end_threads(&threads, data);

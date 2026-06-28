@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 20:39:06 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/25 14:22:41 by maziza           ###   ########.fr       */
+/*   Updated: 2026/06/28 11:16:02 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,9 +58,10 @@ typedef struct s_data
 {
 	struct s_coder		*coders;
 	struct s_dongle		*dongles;
+	enum e_CoderState	*states;
 	struct s_params		params;
 	int					start;
-	enum e_CoderState	*states;
+	struct timeval				start_time;
 
 }						t_data;
 
