@@ -15,12 +15,14 @@
 
 # include <bits/pthreadtypes.h>
 # include <bits/types/struct_timeval.h>
+# include <time.h>
 
 enum					e_CoderState
 {
 	COMPILING,
 	DEBUGGING,
 	REFACTORING,
+	INIT,
 	WAITING,
 	FAILURE,
 	SUCCESS
@@ -48,7 +50,7 @@ typedef struct s_dongle
 {
 	int					to_who;
 	int					cooldown;
-	struct timeval		last_use;
+	struct timespec		last_use;
 	struct s_node		*queue;
 	pthread_mutex_t		mutex_dongle;
 	pthread_cond_t		cond_dongle;
@@ -59,16 +61,18 @@ typedef struct s_data
 	struct s_coder		*coders;
 	struct s_dongle		*dongles;
 	enum e_CoderState	*states;
+	int					failure;
 	struct s_params		params;
 	int					start;
-	struct timeval				start_time;
-
+	struct timeval		time;
+	struct timespec		spec;
 }						t_data;
 
 typedef struct s_coder
 {
 	int					id;
 	struct timeval		time;
+	struct timespec		spec;
 	enum e_CoderState	state;
 	struct s_params		params;
 	struct s_data		*data;

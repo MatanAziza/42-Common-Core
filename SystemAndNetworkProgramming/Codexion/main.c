@@ -13,6 +13,7 @@
 #include "header.h"
 #include "structs.h"
 #include <bits/pthreadtypes.h>
+#include <pthread.h>
 #include <unistd.h>
 
 void	create_threads(pthread_t **p_threads, t_data *data)
@@ -22,46 +23,28 @@ void	create_threads(pthread_t **p_threads, t_data *data)
 
 	threads = *p_threads;
 	i = 0;
+	data->start = 0;
 	while (i < data->params.nb_threads)
 	{
 		pthread_create(&threads[i], NULL, thread_function, &data->coders[i]);
 		i++;
 	}
-	usleep(1000);
+	printf("wait ...\n");
+	usleep(1000000);
+	start_time(data);
 }
 
-void	end_threads(pthread_t **p_threads, t_data data)
+int	end_threads(pthread_t **p_threads, t_data *data)
 {
 	pthread_t	*threads;
 	int			i;
 
 	threads = *p_threads;
 	i = 0;
-	while (i < data.params.nb_threads)
+	while (i < data->params.nb_threads)
 		pthread_join(threads[i++], NULL);
-}
-
-int	error_management(t_data data)
-{
-	int	i;
-	int	count;
-
-	return (0);
-	while (1)
-	{
-		i = 0;
-		count = 0;
-		while (i < data.params.nb_threads)
-		{
-			if (data.states[i] == FAILURE)
-				return (1);
-			if (data.states[i] == SUCCESS)
-				count++;
-			i++;
-		}
-		if (count == i)
-			return (0);
-	}
+	free_all(p_threads, data);
+	return (1);
 }
 
 int	values_check(t_data *data)
@@ -84,13 +67,8 @@ int	main(int argc, char **argv)
 		return (1);
 	if (values_check(&data))
 		return (free_all(&threads, &data));
-	data.start = 0;
+	data.failure = 0;
 	create_threads(&threads, &data);
-	gettimeofday(&data.start_time, NULL);
-	data.start = 1;
-	if (error_management(data))
-		return (free_all(&threads, &data));
-	end_threads(&threads, data);
-	free_all(&threads, &data);
+	end_threads(&threads, &data);
 	return (0);
 }
