@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 17:55:28 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/30 19:12:55 by maziza           ###   ########.fr       */
+/*   Updated: 2026/06/30 19:32:20 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int	wait(t_coder *coder, int use, int dont_use)
 		if (ret == ETIMEDOUT || coder->data->failure)
 			return (unlock(coder, use, dont_use));
 	}
-	if (coder->data->failure || (coder->params.nb_compile == 12))
+	if (coder->data->failure)
 		return (unlock(coder, use, dont_use));
 	update_time(coder);
 	printf("%s%ld : Thread %d took one dongle%s\n", ORANGE, get_time_up(coder), coder->id, WHITE);

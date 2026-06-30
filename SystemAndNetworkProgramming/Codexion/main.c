@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 16:44:23 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/28 11:46:44 by maziza           ###   ########.fr       */
+/*   Updated: 2026/06/30 19:35:43 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,5 +70,6 @@ int	main(int argc, char **argv)
 	data.failure = 0;
 	create_threads(&threads, &data);
 	end_threads(&threads, &data);
+	printf("%sSuccess: All threads compiled%s\n", GREEN, WHITE);
 	return (0);
 }
