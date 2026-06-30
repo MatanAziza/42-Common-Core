@@ -11,8 +11,8 @@
 /* ************************************************************************** */
 
 #include "structs.h"
-#include <sys/time.h>
 #include <stdio.h>
+#include <sys/time.h>
 
 void	start_time(t_data *data)
 {
@@ -41,7 +41,7 @@ void	add_burnout(t_coder *coder)
 
 long	get_time_up(t_coder *coder)
 {
-	long time_elapsed;
+	long	time_elapsed;
 
 	time_elapsed = coder->time.tv_sec * 1000 - coder->data->time.tv_sec * 1000;
 	time_elapsed -= coder->data->time.tv_usec / 1000;
