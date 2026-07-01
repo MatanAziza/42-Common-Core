@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "header.h"
+#include "structs.h"
 #include <stdio.h>
 #include <sys/time.h>
 
@@ -63,17 +64,7 @@ long	get_time_up(t_coder *coder)
 	return (time_elapsed);
 }
 
-struct timespec	time_elapsed(struct timespec smaller, struct timespec bigger)
+long	get_dongle_cd(t_dongle *dongle)
 {
-	struct timespec	result;
-
-	result.tv_sec = bigger.tv_sec - smaller.tv_sec;
-	if (bigger.tv_nsec < smaller.tv_nsec)
-	{
-		result.tv_nsec = 1000000000 - smaller.tv_nsec + bigger.tv_nsec;
-		result.tv_sec--;
-	}
-	else
-		result.tv_nsec = bigger.tv_nsec - smaller.tv_nsec;
-	return (result);
+	return (0);
 }

@@ -26,7 +26,8 @@ t_coder	fill_coder(t_data *data, int id)
 
 int	is_dongle_ready(t_dongle dongle, t_coder *coder)
 {
-	if (dongle.to_who == -1 || dongle.to_who == coder->id)
+	if ((dongle.to_who == -1 || dongle.to_who == coder->id) &&
+		1)
 		return (1);
 	return (0);
 }
