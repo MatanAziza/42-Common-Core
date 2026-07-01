@@ -27,14 +27,8 @@ int	execute_function(int function(t_coder *, int, int), t_coder *coder,
 	{
 		coder->data->failure = 1;
 		usleep(10000);
-		return (1 + 0 * printf("%sERROR in coder %d%s\n", RED, coder->id, WHITE));
+		return (1 + 0 * printf("%s%ld %d burned out\n", RED, get_time_up(coder),
+				coder->id));
 	}
-	else if (result == 1)
-		printf("%s%ld : Thread %d compiled for the %d time%s\n", VIOLET, get_time_up(coder),
-			coder->id, coder->params.nb_compile, WHITE);
-	else if (result == 2)
-		printf("%s%ld : Thread %d debugged%s\n", BLUE, get_time_up(coder), coder->id, WHITE);
-	else if (result == 3)
-		printf("%s%ld : Thread %d refactored%s\n", YELLOW, get_time_up(coder), coder->id, WHITE);
 	return (0);
 }

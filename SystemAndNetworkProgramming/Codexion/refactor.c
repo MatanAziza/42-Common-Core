@@ -16,10 +16,10 @@
 
 int	refactor(t_coder *coder, int left, int right)
 {
+	update_time(coder, 3);
 	usleep(coder->params.refactor_time * 1000);
 	left += right;
 	if (coder->data->failure)
 		return (-2);
-	gettimeofday(&coder->time, NULL);
 	return (3);
 }

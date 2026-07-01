@@ -51,7 +51,7 @@ void			swap(int *a, int *b, int cond);
 
 // Cooldowns
 void			start_time(t_data *data);
-void			update_time(t_coder *coder);
+void			update_time(t_coder *coder, int result);
 void			add_burnout(t_coder *coder);
 long			get_time_up(t_coder *coder);
 struct timespec	time_elapsed(struct timespec smaller, struct timespec bigger);

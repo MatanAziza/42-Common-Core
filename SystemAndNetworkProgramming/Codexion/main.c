@@ -29,7 +29,6 @@ void	create_threads(pthread_t **p_threads, t_data *data)
 		pthread_create(&threads[i], NULL, thread_function, &data->coders[i]);
 		i++;
 	}
-	printf("wait ...\n");
 	usleep(1000000);
 	start_time(data);
 }
@@ -70,6 +69,7 @@ int	main(int argc, char **argv)
 	data.failure = 0;
 	create_threads(&threads, &data);
 	end_threads(&threads, &data);
-	printf("%sSuccess: All threads compiled%s\n", GREEN, WHITE);
+	if (!data.failure)
+		printf("%sSuccess: All threads compiled%s\n", GREEN, WHITE);
 	return (0);
 }

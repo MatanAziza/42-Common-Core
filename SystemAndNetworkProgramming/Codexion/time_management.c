@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "structs.h"
+#include "header.h"
 #include <stdio.h>
 #include <sys/time.h>
 
@@ -22,11 +22,22 @@ void	start_time(t_data *data)
 	data->start = 1;
 }
 
-void	update_time(t_coder *coder)
+void	update_time(t_coder *coder, int result)
 {
 	gettimeofday(&coder->time, NULL);
 	coder->spec.tv_nsec = coder->time.tv_usec * 1000;
 	coder->spec.tv_sec = coder->time.tv_sec;
+	if (!coder->data->failure)
+	{
+		if (result == 1)
+			printf("%s%ld %d compiled\n", VIOLET, get_time_up(coder),
+				coder->id);
+		else if (result == 2)
+			printf("%s%ld %d debugged\n", BLUE, get_time_up(coder), coder->id);
+		else if (result == 3)
+			printf("%s%ld %d refactored\n", YELLOW, get_time_up(coder),
+				coder->id);
+	}
 }
 
 void	add_burnout(t_coder *coder)
