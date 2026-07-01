@@ -26,7 +26,7 @@ fclean: clean
 re: fclean all
 
 exec: $(NAME)
-	./$(NAME) 4 1500 500 200 300 3 100 fifo
+	./$(NAME) 4 1500 500 200 300 2 100 fifo
 
 val: $(NAME)
 	valgrind --leak-check=full ./$(NAME) 4 1500 500 200 300 3 100 fifo

@@ -31,8 +31,8 @@ int	wait(t_coder *coder, int left, int right)
 	int	ret_l;
 	int	ret_r;
 
-	while (!is_dongle_ready(coder->data->dongles[left], coder) &&
-			!is_dongle_ready(coder->data->dongles[right], coder))
+	while (!is_dongle_ready(coder->data->dongles[left], coder)
+		&& !is_dongle_ready(coder->data->dongles[right], coder))
 	{
 		ret_l = pthread_cond_timedwait(&coder->data->dongles[left].cond_dongle,
 				&coder->data->dongles[left].mutex_dongle, &coder->spec);
@@ -44,10 +44,10 @@ int	wait(t_coder *coder, int left, int right)
 	if (coder->data->failure)
 		return (unlock(coder, left, right));
 	update_time(coder, 4);
-	printf("%s%ld %d has taken a dongle %d\n", ORANGE, get_time_up(coder),
-		coder->id, left);
-	printf("%s%ld %d has taken a dongle %d\n", ORANGE, get_time_up(coder),
-		coder->id, right);
+	printf("%s%ld %d has taken a dongle\n", ORANGE, get_time_up(coder),
+		coder->id);
+	printf("%s%ld %d has taken a dongle\n", ORANGE, get_time_up(coder),
+		coder->id);
 	return (0);
 }
 
