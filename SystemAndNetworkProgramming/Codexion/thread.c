@@ -43,7 +43,7 @@ void	*thread_function(void *arg)
 	swap(&right, &left, right < left);
 	while (!coder->data->start)
 		usleep(1);
-	update_time(coder);
+	update_time(coder, 4);
 	while (coder->params.nb_compile < coder->params.max_compile)
 	{
 		if (execute_function(compile, coder, left, right))

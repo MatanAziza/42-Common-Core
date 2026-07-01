@@ -48,7 +48,15 @@ int	end_threads(pthread_t **p_threads, t_data *data)
 
 int	values_check(t_data *data)
 {
-	printf("%p\n", data);
+	int	refactor;
+	int	debug;
+	int	cooldown;
+
+	refactor = data->params.refactor_time;
+	debug = data->params.debug_time;
+	cooldown = data->params.dongle_cooldown;
+	if (data->params.burnout_time < refactor + debug + cooldown)
+		return (1 + 0 * printf("Cooldowns are superior to burnout.\n"));
 	return (0);
 }
 

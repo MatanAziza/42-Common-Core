@@ -22,11 +22,12 @@ int	parse_check(char **argv)
 	while (i < 8)
 	{
 		if (check_arg_int(argv[i]))
-			return (1);
+			return (1 + 0
+				* printf("Parameter is supposed to be an int value.\n"));
 		i++;
 	}
 	if (strcmp("fifo", argv[8]) && strcmp("edf", argv[8]))
-		return (1);
+		return (1 + 0 * printf("Wrong scheduler format.\n"));
 	return (0);
 }
 
@@ -38,6 +39,7 @@ void	fill_params(int *values, char *mode, t_params *params)
 	params->debug_time = values[3];
 	params->refactor_time = values[4];
 	params->max_compile = values[5];
+	params->dongle_cooldown = values[6];
 	params->mode = mode;
 	params->nb_compile = 0;
 }

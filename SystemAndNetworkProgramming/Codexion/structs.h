@@ -37,6 +37,7 @@ typedef struct s_params
 	int					nb_compile;
 	int					nb_threads;
 	int					max_compile;
+	int					dongle_cooldown;
 	char				*mode;
 }						t_params;
 

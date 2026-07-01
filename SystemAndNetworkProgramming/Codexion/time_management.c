@@ -25,8 +25,11 @@ void	start_time(t_data *data)
 void	update_time(t_coder *coder, int result)
 {
 	gettimeofday(&coder->time, NULL);
-	coder->spec.tv_nsec = coder->time.tv_usec * 1000;
-	coder->spec.tv_sec = coder->time.tv_sec;
+	if (result == 4 || result == 1)
+	{
+		coder->spec.tv_nsec = coder->time.tv_usec * 1000;
+		coder->spec.tv_sec = coder->time.tv_sec;
+	}
 	if (!coder->data->failure)
 	{
 		if (result == 1)
@@ -42,10 +45,10 @@ void	update_time(t_coder *coder, int result)
 
 void	add_burnout(t_coder *coder)
 {
-	int	burnout_ms;
+	long	burnout_ms;
 
 	burnout_ms = (coder->params.burnout_time % 1000);
-	coder->spec.tv_nsec += burnout_ms * 1000000;
+	coder->spec.tv_nsec += (burnout_ms * 1000000);
 	coder->spec.tv_sec += coder->params.burnout_time / 1000;
 	coder->spec.tv_nsec %= 1000000000;
 }
