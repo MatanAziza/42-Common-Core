@@ -14,12 +14,12 @@
 #include "structs.h"
 #include <stdio.h>
 #include <sys/time.h>
+#include <time.h>
 
 void	start_time(t_data *data)
 {
 	gettimeofday(&data->time, NULL);
-	data->spec.tv_nsec = data->time.tv_usec * 1000;
-	data->spec.tv_sec = data->time.tv_sec;
+	clock_gettime(0, &data->spec);
 	data->start = 1;
 }
 
@@ -27,11 +27,8 @@ void	update_time(t_coder *coder, int result)
 {
 	gettimeofday(&coder->time, NULL);
 	if (result == 4 || result == 1)
-	{
-		coder->spec.tv_nsec = coder->time.tv_usec * 1000;
-		coder->spec.tv_sec = coder->time.tv_sec;
-	}
-	if (!coder->data->failure)
+		clock_gettime(0, &coder->data->spec);
+	if (!coder->data->failure && result > 0)
 	{
 		if (result == 1)
 			printf("%s%ld %d compiled\n", VIOLET, get_time_up(coder),
@@ -64,7 +61,7 @@ long	get_time_up(t_coder *coder)
 	return (time_elapsed);
 }
 
-long	get_dongle_cd(t_dongle *dongle)
-{
-	return (0);
-}
+// long	get_dongle_cd(t_dongle *dongle)
+// {
+// 	return (0);
+// }

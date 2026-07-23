@@ -61,12 +61,12 @@ int	compile(t_coder *coder, int left, int right)
 		update_time(coder, -1);
 		return (-1 - coder->data->failure);
 	}
+	update_time(coder, 1);
 	coder->data->dongles[left].to_who = coder->id;
 	coder->data->dongles[right].to_who = coder->id;
 	coder->params.nb_compile++;
-	update_time(coder, 1);
 	usleep(coder->params.compile_time * 1000);
-	update_time(coder, 4);
+	update_time(coder, -1);
 	unlock(coder, left, right);
 	return (1);
 }
