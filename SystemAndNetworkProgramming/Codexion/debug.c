@@ -19,6 +19,7 @@ int	debug(t_coder *coder, int left, int right)
 	update_time(coder, 2);
 	usleep(coder->params.debug_time * 1000);
 	left += right;
+	right -= left;
 	if (coder->data->failure)
 		return (-2);
 	return (2);
