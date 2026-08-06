@@ -23,22 +23,11 @@ void	start_time(t_data *data)
 	data->start = 1;
 }
 
-void	update_time(t_coder *coder, int result)
+void	update_time(t_coder *coder, int compile)
 {
 	gettimeofday(&coder->time, NULL);
-	if (result == 4 || result == 1)
+	if (compile)
 		clock_gettime(0, &coder->data->spec);
-	if (!coder->data->failure && result > 0)
-	{
-		if (result == 1)
-			printf("%s%ld %d compiled\n", VIOLET, get_time_up(coder),
-				coder->id);
-		else if (result == 2)
-			printf("%s%ld %d debugged\n", BLUE, get_time_up(coder), coder->id);
-		else if (result == 3)
-			printf("%s%ld %d refactored\n", YELLOW, get_time_up(coder),
-				coder->id);
-	}
 }
 
 void	add_burnout(t_coder *coder)
@@ -60,8 +49,3 @@ long	get_time_up(t_coder *coder)
 	time_elapsed += coder->time.tv_usec / 1000;
 	return (time_elapsed);
 }
-
-// long	get_dongle_cd(t_dongle *dongle)
-// {
-// 	return (0);
-// }

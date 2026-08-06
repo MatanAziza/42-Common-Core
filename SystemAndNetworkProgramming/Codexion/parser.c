@@ -57,15 +57,9 @@ int	mallocs(t_data *data, int *values)
 	data->dongles = malloc(sizeof(t_dongle) * values[0]);
 	if (!data->dongles)
 		return (1);
-	data->states = malloc(sizeof(int) * values[0]);
-	if (!data->states)
-		return (free_dongles(data));
 	data->coders = malloc(sizeof(t_coder) * values[0]);
 	if (!data->coders)
-	{
-		free_dongles(data);
-		return (free_states(data));
-	}
+		return (free_dongles(data));
 	return (0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 20:39:06 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/28 11:16:02 by maziza           ###   ########.fr       */
+/*   Updated: 2026/08/03 11:47:26 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@
 
 enum					e_CoderState
 {
+	DONGLE,
 	COMPILING,
 	DEBUGGING,
 	REFACTORING,
 	INIT,
-	WAITING,
 	FAILURE,
 	SUCCESS
 };
@@ -57,13 +57,25 @@ typedef struct s_dongle
 	pthread_cond_t		cond_dongle;
 }						t_dongle;
 
+typedef struct s_status
+{
+	long				timestamp;
+	pthread_mutex_t		mutex_status;
+	pthread_cond_t		cond_status;
+	enum e_CoderState	state;
+	enum e_CoderState	last_state;
+	int 				counter;
+	int					id;
+	int					last_id;
+}						t_status;
+
 typedef struct s_data
 {
 	struct s_coder		*coders;
 	struct s_dongle		*dongles;
-	enum e_CoderState	*states;
-	int					failure;
 	struct s_params		params;
+	struct s_status		status;
+	int					failure;
 	int					start;
 	struct timeval		time;
 	struct timespec		spec;

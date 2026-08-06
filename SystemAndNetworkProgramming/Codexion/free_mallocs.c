@@ -30,17 +30,10 @@ int	free_coders(t_data *data)
 	return (1);
 }
 
-int	free_states(t_data *data)
-{
-	free(data->states);
-	return (1);
-}
-
 int	free_all(pthread_t **threads, t_data *data)
 {
 	free(*threads);
 	free(data->dongles);
-	free(data->states);
 	free(data->coders);
 	return (1);
 }

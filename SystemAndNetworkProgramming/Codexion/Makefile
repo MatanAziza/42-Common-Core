@@ -1,9 +1,9 @@
 NAME    = codexion
 CC      = cc
-CFLAGS  = -Wall -Wextra -Werror -pthread
+CFLAGS  = -Wall -Wextra -Werror -pthread -g
 
 SRC     = compile.c debug.c free_mallocs.c main.c parser.c queue.c refactor.c \
-          steps.c thread.c time_management.c utils.c
+          supervisor.c thread.c time_management.c utils.c
 
 OBJDIR  = prefiles
 OBJS    = $(SRC:%.c=$(OBJDIR)/%.o)

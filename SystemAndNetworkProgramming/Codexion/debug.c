@@ -21,6 +21,6 @@ int	debug(t_coder *coder, int left, int right)
 	left += right;
 	right -= left;
 	if (coder->data->failure)
-		return (-2);
-	return (2);
+		return (1);
+	return (0);
 }

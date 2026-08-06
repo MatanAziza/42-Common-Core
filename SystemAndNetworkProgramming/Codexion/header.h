@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 17:34:10 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/30 18:54:57 by maziza           ###   ########.fr       */
+/*   Updated: 2026/08/03 11:04:25 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 # define HEADER_H
 
 # include <pthread.h>
-# include "structs.h"
 # include "colors.h"
+# include "structs.h"
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
@@ -33,7 +33,6 @@ int				free_all(pthread_t **threads, t_data *data);
 int				free_values(int *values);
 int				free_dongles(t_data *data);
 int				free_coders(t_data *data);
-int				free_states(t_data *data);
 
 // Thread Management
 void			*thread_function(void *arg);
@@ -43,15 +42,20 @@ int				execute_function(int function(t_coder *, int, int),
 int				compile(t_coder *coder, int left, int right);
 int				debug(t_coder *coder, int left, int right);
 int				refactor(t_coder *coder, int left, int right);
-int				fifo(t_coder coder);
-int				edf(t_coder coder);
 void			swap(int *a, int *b, int cond);
 
 // Queue
+int				fifo(t_coder coder);
+int				edf(t_coder coder);
+
+// Supervisor
+void			change_status(long time, t_coder *coder,
+					enum e_CoderState state);
+void			*supervise(void *arg);
 
 // Cooldowns
 void			start_time(t_data *data);
-void			update_time(t_coder *coder, int result);
+void			update_time(t_coder *coder, int compile);
 void			add_burnout(t_coder *coder);
 long			get_time_up(t_coder *coder);
 struct timespec	time_elapsed(struct timespec smaller, struct timespec bigger);
