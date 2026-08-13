@@ -42,11 +42,10 @@ int	wait(t_coder *coder, int left, int right)
 		if (ret_l == ETIMEDOUT || ret_r == ETIMEDOUT || coder->data->failure)
 			return (1 + 0 *printf("FAIL\n"));
 	}
-	printf("%d got dongles\n", coder->id);
 	if (coder->data->failure)
 		return (1 + 0 *printf("%d, FAIL\n", coder->id));
 	update_time(coder, 0);
-	change_status(get_time_up(coder), coder, DONGLE);
+	// change_status(get_time_up(coder), coder, DONGLE);
 	return (0);
 }
 
@@ -57,16 +56,17 @@ int	compile(t_coder *coder, int left, int right)
 	pthread_mutex_lock(&coder->data->dongles[right].mutex_dongle);
 	if (wait(coder, left, right)){
 		update_time(coder, 0);
-		change_status(get_time_up(coder), coder, FAILURE);
+		// change_status(get_time_up(coder), coder, FAILURE);
 		printf("haha\n");
 		return (unlock(coder, left, right));
 	}
 	update_time(coder, 1);
-	change_status(get_time_up(coder), coder, COMPILING);
+	// change_status(get_time_up(coder), coder, COMPILING);
 	coder->data->dongles[left].to_who = coder->id;
 	coder->data->dongles[right].to_who = coder->id;
 	coder->params.nb_compile++;
 	usleep(coder->params.compile_time * 1000);
+	printf("Coder %d, state %d\n", coder->id, COMPILING);
 	unlock(coder, left, right);
 	return (0);
 }

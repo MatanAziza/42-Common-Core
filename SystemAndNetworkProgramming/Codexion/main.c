@@ -40,7 +40,7 @@ int	end_threads(pthread_t **p_threads, t_data *data)
 
 	threads = *p_threads;
 	i = 0;
-	while (i < data->params.nb_threads + 1)
+	while (i < data->params.nb_threads)
 		pthread_join(threads[i++], NULL);
 	free_all(p_threads, data);
 	return (1);
@@ -64,14 +64,26 @@ int	values_check(t_data *data)
 
 void	init_status(t_data *data)
 {
+	int	i;
+	int	messages;
+
 	pthread_mutex_init(&data->status.mutex_status, NULL);
 	pthread_cond_init(&data->status.cond_status, NULL);
-	data->status.state = INIT;
-	data->status.last_state = INIT;
-	data->status.id = -1;
-	data->status.last_id = -1;
+	messages = (3 * data->params.max_compile + 1) * data->params.nb_threads + 1;
+	printf("size = %d\n", messages);
+	data->status.status = malloc(sizeof(struct s_log) * messages);
+	i = 0;
+	while (i < messages)
+	{
+		data->status.status[i].timestamp = 0;
+		data->status.status[i].id = -1;
+		data->status.status[i].state = INIT;
+		i++;
+	}
+	data->status.status[i].state = INIT;
+	data->status.length = messages;
 	data->status.counter = 0;
-	data->failure = 0;
+	data->status.index = 0;
 }
 
 int	main(int argc, char **argv)
@@ -83,16 +95,18 @@ int	main(int argc, char **argv)
 		return (0 * printf("Wrong number of args.\n"));
 	if (filler(argv, &data))
 		return (1);
-	threads = malloc(sizeof(pthread_t) * (data.params.nb_threads + 1));
+	// threads = malloc(sizeof(pthread_t) * (data.params.nb_threads + 1));
+	threads = malloc(sizeof(pthread_t) * (data.params.nb_threads));
 	if (!threads)
 		return (1);
 	if (values_check(&data))
 		return (free_all(&threads, &data));
-	init_status(&data);
-	pthread_create(&threads[data.params.nb_threads], NULL, supervise, &data);
+	// init_status(&data);
+	data.failure = 0;
+	// pthread_create(&threads[data.params.nb_threads], NULL, supervise, &data);
 	create_threads(&threads, &data);
 	end_threads(&threads, &data);
-	pthread_join(threads[data.params.nb_threads], NULL);
+	// pthread_join(threads[data.params.nb_threads], NULL);
 	if (!data.failure)
 		printf("%sSuccess: All threads compiled%s\n", GREEN, WHITE);
 	return (0);

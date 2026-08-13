@@ -19,11 +19,11 @@
 
 enum					e_CoderState
 {
+	INIT,
 	DONGLE,
 	COMPILING,
 	DEBUGGING,
 	REFACTORING,
-	INIT,
 	FAILURE,
 	SUCCESS
 };
@@ -57,16 +57,21 @@ typedef struct s_dongle
 	pthread_cond_t		cond_dongle;
 }						t_dongle;
 
-typedef struct s_status
+typedef struct s_log
 {
 	long				timestamp;
+	int					id;
+	enum e_CoderState	state;
+}						t_log;
+
+typedef struct s_status
+{
 	pthread_mutex_t		mutex_status;
 	pthread_cond_t		cond_status;
-	enum e_CoderState	state;
-	enum e_CoderState	last_state;
+	struct s_log		*status;
+	int					length;
 	int 				counter;
-	int					id;
-	int					last_id;
+	int					index;
 }						t_status;
 
 typedef struct s_data
@@ -86,7 +91,6 @@ typedef struct s_coder
 	int					id;
 	struct timeval		time;
 	struct timespec		spec;
-	enum e_CoderState	state;
 	struct s_params		params;
 	struct s_data		*data;
 }						t_coder;

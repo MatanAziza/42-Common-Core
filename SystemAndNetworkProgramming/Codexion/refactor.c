@@ -22,5 +22,7 @@ int	refactor(t_coder *coder, int left, int right)
 	right -= left;
 	if (coder->data->failure)
 		return (1);
+	update_time(coder, 0);
+	// change_status(get_time_up(coder), coder, REFACTORING);
 	return (0);
 }

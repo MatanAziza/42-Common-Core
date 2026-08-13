@@ -20,7 +20,6 @@ t_coder	fill_coder(t_data *data, int id)
 	t_coder	coder;
 
 	coder.id = id;
-	coder.state = INIT;
 	coder.params = data->params;
 	coder.data = data;
 	return (coder);
