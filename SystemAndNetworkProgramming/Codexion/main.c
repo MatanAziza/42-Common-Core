@@ -69,7 +69,7 @@ void	init_status(t_data *data)
 
 	pthread_mutex_init(&data->status.mutex_status, NULL);
 	pthread_cond_init(&data->status.cond_status, NULL);
-	messages = (3 * data->params.max_compile + 1) * data->params.nb_threads + 1;
+	messages = (4 * data->params.max_compile + 1) * data->params.nb_threads;
 	printf("size = %d\n", messages);
 	data->status.status = malloc(sizeof(struct s_log) * messages);
 	i = 0;
@@ -80,7 +80,6 @@ void	init_status(t_data *data)
 		data->status.status[i].state = INIT;
 		i++;
 	}
-	data->status.status[i].state = INIT;
 	data->status.length = messages;
 	data->status.counter = 0;
 	data->status.index = 0;
@@ -95,18 +94,17 @@ int	main(int argc, char **argv)
 		return (0 * printf("Wrong number of args.\n"));
 	if (filler(argv, &data))
 		return (1);
-	// threads = malloc(sizeof(pthread_t) * (data.params.nb_threads + 1));
-	threads = malloc(sizeof(pthread_t) * (data.params.nb_threads));
+	threads = malloc(sizeof(pthread_t) * (data.params.nb_threads + 1));
 	if (!threads)
 		return (1);
 	if (values_check(&data))
 		return (free_all(&threads, &data));
-	// init_status(&data);
+	init_status(&data);
 	data.failure = 0;
-	// pthread_create(&threads[data.params.nb_threads], NULL, supervise, &data);
+	pthread_create(&threads[data.params.nb_threads], NULL, supervise, &data);
 	create_threads(&threads, &data);
+	pthread_join(threads[data.params.nb_threads], NULL);
 	end_threads(&threads, &data);
-	// pthread_join(threads[data.params.nb_threads], NULL);
 	if (!data.failure)
 		printf("%sSuccess: All threads compiled%s\n", GREEN, WHITE);
 	return (0);

@@ -16,13 +16,12 @@
 
 int	debug(t_coder *coder, int left, int right)
 {
-	update_time(coder, 2);
+	update_time(coder, 0);
+	change_status(get_time_up(coder), coder, DEBUGGING);
 	usleep(coder->params.debug_time * 1000);
 	left += right;
 	right -= left;
 	if (coder->data->failure)
 		return (1);
-	update_time(coder, 0);
-	// change_status(get_time_up(coder), coder, DEBUGGING);
 	return (0);
 }

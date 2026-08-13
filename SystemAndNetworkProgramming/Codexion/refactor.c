@@ -16,13 +16,12 @@
 
 int	refactor(t_coder *coder, int left, int right)
 {
-	update_time(coder, 3);
+	update_time(coder, 0);
+	change_status(get_time_up(coder), coder, REFACTORING);
 	usleep(coder->params.refactor_time * 1000);
 	left += right;
 	right -= left;
 	if (coder->data->failure)
 		return (1);
-	update_time(coder, 0);
-	// change_status(get_time_up(coder), coder, REFACTORING);
 	return (0);
 }
