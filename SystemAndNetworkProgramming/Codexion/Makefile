@@ -8,9 +8,10 @@ SRC     = compile.c debug.c free_mallocs.c main.c parser.c queue.c refactor.c \
 OBJDIR  = prefiles
 OBJS    = $(SRC:%.c=$(OBJDIR)/%.o)
 
-all: $(NAME)
+all: $(NAME) exec
 
 $(NAME): $(OBJS)
+	clear
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
 $(OBJDIR)/%.o: %.c
@@ -26,9 +27,9 @@ fclean: clean
 re: fclean all
 
 exec: $(NAME)
-	./$(NAME) 4 1500 500 200 300 3 100 fifo
+	./$(NAME) 4 1500 500 200 300 2 100 fifo
 
 val: $(NAME)
-	valgrind --leak-check=full ./$(NAME) 4 1500 500 200 300 3 100 fifo
+	valgrind --leak-check=full ./$(NAME) 4 1500 500 200 300 2 100 fifo
 
 .PHONY: all clean fclean re exec val

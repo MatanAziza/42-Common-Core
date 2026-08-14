@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 17:55:28 by maziza            #+#    #+#             */
-/*   Updated: 2026/08/03 11:47:25 by maziza           ###   ########.fr       */
+/*   Updated: 2026/08/14 14:56:45 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,29 +39,35 @@ int	wait(t_coder *coder, int left, int right)
 				&coder->data->dongles[left].mutex_dongle, &coder->spec);
 		ret_r = pthread_cond_timedwait(&coder->data->dongles[right].cond_dongle,
 				&coder->data->dongles[right].mutex_dongle, &coder->spec);
-		if (ret_l == ETIMEDOUT || ret_r == ETIMEDOUT || coder->data->failure)
-			return (1 + 0 *printf("FAIL\n"));
+		if (ret_l == ETIMEDOUT || ret_r == ETIMEDOUT)
+			return (1);
 	}
+	// if (coder->id == 2 && coder->params.nb_compile == 1)
+	// 	return (1);
 	if (coder->data->failure)
-		return (1 + 0 *printf("%d, FAIL\n", coder->id));
-	update_time(coder, 0);
-	change_status(get_time_up(coder), coder, DONGLE);
+		return (2);
+	change_status(coder, DONGLE);
 	return (0);
 }
 
 int	compile(t_coder *coder, int left, int right)
 {
+	int	failure;
+
 	add_burnout(coder);
 	pthread_mutex_lock(&coder->data->dongles[left].mutex_dongle);
 	pthread_mutex_lock(&coder->data->dongles[right].mutex_dongle);
-	if (wait(coder, left, right)){
-		update_time(coder, 0);
-		// change_status(get_time_up(coder), coder, FAILURE);
-		printf("haha\n");
-		return (unlock(coder, left, right));
+	failure = wait(coder, left, right);
+	if (failure == 1)
+	{
+		// printf("%ld %d Start of Burn Out !\n", get_time_up(coder), coder->id);
+		usleep(10000);
+		change_status(coder, FAILURE);
+		coder->data->failure = 1;
 	}
-	update_time(coder, 1);
-	change_status(get_time_up(coder), coder, COMPILING);
+	if (coder->data->status.status[coder->data->status.index].state == FAILURE)
+		return (unlock(coder, left, right));
+	change_status(coder, COMPILING);
 	coder->data->dongles[left].to_who = coder->id;
 	coder->data->dongles[right].to_who = coder->id;
 	coder->params.nb_compile++;

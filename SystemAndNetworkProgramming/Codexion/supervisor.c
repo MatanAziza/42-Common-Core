@@ -6,10 +6,11 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/03 10:56:33 by maziza            #+#    #+#             */
-/*   Updated: 2026/08/11 13:21:14 by maziza           ###   ########.fr       */
+/*   Updated: 2026/08/14 14:46:46 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "colors.h"
 #include "header.h"
 #include "structs.h"
 #include <pthread.h>
@@ -22,35 +23,41 @@ void	print_status(t_status *status, int index)
 
 	state = status->status[index].state;
 	id = status->status[index].id;
-	// printf("%d, %d\n", state, id);
+	if (state == FAILURE)
+		printf("%s%ld %d burnt out !\n", RED, status->status[index].timestamp, id);
 	if (state == DONGLE)
-		printf("\033[0;3%dm %ld %d got dongles\n", id, status->status[index].timestamp, id);
+	{
+		printf("%s%ld %d got dongles\n", ORANGE,
+			status->status[index].timestamp, id);
+		printf("%s%ld %d got dongles\n", ORANGE,
+			status->status[index].timestamp, id);
+	}
 	else if (state == COMPILING)
-		printf("\033[0;3%dm %ld %d is compiling\n", id, status->status[index].timestamp, id);
+		printf("%s%ld %d is compiling\n", YELLOW,
+			status->status[index].timestamp, id);
 	else if (state == DEBUGGING)
-		printf("\033[0;3%dm %ld %d is debugging\n", id, status->status[index].timestamp, id);
+		printf("%s%ld %d is debugging\n", BLUE,
+			status->status[index].timestamp, id);
 	else if (state == REFACTORING)
-		printf("\033[0;3%dm %ld %d is refactoring\n", id, status->status[index].timestamp, id);
+		printf("%s%ld %d is refactoring\n", VIOLET,
+			status->status[index].timestamp, id);
 }
 
-void	change_status(long time, t_coder *coder, enum e_CoderState state)
+void	change_status(t_coder *coder, enum e_CoderState state)
 {
 	t_status	*status;
 
 	status = &coder->data->status;
 	pthread_mutex_lock(&status->mutex_status);
-	status->status[status->index].timestamp = time;
+	update_time(coder, state);
+	status->status[status->index].timestamp = get_time_up(coder);
 	status->status[status->index].id = coder->id;
 	status->status[status->index].state = state;
-	// print_status(status, status->index);
-	status->index++;
-	if (state == FAILURE)
-		coder->data->failure = 1;
+	if (state != FAILURE)
+		status->index++;
 	if (state == REFACTORING
 		&& coder->params.nb_compile == coder->params.max_compile)
 		status->status[status->index++].state = SUCCESS;
-	// printf("Coder %d, state %d, counter %d\n", coder->id, state,
-	// status->index);
 	pthread_cond_broadcast(&status->cond_status);
 	pthread_mutex_unlock(&status->mutex_status);
 }
@@ -65,17 +72,13 @@ void	*supervise(void *arg)
 	status = &data->status;
 	index = 0;
 	pthread_mutex_lock(&status->mutex_status);
-	while (status->index < status->length)
+	while (status->index < status->length && !data->failure)
 	{
 		while (status->status[index].state == INIT)
-			// printf("%d, ", status->status[index].state);
-			// continue;
 			pthread_cond_wait(&status->cond_status, &status->mutex_status);
-		// printf("%d\n", index);
 		print_status(status, index);
 		index++;
 	}
-	// printf("the end\n");
 	pthread_mutex_unlock(&status->mutex_status);
 	return (NULL);
 }

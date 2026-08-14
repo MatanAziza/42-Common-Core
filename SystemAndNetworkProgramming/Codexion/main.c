@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 16:44:23 by maziza            #+#    #+#             */
-/*   Updated: 2026/06/30 19:35:43 by maziza           ###   ########.fr       */
+/*   Updated: 2026/08/14 14:42:41 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,6 @@ void	init_status(t_data *data)
 	pthread_mutex_init(&data->status.mutex_status, NULL);
 	pthread_cond_init(&data->status.cond_status, NULL);
 	messages = (4 * data->params.max_compile + 1) * data->params.nb_threads;
-	printf("size = %d\n", messages);
 	data->status.status = malloc(sizeof(struct s_log) * messages);
 	i = 0;
 	while (i < messages)

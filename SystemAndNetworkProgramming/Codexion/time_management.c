@@ -26,7 +26,7 @@ void	start_time(t_data *data)
 void	update_time(t_coder *coder, int compile)
 {
 	gettimeofday(&coder->time, NULL);
-	if (compile)
+	if (compile == COMPILING)
 		clock_gettime(0, &coder->data->spec);
 }
 

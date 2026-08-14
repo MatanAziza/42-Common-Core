@@ -16,8 +16,7 @@
 
 int	debug(t_coder *coder, int left, int right)
 {
-	update_time(coder, 0);
-	change_status(get_time_up(coder), coder, DEBUGGING);
+	change_status(coder, DEBUGGING);
 	usleep(coder->params.debug_time * 1000);
 	left += right;
 	right -= left;

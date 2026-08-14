@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 13:45:14 by maziza            #+#    #+#             */
-/*   Updated: 2026/08/03 11:47:29 by maziza           ###   ########.fr       */
+/*   Updated: 2026/08/14 14:59:51 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,5 @@ void	*thread_function(void *arg)
 		if (execute_function(refactor, coder, left, right))
 			return (NULL);
 	}
-	printf("%d the end\n", coder->id);
 	return (NULL);
 }

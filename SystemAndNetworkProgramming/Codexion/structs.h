@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 20:39:06 by maziza            #+#    #+#             */
-/*   Updated: 2026/08/03 11:47:26 by maziza           ###   ########.fr       */
+/*   Updated: 2026/08/14 14:35:02 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ typedef struct s_status
 	pthread_cond_t		cond_status;
 	struct s_log		*status;
 	int					length;
-	int 				counter;
+	int					counter;
 	int					index;
 }						t_status;
 

@@ -16,8 +16,7 @@
 
 int	refactor(t_coder *coder, int left, int right)
 {
-	update_time(coder, 0);
-	change_status(get_time_up(coder), coder, REFACTORING);
+	change_status(coder, REFACTORING);
 	usleep(coder->params.refactor_time * 1000);
 	left += right;
 	right -= left;

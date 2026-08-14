@@ -49,7 +49,7 @@ int				fifo(t_coder coder);
 int				edf(t_coder coder);
 
 // Supervisor
-void			change_status(long time, t_coder *coder,
+void			change_status(t_coder *coder,
 					enum e_CoderState state);
 void			*supervise(void *arg);
 
