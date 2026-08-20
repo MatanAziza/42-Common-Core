@@ -6,7 +6,7 @@
 /*   By: maziza <matan.aziza@learner.42.tech>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 17:34:10 by maziza            #+#    #+#             */
-/*   Updated: 2026/08/03 11:04:25 by maziza           ###   ########.fr       */
+/*   Updated: 2026/08/18 12:10:50 by maziza           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ int				free_coders(t_data *data);
 
 // Thread Management
 void			*thread_function(void *arg);
-int				is_dongle_ready(t_dongle dongle, t_coder *coder);
+int				is_dongle_ready(t_dongle *dongle, t_coder *coder);
 int				execute_function(int function(t_coder *, int, int),
 					t_coder *coder, int left, int right);
 int				compile(t_coder *coder, int left, int right);
@@ -49,15 +49,14 @@ int				fifo(t_coder coder);
 int				edf(t_coder coder);
 
 // Supervisor
-void			change_status(t_coder *coder,
-					enum e_CoderState state);
+void			change_status(t_coder *coder, enum e_CoderState state);
 void			*supervise(void *arg);
 
 // Cooldowns
 void			start_time(t_data *data);
 void			update_time(t_coder *coder, int compile);
-void			add_burnout(t_coder *coder);
-long			get_time_up(t_coder *coder);
+void			add_time(struct timespec *ts, long time);
+long			get_time_up(t_coder *coder, struct timeval time);
 struct timespec	time_elapsed(struct timespec smaller, struct timespec bigger);
 
 #endif

@@ -25,10 +25,17 @@ t_coder	fill_coder(t_data *data, int id)
 	return (coder);
 }
 
-int	is_dongle_ready(t_dongle dongle, t_coder *coder)
+int	is_dongle_ready(t_dongle *dongle, t_coder *coder)
 {
-	if ((dongle.to_who == -1 || dongle.to_who == coder->id) && 1)
+	struct timeval	time;
+	int				is_ts_same;
+
+	gettimeofday(&time, NULL);
+	is_ts_same = (dongle->last_ts.tv_sec == dongle->ts.tv_sec && dongle->last_ts.tv_nsec == dongle->ts.tv_nsec);
+	if ((dongle->to_who == -1 || dongle->to_who == coder->id) && is_ts_same)
 		return (1);
+	dongle->last_ts.tv_sec = dongle->ts.tv_sec;
+	dongle->last_ts.tv_nsec = dongle->ts.tv_nsec;
 	return (0);
 }
 
@@ -55,7 +62,11 @@ void	*thread_function(void *arg)
 	swap(&right, &left, right < left);
 	while (!coder->data->start)
 		usleep(1);
-	update_time(coder, 4);
+	update_time(coder, COMPILING);
+	clock_gettime(0, &coder->data->dongles[left].ts);
+	clock_gettime(0, &coder->data->dongles[right].ts);
+	coder->data->dongles[left].last_ts = coder->data->dongles[left].ts;
+	coder->data->dongles[right].last_ts = coder->data->dongles[right].ts;
 	while (coder->params.nb_compile < coder->params.max_compile)
 	{
 		if (execute_function(compile, coder, left, right))

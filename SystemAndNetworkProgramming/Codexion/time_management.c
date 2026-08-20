@@ -26,26 +26,28 @@ void	start_time(t_data *data)
 void	update_time(t_coder *coder, int compile)
 {
 	gettimeofday(&coder->time, NULL);
-	if (compile == COMPILING)
-		clock_gettime(0, &coder->data->spec);
+	if (compile == COMPILING){
+		clock_gettime(0, &coder->spec);
+	}
 }
 
-void	add_burnout(t_coder *coder)
+void	add_time(struct timespec *ts, long time)
 {
-	long	burnout_ms;
-
-	burnout_ms = (coder->params.burnout_time % 1000);
-	coder->spec.tv_nsec += (burnout_ms * 1000000);
-	coder->spec.tv_sec += coder->params.burnout_time / 1000;
-	coder->spec.tv_nsec %= 1000000000;
+	// printf("%ld.%ld is time before added\n", ts->tv_sec, ts->tv_nsec);
+	// burnout_ms = coder->params.burnout_time;
+	ts->tv_sec += time / 1000;
+	ts->tv_nsec += (time % 1000) * 1000 * 1000;
+	ts->tv_sec += (ts->tv_nsec / 1000000000);
+	ts->tv_nsec %= 1000 * 1000 * 1000;
+	// printf("%ld.%ld is time after added\n", ts->tv_sec, ts->tv_nsec);
 }
 
-long	get_time_up(t_coder *coder)
+long	get_time_up(t_coder *coder, struct timeval time)
 {
 	long	time_elapsed;
 
-	time_elapsed = coder->time.tv_sec * 1000 - coder->data->time.tv_sec * 1000;
+	time_elapsed = time.tv_sec * 1000 - coder->data->time.tv_sec * 1000;
 	time_elapsed -= coder->data->time.tv_usec / 1000;
-	time_elapsed += coder->time.tv_usec / 1000;
+	time_elapsed += time.tv_usec / 1000;
 	return (time_elapsed);
 }

@@ -50,7 +50,7 @@ void	change_status(t_coder *coder, enum e_CoderState state)
 	status = &coder->data->status;
 	pthread_mutex_lock(&status->mutex_status);
 	update_time(coder, state);
-	status->status[status->index].timestamp = get_time_up(coder);
+	status->status[status->index].timestamp = get_time_up(coder, coder->time);
 	status->status[status->index].id = coder->id;
 	status->status[status->index].state = state;
 	if (state != FAILURE)

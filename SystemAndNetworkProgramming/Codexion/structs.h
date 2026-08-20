@@ -51,7 +51,8 @@ typedef struct s_dongle
 {
 	int					to_who;
 	int					cooldown;
-	struct timespec		last_use;
+	struct timespec		last_ts;
+	struct timespec		ts;
 	struct s_node		*queue;
 	pthread_mutex_t		mutex_dongle;
 	pthread_cond_t		cond_dongle;
