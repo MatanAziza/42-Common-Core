@@ -33,13 +33,10 @@ void	update_time(t_coder *coder, int compile)
 
 void	add_time(struct timespec *ts, long time)
 {
-	// printf("%ld.%ld is time before added\n", ts->tv_sec, ts->tv_nsec);
-	// burnout_ms = coder->params.burnout_time;
 	ts->tv_sec += time / 1000;
 	ts->tv_nsec += (time % 1000) * 1000 * 1000;
 	ts->tv_sec += (ts->tv_nsec / 1000000000);
 	ts->tv_nsec %= 1000 * 1000 * 1000;
-	// printf("%ld.%ld is time after added\n", ts->tv_sec, ts->tv_nsec);
 }
 
 long	get_time_up(t_coder *coder, struct timeval time)

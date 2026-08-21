@@ -36,25 +36,20 @@ int	unlock(t_coder *coder, int left, int right)
 
 int	wait(t_coder *coder, int left, int right)
 {
-	struct timespec ts;
-
-	clock_gettime(0, &ts);
-	clock_gettime(0, &ts);
-	printf("\033[1;31m%d %ld.%ld is dongle wait\n",coder->id, ts.tv_sec % 10, ts.tv_nsec);
 	while (1)
 	{
-	pthread_cond_timedwait(&coder->data->dongles[left].cond_dongle,
-		&coder->data->dongles[left].mutex_dongle,
-		&coder->data->dongles[left].ts);
-	pthread_cond_timedwait(&coder->data->dongles[right].cond_dongle,
-		&coder->data->dongles[right].mutex_dongle,
-		&coder->data->dongles[right].ts);
-	if (is_dongle_ready(&coder->data->dongles[left], coder)
-		&& is_dongle_ready(&coder->data->dongles[right], coder))
-		break;
+		if (is_dongle_ready(&coder->data->dongles[left], coder)
+			&& is_dongle_ready(&coder->data->dongles[right], coder))
+			break ;
+		pthread_cond_timedwait(&coder->data->dongles[left].cond_dongle,
+			&coder->data->dongles[left].mutex_dongle,
+			&coder->data->dongles[left].ts);
+		pthread_cond_timedwait(&coder->data->dongles[right].cond_dongle,
+			&coder->data->dongles[right].mutex_dongle,
+			&coder->data->dongles[right].ts);
 	}
-	clock_gettime(0, &ts);
-	printf("\033[1;31m%d %ld.%ld is end wait\n",coder->id, ts.tv_sec % 10, ts.tv_nsec);
+	// if (coder->id == 2 && coder->params.nb_compile == 1)
+	// 	return (1);
 	if (coder->data->failure)
 		return (2);
 	change_status(coder, DONGLE);
@@ -71,7 +66,6 @@ int	compile(t_coder *coder, int left, int right)
 	failure = wait(coder, left, right);
 	if (failure == 1)
 	{
-		// printf("%ld %d Start of BurnOut!\n", get_time_up(coder),coder->id);
 		usleep(10000);
 		change_status(coder, FAILURE);
 		coder->data->failure = 1;
@@ -80,8 +74,6 @@ int	compile(t_coder *coder, int left, int right)
 		return (unlock(coder, left, right));
 	coder->data->dongles[left].to_who = coder->id;
 	coder->data->dongles[right].to_who = coder->id;
-	// printf("%d to who = %d\n", coder->id, coder->data->dongles[left].to_who);
-	// printf("%d to who = %d\n", coder->id, coder->data->dongles[right].to_who);
 	change_status(coder, COMPILING);
 	coder->params.nb_compile++;
 	usleep(coder->params.compile_time * 1000);

@@ -11,7 +11,6 @@ OBJS    = $(SRC:%.c=$(OBJDIR)/%.o)
 all: $(NAME) exec
 
 $(NAME): $(OBJS)
-	clear
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
 $(OBJDIR)/%.o: %.c
@@ -27,9 +26,10 @@ fclean: clean
 re: fclean all
 
 exec: $(NAME)
-	./$(NAME) 4 10000 1000 1000 1000 2 500 fifo
+	clear
+	./$(NAME) 4 100 5 3 2 2 5 fifo
 
 val: $(NAME)
-	valgrind --leak-check=full ./$(NAME) 4 10000 1000 1000 1000 2 500 fifo
+	valgrind --leak-check=full ./$(NAME) 4 100 5 3 2 2 5 fifo
 
 .PHONY: all clean fclean re exec val
