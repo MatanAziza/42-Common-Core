@@ -34,6 +34,23 @@ int	unlock(t_coder *coder, int left, int right)
 	return (1);
 }
 
+int	has_burnt_out(t_coder *coder)
+{
+	struct timespec	ts;
+
+	clock_gettime(0, &ts);
+	// printf("%ld.%ld %d actual\n", ts.tv_sec%100, ts.tv_nsec/1000000, coder->id);
+	// printf("%ld.%ld %d burnout\n", coder->spec.tv_sec%100, coder->spec.tv_nsec/1000000, coder->id);
+	if (coder->spec.tv_sec > ts.tv_sec)
+		return (0);
+	else if (coder->spec.tv_sec == ts.tv_sec){
+		if (coder->spec.tv_nsec >= ts.tv_nsec)
+			return (0);
+	return (1);
+	}
+	return (1);
+}
+
 int	wait(t_coder *coder, int left, int right)
 {
 	while (1)
@@ -47,13 +64,14 @@ int	wait(t_coder *coder, int left, int right)
 		pthread_cond_timedwait(&coder->data->dongles[right].cond_dongle,
 			&coder->data->dongles[right].mutex_dongle,
 			&coder->data->dongles[right].ts);
+		if (has_burnt_out(coder))
+			return (1);
 	}
 	// if (coder->id == 2 && coder->params.nb_compile == 1)
 	// 	return (1);
 	if (coder->data->failure)
 		return (2);
 	change_status(coder, DONGLE);
-	add_time(&coder->spec, coder->params.burnout_time);
 	return (0);
 }
 
@@ -68,13 +86,14 @@ int	compile(t_coder *coder, int left, int right)
 	{
 		usleep(10000);
 		change_status(coder, FAILURE);
-		coder->data->failure = 1;
+		// coder->data->failure = 1;
 	}
 	if (coder->data->status.status[coder->data->status.index].state == FAILURE)
 		return (unlock(coder, left, right));
 	coder->data->dongles[left].to_who = coder->id;
 	coder->data->dongles[right].to_who = coder->id;
 	change_status(coder, COMPILING);
+	add_time(&coder->spec, coder->params.burnout_time);
 	coder->params.nb_compile++;
 	usleep(coder->params.compile_time * 1000);
 	unlock(coder, left, right);

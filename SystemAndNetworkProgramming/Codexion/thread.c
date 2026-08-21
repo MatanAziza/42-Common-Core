@@ -14,6 +14,7 @@
 #include "structs.h"
 #include <errno.h>
 #include <sys/time.h>
+#include <time.h>
 
 t_coder	fill_coder(t_data *data, int id)
 {
@@ -63,6 +64,9 @@ void	*thread_function(void *arg)
 	while (!coder->data->start)
 		usleep(1);
 	update_time(coder, COMPILING);
+	// printf("%ld.%ld start adding\n", coder->spec.tv_sec % 100, coder->spec.tv_nsec / 1000000);
+	add_time(&coder->spec, coder->params.burnout_time);
+	// printf("%ld.%ld start adding 2\n", coder->spec.tv_sec % 100, coder->spec.tv_nsec / 1000000);
 	clock_gettime(0, &coder->data->dongles[left].ts);
 	clock_gettime(0, &coder->data->dongles[right].ts);
 	coder->data->dongles[left].last_ts = coder->data->dongles[left].ts;

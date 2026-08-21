@@ -77,6 +77,8 @@ void	*supervise(void *arg)
 		while (status->status[index].state == INIT)
 			pthread_cond_wait(&status->cond_status, &status->mutex_status);
 		print_status(status, index);
+		if (status->status[index].state == FAILURE)
+			data->failure = 1;
 		index++;
 	}
 	pthread_mutex_unlock(&status->mutex_status);
