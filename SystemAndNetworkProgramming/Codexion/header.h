@@ -45,8 +45,8 @@ int				refactor(t_coder *coder, int left, int right);
 void			swap(int *a, int *b, int cond);
 
 // Queue
-int				fifo(t_coder coder);
-int				edf(t_coder coder);
+int				fifo(t_dongle *dongle);
+int				edf(t_dongle *dongle);
 
 // Supervisor
 void			change_status(t_coder *coder, enum e_CoderState state);

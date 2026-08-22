@@ -43,8 +43,9 @@ typedef struct s_params
 
 typedef struct s_node
 {
-	int					thread_id;
-	struct timeval		time;
+	int					id;
+	struct timeval		tv;
+	struct timespec		burnout;
 }						t_node;
 
 typedef struct s_dongle
@@ -53,7 +54,8 @@ typedef struct s_dongle
 	int					cooldown;
 	struct timespec		last_ts;
 	struct timespec		ts;
-	struct s_node		*queue;
+	struct s_node		left;
+	struct s_node		right;
 	pthread_mutex_t		mutex_dongle;
 	pthread_cond_t		cond_dongle;
 }						t_dongle;

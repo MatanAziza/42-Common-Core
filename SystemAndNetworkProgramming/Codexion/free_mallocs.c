@@ -35,5 +35,6 @@ int	free_all(pthread_t **threads, t_data *data)
 	free(*threads);
 	free(data->dongles);
 	free(data->coders);
+	free(data->status.status);
 	return (1);
 }

@@ -48,6 +48,8 @@ void	fill_dongle(t_dongle *dongle, int cd)
 {
 	dongle->to_who = -1;
 	dongle->cooldown = cd;
+	dongle->left.id = -1;
+	dongle->right.id = -1;
 	pthread_mutex_init(&dongle->mutex_dongle, NULL);
 	pthread_cond_init(&dongle->cond_dongle, NULL);
 }
