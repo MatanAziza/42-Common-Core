@@ -21,8 +21,7 @@ int	unlock(t_coder *coder, int left, int right)
 {
 	update_time(coder, 0);
 	// To do: replace next 2 lines with queue to_who
-	coder->data->dongles[left].to_who = -1;
-	coder->data->dongles[right].to_who = -1;
+	update_dongle_queue(coder, left, right);
 	clock_gettime(0, &coder->data->dongles[left].ts);
 	clock_gettime(0, &coder->data->dongles[right].ts);
 	add_time(&coder->data->dongles[left].ts, coder->params.dongle_cooldown);
@@ -55,6 +54,7 @@ int	wait(t_coder *coder, int left, int right)
 {
 	while (1)
 	{
+		printf("\033[1;37mCoder %d, left dongle %d, right dongle %d\n", coder->id, coder->data->dongles[left].to_who, coder->data->dongles[right].to_who);
 		if (is_dongle_ready(&coder->data->dongles[left], coder)
 			&& is_dongle_ready(&coder->data->dongles[right], coder))
 			break ;
@@ -79,9 +79,12 @@ int	compile(t_coder *coder, int left, int right)
 {
 	int	failure;
 
+	printf("\033[1;37mStart for %d\n", coder->id);
 	pthread_mutex_lock(&coder->data->dongles[left].mutex_dongle);
+	printf("Coder %d unlocked %d\n", coder->id, left);
 	pthread_mutex_lock(&coder->data->dongles[right].mutex_dongle);
 	failure = wait(coder, left, right);
+	printf("\033[1;37m%d finished waiting\n", coder->id);
 	if (failure == 1)
 	{
 		usleep(10000);

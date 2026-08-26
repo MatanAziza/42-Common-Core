@@ -45,8 +45,9 @@ int				refactor(t_coder *coder, int left, int right);
 void			swap(int *a, int *b, int cond);
 
 // Queue
-int				fifo(t_dongle *dongle);
-int				edf(t_dongle *dongle);
+void			fifo(t_dongle *dongle);
+void			edf(t_dongle *dongle);
+void			update_dongle_queue(t_coder *coder, int left, int right);
 
 // Supervisor
 void			change_status(t_coder *coder, enum e_CoderState state);

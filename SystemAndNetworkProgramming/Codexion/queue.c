@@ -15,7 +15,7 @@
 
 void	update_queue_infos(t_coder *coder, int dongle_id)
 {
-	t_dongle *dongle;
+	t_dongle	*dongle;
 
 	dongle = &coder->data->dongles[dongle_id];
 	if (coder->id == dongle_id)
@@ -32,19 +32,61 @@ void	update_queue_infos(t_coder *coder, int dongle_id)
 	}
 }
 
-int		next_coder(t_coder *coder, t_dongle *dongle)
+void	fifo(t_dongle *dongle)
+{
+	if (dongle->left.tv.tv_sec > dongle->right.tv.tv_sec)
+	// {
+		dongle->to_who = dongle->right.id;
+	// 	printf("right first\n");
+	// }
+	else if (dongle->left.tv.tv_sec < dongle->right.tv.tv_sec)
+	// {
+		dongle->to_who = dongle->left.id;
+	// 	printf("left first\n");
+	// }
+	else
+	{
+		if (dongle->left.tv.tv_usec > dongle->right.tv.tv_usec)
+		// {
+			dongle->to_who = dongle->right.id;
+		// 	printf("miniright first\n");
+		// }
+		else if (dongle->left.tv.tv_usec < dongle->right.tv.tv_usec)
+		// {
+			dongle->to_who = dongle->left.id;
+			// printf("minileft first\n");
+		// }
+		else
+		// {
+			dongle->to_who = dongle->left.id;
+			// printf("last option\n");
+		// }
+	}
+}
+
+void	edf(t_dongle *dongle)
+{
+	dongle->to_who = -1;
+}
+
+int	next_coder(t_coder *coder, t_dongle *dongle)
 {
 	if (dongle->right.id == -1)
-		dongle->to_who = dongle->left.id;
+		dongle->to_who = (dongle->left.id + 1) % coder->params.nb_threads;
 	else if (dongle->left.id == -1)
-		dongle->to_who = dongle->right.id;
+		dongle->to_who = (dongle->right.id - 1 + coder->params.nb_threads)
+			% coder->params.nb_threads;
 	else
 	{
 		if (!strcmp(coder->params.mode, "fifo"))
-			dongle->to_who = fifo(dongle);
-		else if (!strcmp(coder->params.mode, "edf"))
-			dongle->to_who = edf(dongle);
+			fifo(dongle);
+		// else if (!strcmp(coder->params.mode, "edf"))
+		// 	edf(dongle);
+		else
+			dongle->to_who = -1;
 	}
+	printf("\033[1;37mDongle for %d and %d to_who: %d\n", dongle->left.id,
+		dongle->right.id, dongle->to_who);
 	return (0);
 }
 
@@ -57,5 +99,5 @@ void	update_dongle_queue(t_coder *coder, int left, int right)
 	// l'id du to_who (selon fifo ou edf)
 	next_coder(coder, &coder->data->dongles[left]);
 	next_coder(coder, &coder->data->dongles[right]);
-	return;
+	return ;
 }
