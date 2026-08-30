@@ -38,14 +38,17 @@ int	has_burnt_out(t_coder *coder)
 	struct timespec	ts;
 
 	clock_gettime(0, &ts);
-	// printf("%ld.%ld %d actual\n", ts.tv_sec%100, ts.tv_nsec/1000000, coder->id);
-	// printf("%ld.%ld %d burnout\n", coder->spec.tv_sec%100, coder->spec.tv_nsec/1000000, coder->id);
+	// printf("%ld.%ld %d actual\n", ts.tv_sec%100, ts.tv_nsec/1000000,
+		// coder->id);
+	// printf("%ld.%ld %d burnout\n", coder->spec.tv_sec%100,
+		// coder->spec.tv_nsec/1000000, coder->id);
 	if (coder->spec.tv_sec > ts.tv_sec)
 		return (0);
-	else if (coder->spec.tv_sec == ts.tv_sec){
+	else if (coder->spec.tv_sec == ts.tv_sec)
+	{
 		if (coder->spec.tv_nsec >= ts.tv_nsec)
 			return (0);
-	return (1);
+		return (1);
 	}
 	return (1);
 }
@@ -54,7 +57,9 @@ int	wait(t_coder *coder, int left, int right)
 {
 	while (1)
 	{
-		printf("\033[1;37mCoder %d, left dongle %d, right dongle %d\n", coder->id, coder->data->dongles[left].to_who, coder->data->dongles[right].to_who);
+		printf("\033[1;37mCoder %d, left dongle %d, right dongle %d\n",
+			coder->id, coder->data->dongles[left].to_who,
+			coder->data->dongles[right].to_who);
 		if (is_dongle_ready(&coder->data->dongles[left], coder)
 			&& is_dongle_ready(&coder->data->dongles[right], coder))
 			break ;
