@@ -58,10 +58,11 @@ void	fifo(t_dongle *dongle)
 		// }
 		else
 		// {
-			dongle->to_who = dongle->left.id;
+			dongle->to_who = -1;
 			// printf("last option\n");
 		// }
 	}
+	printf("%d is next for dongle %d %d\n", dongle->to_who, dongle->left.id, dongle->right.id);
 }
 
 void	edf(t_dongle *dongle)
@@ -85,8 +86,8 @@ int	next_coder(t_coder *coder, t_dongle *dongle)
 		else
 			dongle->to_who = -1;
 	}
-	printf("\033[1;37mDongle for %d and %d to_who: %d\n", dongle->left.id,
-		dongle->right.id, dongle->to_who);
+	// printf("\033[1;37mDongle for %d and %d to_who: %d\n", dongle->left.id,
+		// dongle->right.id, dongle->to_who);
 	return (0);
 }
 

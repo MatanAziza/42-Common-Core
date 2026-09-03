@@ -57,9 +57,9 @@ int	wait(t_coder *coder, int left, int right)
 {
 	while (1)
 	{
-		printf("\033[1;37mCoder %d, left dongle %d, right dongle %d\n",
-			coder->id, coder->data->dongles[left].to_who,
-			coder->data->dongles[right].to_who);
+		// printf("\033[1;37mCoder %d, left dongle %d, right dongle %d\n",
+			// coder->id, coder->data->dongles[left].to_who,
+			// coder->data->dongles[right].to_who);
 		if (is_dongle_ready(&coder->data->dongles[left], coder)
 			&& is_dongle_ready(&coder->data->dongles[right], coder))
 			break ;
@@ -84,9 +84,12 @@ int	compile(t_coder *coder, int left, int right)
 {
 	int	failure;
 
-	printf("\033[1;37mStart for %d\n", coder->id);
+	// printf("\033[1;37mStart for %d\n", coder->id);
+	while (!is_dongle_ready(&coder->data->dongles[left], coder)
+		|| !is_dongle_ready(&coder->data->dongles[right], coder))
+		continue ;
 	pthread_mutex_lock(&coder->data->dongles[left].mutex_dongle);
-	printf("Coder %d unlocked %d\n", coder->id, left);
+	// printf("Coder %d unlocked %d\n", coder->id, left);
 	pthread_mutex_lock(&coder->data->dongles[right].mutex_dongle);
 	failure = wait(coder, left, right);
 	printf("\033[1;37m%d finished waiting\n", coder->id);

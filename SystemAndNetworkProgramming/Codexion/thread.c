@@ -31,7 +31,7 @@ int	is_dongle_ready(t_dongle *dongle, t_coder *coder)
 	int				is_ts_same;
 
 	is_ts_same = (dongle->last_ts.tv_sec == dongle->ts.tv_sec && dongle->last_ts.tv_nsec == dongle->ts.tv_nsec);
-	printf("Coder %d for %d %d, ts_same = %d\n", coder->id, dongle->left.id, dongle->right.id, is_ts_same);
+	// printf("Coder %d for %d %d, ts_same = %d\n", coder->id, dongle->left.id, dongle->right.id, is_ts_same);
 	if ((dongle->to_who == -1 || dongle->to_who == coder->id) && is_ts_same)
 		return (1);
 	dongle->last_ts.tv_sec = dongle->ts.tv_sec;
