@@ -20,7 +20,6 @@
 int	unlock(t_coder *coder, int left, int right)
 {
 	update_time(coder, 0);
-	// To do: replace next 2 lines with queue to_who
 	update_dongle_queue(coder, left, right);
 	clock_gettime(0, &coder->data->dongles[left].ts);
 	clock_gettime(0, &coder->data->dongles[right].ts);
@@ -38,10 +37,6 @@ int	has_burnt_out(t_coder *coder)
 	struct timespec	ts;
 
 	clock_gettime(0, &ts);
-	// printf("%ld.%ld %d actual\n", ts.tv_sec%100, ts.tv_nsec/1000000,
-		// coder->id);
-	// printf("%ld.%ld %d burnout\n", coder->spec.tv_sec%100,
-		// coder->spec.tv_nsec/1000000, coder->id);
 	if (coder->spec.tv_sec > ts.tv_sec)
 		return (0);
 	else if (coder->spec.tv_sec == ts.tv_sec)

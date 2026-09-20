@@ -24,7 +24,8 @@ void	print_status(t_status *status, int index)
 	state = status->status[index].state;
 	id = status->status[index].id;
 	if (state == FAILURE)
-		printf("%s%ld %d burnt out !\n", RED, status->status[index].timestamp, id);
+		printf("%s%ld %d burnt out !\n", RED, status->status[index].timestamp,
+			id);
 	if (state == DONGLE)
 	{
 		printf("%s%ld %d got dongles\n", ORANGE,
@@ -36,8 +37,8 @@ void	print_status(t_status *status, int index)
 		printf("%s%ld %d is compiling\n", YELLOW,
 			status->status[index].timestamp, id);
 	else if (state == DEBUGGING)
-		printf("%s%ld %d is debugging\n", BLUE,
-			status->status[index].timestamp, id);
+		printf("%s%ld %d is debugging\n", BLUE, status->status[index].timestamp,
+			id);
 	else if (state == REFACTORING)
 		printf("%s%ld %d is refactoring\n", VIOLET,
 			status->status[index].timestamp, id);

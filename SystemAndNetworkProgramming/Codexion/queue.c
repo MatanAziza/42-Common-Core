@@ -77,8 +77,8 @@ int	next_coder(t_coder *coder, t_dongle *dongle)
 	{
 		if (!strcmp(coder->params.mode, "fifo"))
 			fifo(dongle);
-		// else if (!strcmp(coder->params.mode, "edf"))
-		// 	edf(dongle);
+		else if (!strcmp(coder->params.mode, "edf"))
+			edf(dongle);
 		else
 			dongle->to_who = -1;
 	}
