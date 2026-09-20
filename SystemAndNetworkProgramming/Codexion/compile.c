@@ -57,9 +57,6 @@ int	wait(t_coder *coder, int left, int right)
 {
 	while (1)
 	{
-		// printf("\033[1;37mCoder %d, left dongle %d, right dongle %d\n",
-			// coder->id, coder->data->dongles[left].to_who,
-			// coder->data->dongles[right].to_who);
 		if (is_dongle_ready(&coder->data->dongles[left], coder)
 			&& is_dongle_ready(&coder->data->dongles[right], coder))
 			break ;
@@ -72,8 +69,6 @@ int	wait(t_coder *coder, int left, int right)
 		if (has_burnt_out(coder))
 			return (1);
 	}
-	// if (coder->id == 2 && coder->params.nb_compile == 1)
-	// 	return (1);
 	if (coder->data->failure)
 		return (2);
 	change_status(coder, DONGLE);
@@ -84,20 +79,16 @@ int	compile(t_coder *coder, int left, int right)
 {
 	int	failure;
 
-	// printf("\033[1;37mStart for %d\n", coder->id);
 	while (!is_dongle_ready(&coder->data->dongles[left], coder)
 		|| !is_dongle_ready(&coder->data->dongles[right], coder))
 		continue ;
 	pthread_mutex_lock(&coder->data->dongles[left].mutex_dongle);
-	// printf("Coder %d unlocked %d\n", coder->id, left);
 	pthread_mutex_lock(&coder->data->dongles[right].mutex_dongle);
 	failure = wait(coder, left, right);
-	printf("\033[1;37m%d finished waiting\n", coder->id);
 	if (failure == 1)
 	{
 		usleep(10000);
 		change_status(coder, FAILURE);
-		// coder->data->failure = 1;
 	}
 	if (coder->data->status.status[coder->data->status.index].state == FAILURE)
 		return (unlock(coder, left, right));
