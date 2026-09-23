@@ -29,6 +29,9 @@ exec: $(NAME)
 	clear
 	./$(NAME) 4 100 5 3 2 2 5 fifo
 
+loop:
+	for i in $(seq 1 100); do make exec; done;
+
 val: $(NAME)
 	valgrind --leak-check=full ./$(NAME) 4 100 5 3 2 2 5 fifo
 

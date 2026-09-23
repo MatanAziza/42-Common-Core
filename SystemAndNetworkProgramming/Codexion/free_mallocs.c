@@ -30,6 +30,16 @@ int	free_coders(t_data *data)
 	return (1);
 }
 
+int	free_queues(t_data *data, int max_malloc)
+{
+	int	i;
+
+	i = 0;
+	while (i < max_malloc)
+		free(data->dongles[i++].queue);
+	return (1);
+}
+
 int	free_all(pthread_t **threads, t_data *data)
 {
 	free(*threads);

@@ -48,17 +48,25 @@ void	fill_dongle(t_dongle *dongle, int cd)
 {
 	dongle->to_who = -1;
 	dongle->cooldown = cd;
-	dongle->left.id = -1;
-	dongle->right.id = -1;
+	dongle->queue_index = 0;
 	pthread_mutex_init(&dongle->mutex_dongle, NULL);
 	pthread_cond_init(&dongle->cond_dongle, NULL);
 }
 
 int	mallocs(t_data *data, int *values)
 {
+	int	i;
+
+	i = 0;
 	data->dongles = malloc(sizeof(t_dongle) * values[0]);
 	if (!data->dongles)
 		return (1);
+	while (i < values[0]){
+		data->dongles[i].queue = malloc(sizeof(struct s_node) * 2);
+		if (!data->dongles[i].queue)
+			return (free_queues(data, i));
+		i++;
+	}
 	data->coders = malloc(sizeof(t_coder) * values[0]);
 	if (!data->coders)
 		return (free_dongles(data));

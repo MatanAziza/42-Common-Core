@@ -33,20 +33,25 @@ int				free_all(pthread_t **threads, t_data *data);
 int				free_values(int *values);
 int				free_dongles(t_data *data);
 int				free_coders(t_data *data);
+int				free_queues(t_data *data, int max_malloc);
 
 // Thread Management
 void			*thread_function(void *arg);
 int				is_dongle_ready(t_dongle *dongle, t_coder *coder);
+int				is_ts_same(t_dongle *dongle1, t_dongle *dongle2);
 int				execute_function(int function(t_coder *, int, int),
 					t_coder *coder, int left, int right);
 int				compile(t_coder *coder, int left, int right);
 int				debug(t_coder *coder, int left, int right);
 int				refactor(t_coder *coder, int left, int right);
 void			swap(int *a, int *b, int cond);
+void			custom_timedwait(const struct timespec *abstime);
 
 // Queue
 void			fifo(t_dongle *dongle);
 void			edf(t_dongle *dongle);
+void			update_queue_infos(t_coder *coder, int dongle_id);
+int				next_coder(t_coder *coder, t_dongle *dongle);
 void			update_dongle_queue(t_coder *coder, int left, int right);
 
 // Supervisor

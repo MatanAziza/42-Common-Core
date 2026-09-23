@@ -16,63 +16,49 @@
 void	update_queue_infos(t_coder *coder, int dongle_id)
 {
 	t_dongle	*dongle;
+	int			index;
 
 	dongle = &coder->data->dongles[dongle_id];
-	if (coder->id == dongle_id)
-	{
-		dongle->right.id = coder->id;
-		dongle->right.burnout = coder->spec;
-		dongle->right.tv = coder->time;
-	}
-	else
-	{
-		dongle->left.id = coder->id;
-		dongle->left.burnout = coder->spec;
-		dongle->left.tv = coder->time;
-	}
+	index = dongle->queue_index;
+	if (index > 1)
+		index = 1;
+	dongle->queue[index].id = coder->id;
+	// printf("%d\n", dongle->queue[dongle->queue_index].id);
+	dongle->queue[index].ts = coder->spec;
+	dongle->queue[index].tv = coder->time;
+	dongle->queue_index = index + 1;
 }
 
 void	fifo(t_dongle *dongle)
 {
-	if (dongle->left.tv.tv_sec > dongle->right.tv.tv_sec)
-		dongle->to_who = dongle->right.id;
-	else if (dongle->left.tv.tv_sec < dongle->right.tv.tv_sec)
-		dongle->to_who = dongle->left.id;
-	else
-	{
-		if (dongle->left.tv.tv_usec > dongle->right.tv.tv_usec)
-			dongle->to_who = dongle->right.id;
-		else if (dongle->left.tv.tv_usec < dongle->right.tv.tv_usec)
-			dongle->to_who = dongle->left.id;
-		else
-			dongle->to_who = -1;
-	}
+	dongle->to_who = dongle->queue[0].id;
+	// printf("\033[0;37m%d, %d, %d\n", dongle->queue[0].id, dongle->queue[1].id, dongle->to_who);
+	dongle->queue[0] = dongle->queue[1];
 }
 
 void	edf(t_dongle *dongle)
 {
-	if (dongle->left.burnout.tv_sec > dongle->right.burnout.tv_sec)
-		dongle->to_who = dongle->right.id;
-	else if (dongle->left.burnout.tv_sec < dongle->right.burnout.tv_sec)
-		dongle->to_who = dongle->left.id;
+	if (dongle->queue[0].ts.tv_sec > dongle->queue[1].ts.tv_sec)
+		dongle->to_who = dongle->queue[1].id;
+	else if (dongle->queue[0].ts.tv_sec < dongle->queue[1].ts.tv_sec)
+		dongle->to_who = dongle->queue[0].id;
 	else
 	{
-		if (dongle->left.burnout.tv_nsec > dongle->right.burnout.tv_nsec)
-			dongle->to_who = dongle->right.id;
-		else if (dongle->left.burnout.tv_nsec < dongle->right.burnout.tv_nsec)
-			dongle->to_who = dongle->left.id;
+		if (dongle->queue[0].ts.tv_nsec > dongle->queue[1].ts.tv_nsec)
+			dongle->to_who = dongle->queue[1].id;
+		else if (dongle->queue[0].ts.tv_nsec < dongle->queue[1].ts.tv_nsec)
+			dongle->to_who = dongle->queue[0].id;
 		else
 			dongle->to_who = -1;
 	}
+	dongle->queue[0] = dongle->queue[1];
+	// printf("edf\n");
 }
 
 int	next_coder(t_coder *coder, t_dongle *dongle)
 {
-	if (dongle->right.id == -1)
-		dongle->to_who = (dongle->left.id + 1) % coder->params.nb_threads;
-	else if (dongle->left.id == -1)
-		dongle->to_who = (dongle->right.id - 1 + coder->params.nb_threads)
-			% coder->params.nb_threads;
+	if (dongle->queue_index == 1)
+		dongle->to_who = dongle->queue[0].id ;
 	else
 	{
 		if (!strcmp(coder->params.mode, "fifo"))
@@ -82,14 +68,23 @@ int	next_coder(t_coder *coder, t_dongle *dongle)
 		else
 			dongle->to_who = -1;
 	}
+	// printf("Dongle %d owned by %d\n", dongle->queue[0].id, dongle->to_who);
 	return (0);
 }
 
 void	update_dongle_queue(t_coder *coder, int left, int right)
 {
+	pthread_mutex_lock(&coder->data->dongles[left].mutex_dongle);
+	clock_gettime(0, &coder->data->dongles[left].ts);
+	coder->data->dongles[left].last_ts = coder->data->dongles[left].ts;
 	update_queue_infos(coder, left);
-	update_queue_infos(coder, right);
 	next_coder(coder, &coder->data->dongles[left]);
+	pthread_mutex_unlock(&coder->data->dongles[left].mutex_dongle);
+	pthread_mutex_lock(&coder->data->dongles[right].mutex_dongle);
+	clock_gettime(0, &coder->data->dongles[right].ts);
+	coder->data->dongles[right].last_ts = coder->data->dongles[right].ts;
+	update_queue_infos(coder, right);
 	next_coder(coder, &coder->data->dongles[right]);
+	pthread_mutex_unlock(&coder->data->dongles[right].mutex_dongle);
 	return ;
 }

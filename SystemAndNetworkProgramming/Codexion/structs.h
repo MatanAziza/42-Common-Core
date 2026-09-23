@@ -45,17 +45,17 @@ typedef struct s_node
 {
 	int					id;
 	struct timeval		tv;
-	struct timespec		burnout;
+	struct timespec		ts;
 }						t_node;
 
 typedef struct s_dongle
 {
 	int					to_who;
 	int					cooldown;
+	int					queue_index;
 	struct timespec		last_ts;
 	struct timespec		ts;
-	struct s_node		left;
-	struct s_node		right;
+	struct s_node		*queue;
 	pthread_mutex_t		mutex_dongle;
 	pthread_cond_t		cond_dongle;
 }						t_dongle;
