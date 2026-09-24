@@ -61,7 +61,8 @@ int	mallocs(t_data *data, int *values)
 	data->dongles = malloc(sizeof(t_dongle) * values[0]);
 	if (!data->dongles)
 		return (1);
-	while (i < values[0]){
+	while (i < values[0])
+	{
 		data->dongles[i].queue = malloc(sizeof(struct s_node) * 2);
 		if (!data->dongles[i].queue)
 			return (free_queues(data, i));

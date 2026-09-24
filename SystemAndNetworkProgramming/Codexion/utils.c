@@ -28,12 +28,14 @@ void	custom_timedwait(const struct timespec *abstime)
 {
 	struct timespec	now;
 	long			time_in_ms;
+
 	clock_gettime(0, &now);
 	if (now.tv_sec > abstime->tv_sec)
 		return ;
 	if (now.tv_sec == abstime->tv_sec && now.tv_nsec >= abstime->tv_nsec)
 		return ;
-	time_in_ms = 1000000 * (abstime->tv_sec - now.tv_sec) + (abstime->tv_nsec - now.tv_nsec) / 1000;
+	time_in_ms = 1000000 * (abstime->tv_sec - now.tv_sec) + (abstime->tv_nsec
+			- now.tv_nsec) / 1000;
 	usleep(time_in_ms);
 }
 

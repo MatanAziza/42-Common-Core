@@ -40,11 +40,13 @@ int	is_ts_same(t_dongle *dongle1, t_dongle *dongle2)
 			&& dongle1->last_ts.tv_nsec == dongle1->ts.tv_nsec);
 	is_ts_same2 = (dongle2->last_ts.tv_sec == dongle2->ts.tv_sec
 			&& dongle2->last_ts.tv_nsec == dongle2->ts.tv_nsec);
-	if (!is_ts_same1){
+	if (!is_ts_same1)
+	{
 		dongle1->last_ts.tv_sec = dongle1->ts.tv_sec;
 		dongle1->last_ts.tv_nsec = dongle1->ts.tv_nsec;
 	}
-	if (!is_ts_same2){
+	if (!is_ts_same2)
+	{
 		dongle2->last_ts.tv_sec = dongle2->ts.tv_sec;
 		dongle2->last_ts.tv_nsec = dongle2->ts.tv_nsec;
 	}

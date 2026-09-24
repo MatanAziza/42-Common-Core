@@ -23,7 +23,6 @@ void	update_queue_infos(t_coder *coder, int dongle_id)
 	if (index > 1)
 		index = 1;
 	dongle->queue[index].id = coder->id;
-	// printf("%d\n", dongle->queue[dongle->queue_index].id);
 	dongle->queue[index].ts = coder->spec;
 	dongle->queue[index].tv = coder->time;
 	dongle->queue_index = index + 1;
@@ -32,7 +31,6 @@ void	update_queue_infos(t_coder *coder, int dongle_id)
 void	fifo(t_dongle *dongle)
 {
 	dongle->to_who = dongle->queue[0].id;
-	// printf("\033[0;37m%d, %d, %d\n", dongle->queue[0].id, dongle->queue[1].id, dongle->to_who);
 	dongle->queue[0] = dongle->queue[1];
 }
 
@@ -52,13 +50,12 @@ void	edf(t_dongle *dongle)
 			dongle->to_who = -1;
 	}
 	dongle->queue[0] = dongle->queue[1];
-	// printf("edf\n");
 }
 
 int	next_coder(t_coder *coder, t_dongle *dongle)
 {
 	if (dongle->queue_index == 1)
-		dongle->to_who = dongle->queue[0].id ;
+		dongle->to_who = dongle->queue[0].id;
 	else
 	{
 		if (!strcmp(coder->params.mode, "fifo"))
@@ -68,7 +65,6 @@ int	next_coder(t_coder *coder, t_dongle *dongle)
 		else
 			dongle->to_who = -1;
 	}
-	// printf("Dongle %d owned by %d\n", dongle->queue[0].id, dongle->to_who);
 	return (0);
 }
 

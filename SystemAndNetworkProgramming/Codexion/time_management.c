@@ -12,7 +12,6 @@
 
 #include "header.h"
 #include "structs.h"
-#include <stdio.h>
 #include <sys/time.h>
 #include <time.h>
 
@@ -28,7 +27,6 @@ void	update_time(t_coder *coder, int compile)
 	gettimeofday(&coder->time, NULL);
 	if (compile == COMPILING)
 		clock_gettime(0, &coder->spec);
-	// printf("%d my time is %ld.%ld\n", coder->id, coder->spec.tv_sec, coder->spec.tv_nsec);
 }
 
 void	add_time(struct timespec *ts, long time)
