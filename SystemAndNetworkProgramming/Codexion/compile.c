@@ -56,7 +56,6 @@ int	wait(t_coder *coder, int left, int right)
 {
 	while (1)
 	{
-		// Lock unlock dans is_dongle_ready pour eviter les data race
 		if (is_dongle_ready(&coder->data->dongles[left], coder)
 			&& is_dongle_ready(&coder->data->dongles[right], coder))
 			break ;

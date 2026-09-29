@@ -28,7 +28,7 @@ t_coder	fill_coder(t_data *data, int id)
 
 int	is_dongle_ready(t_dongle *dongle, t_coder *coder)
 {
-	return (dongle->to_who == -1 || dongle->to_who == coder->id);
+	return (dongle->to_who == coder->id);
 }
 
 int	is_ts_same(t_dongle *dongle1, t_dongle *dongle2)

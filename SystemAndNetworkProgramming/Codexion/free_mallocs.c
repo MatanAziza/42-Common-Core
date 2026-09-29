@@ -43,6 +43,7 @@ int	free_queues(t_data *data, int max_malloc)
 int	free_all(pthread_t **threads, t_data *data)
 {
 	free(*threads);
+	free_queues(data, data->params.nb_threads);
 	free(data->dongles);
 	free(data->coders);
 	free(data->status.status);

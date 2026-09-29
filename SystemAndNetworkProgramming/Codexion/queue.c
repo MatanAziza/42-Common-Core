@@ -39,23 +39,26 @@ void	edf(t_dongle *dongle)
 	if (dongle->queue[0].ts.tv_sec > dongle->queue[1].ts.tv_sec)
 		dongle->to_who = dongle->queue[1].id;
 	else if (dongle->queue[0].ts.tv_sec < dongle->queue[1].ts.tv_sec)
+	{
 		dongle->to_who = dongle->queue[0].id;
+		dongle->queue[0] = dongle->queue[1];
+	}
 	else
 	{
 		if (dongle->queue[0].ts.tv_nsec > dongle->queue[1].ts.tv_nsec)
 			dongle->to_who = dongle->queue[1].id;
-		else if (dongle->queue[0].ts.tv_nsec < dongle->queue[1].ts.tv_nsec)
-			dongle->to_who = dongle->queue[0].id;
 		else
-			dongle->to_who = -1;
+		{
+			dongle->to_who = dongle->queue[0].id;
+			dongle->queue[0] = dongle->queue[1];
+		}
 	}
-	dongle->queue[0] = dongle->queue[1];
 }
 
 int	next_coder(t_coder *coder, t_dongle *dongle)
 {
 	if (dongle->queue_index == 1)
-		dongle->to_who = dongle->queue[0].id;
+		return (0);
 	else
 	{
 		if (!strcmp(coder->params.mode, "fifo"))
