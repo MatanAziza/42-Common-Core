@@ -25,23 +25,23 @@ void	print_status(t_status *status, int index)
 	id = status->status[index].id;
 	if (state == FAILURE)
 		printf("%s%ld %d burnt out !\n", RED, status->status[index].timestamp,
-			id);
+			id + 1);
 	if (state == DONGLE)
 	{
 		printf("%s%ld %d got dongles\n", ORANGE,
-			status->status[index].timestamp, id);
+			status->status[index].timestamp, id + 1);
 		printf("%s%ld %d got dongles\n", ORANGE,
-			status->status[index].timestamp, id);
+			status->status[index].timestamp, id + 1);
 	}
 	else if (state == COMPILING)
 		printf("%s%ld %d is compiling\n", YELLOW,
-			status->status[index].timestamp, id);
+			status->status[index].timestamp, id + 1);
 	else if (state == DEBUGGING)
 		printf("%s%ld %d is debugging\n", BLUE, status->status[index].timestamp,
-			id);
+			id + 1);
 	else if (state == REFACTORING)
 		printf("%s%ld %d is refactoring\n", VIOLET,
-			status->status[index].timestamp, id);
+			status->status[index].timestamp, id + 1);
 }
 
 void	change_status(t_coder *coder, enum e_CoderState state)
@@ -75,6 +75,8 @@ void	*supervise(void *arg)
 	pthread_mutex_lock(&status->mutex_status);
 	while (status->index < status->length && !data->failure)
 	{
+		if (data->params.max_compile == 0)
+			break ;
 		while (status->status[index].state == INIT)
 			pthread_cond_wait(&status->cond_status, &status->mutex_status);
 		print_status(status, index);

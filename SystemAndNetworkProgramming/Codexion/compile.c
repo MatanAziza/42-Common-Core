@@ -57,7 +57,8 @@ int	wait(t_coder *coder, int left, int right)
 	while (1)
 	{
 		if (is_dongle_ready(&coder->data->dongles[left], coder)
-			&& is_dongle_ready(&coder->data->dongles[right], coder))
+			&& is_dongle_ready(&coder->data->dongles[right], coder)
+			&& left != right)
 			break ;
 		if (has_burnt_out(coder))
 			return (1);
@@ -84,10 +85,7 @@ int	compile(t_coder *coder, int left, int right)
 
 	failure = wait(coder, left, right);
 	if (failure == 1)
-	{
-		usleep(10000);
 		change_status(coder, FAILURE);
-	}
 	if (coder->data->status.status[coder->data->status.index].state == FAILURE)
 		return (1);
 	change_status(coder, COMPILING);

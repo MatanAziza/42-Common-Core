@@ -13,6 +13,7 @@
 #include "header.h"
 #include "structs.h"
 #include <errno.h>
+#include <pthread.h>
 #include <sys/time.h>
 #include <time.h>
 

@@ -62,6 +62,8 @@ int	values_check(t_data *data)
 	cooldown = data->params.dongle_cooldown;
 	if (data->params.burnout_time < compile + refactor + debug + cooldown)
 		return (1 + 0 * printf("Cooldowns are superior to burnout.\n"));
+	if (data->params.nb_threads == 0)
+		return (1 + 0 * printf("Thread number can't be null.\n"));
 	return (0);
 }
 
@@ -99,9 +101,9 @@ int	main(int argc, char **argv)
 	threads = malloc(sizeof(pthread_t) * (data.params.nb_threads + 1));
 	if (!threads)
 		return (1);
+	init_status(&data);
 	if (values_check(&data))
 		return (free_all(&threads, &data));
-	init_status(&data);
 	data.failure = 0;
 	pthread_create(&threads[data.params.nb_threads], NULL, supervise, &data);
 	create_threads(&threads, &data);
