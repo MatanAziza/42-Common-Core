@@ -97,8 +97,8 @@ int	filler(char **args, t_data *data)
 	while (i < values[0])
 	{
 		data->coders[i] = fill_coder(data, i);
-		fill_dongle(&data->dongles[i++], values[6]);
+		fill_dongle(&data->dongles[i], values[6]);
+		i++;
 	}
-	free(values);
-	return (0);
+	return (0 * free_values(values));
 }
