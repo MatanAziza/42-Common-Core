@@ -36,7 +36,10 @@ int	free_queues(t_data *data, int max_malloc)
 
 	i = 0;
 	while (i < max_malloc)
-		free(data->dongles[i++].queue);
+	{
+		free(data->dongles[i].queue);
+		i++;
+	}
 	return (1);
 }
 

@@ -42,8 +42,9 @@ int	end_threads(pthread_t **p_threads, t_data *data)
 	i = 0;
 	while (i < data->params.nb_threads)
 	{
-		pthread_join(threads[i++], NULL);
+		pthread_join(threads[i], NULL);
 		pthread_mutex_destroy(&data->dongles[i].mutex_dongle);
+		i++;
 	}
 	free_all(p_threads, data);
 	return (1);
