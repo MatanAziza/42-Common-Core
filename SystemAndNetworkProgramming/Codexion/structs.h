@@ -57,7 +57,6 @@ typedef struct s_dongle
 	struct timespec		ts;
 	struct s_node		*queue;
 	pthread_mutex_t		mutex_dongle;
-	pthread_cond_t		cond_dongle;
 }						t_dongle;
 
 typedef struct s_log

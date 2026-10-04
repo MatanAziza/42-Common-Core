@@ -50,7 +50,6 @@ void	fill_dongle(t_dongle *dongle, int cd)
 	dongle->cooldown = cd;
 	dongle->queue_index = 0;
 	pthread_mutex_init(&dongle->mutex_dongle, NULL);
-	pthread_cond_init(&dongle->cond_dongle, NULL);
 }
 
 int	mallocs(t_data *data, int *values)
