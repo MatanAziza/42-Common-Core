@@ -31,7 +31,6 @@ Here's the overview of how it works:
 
 ### Requirements
 
-- A Linux machine (the code includes `bits/` headers)
 - `cc` (gcc or clang) and `make`
 - `valgrind` (optional, only for `make val`)
 
@@ -45,11 +44,12 @@ This builds the `codexion` executable (flags: `-Wall -Wextra -Werror -pthread -g
 
 Other rules:
 
-- `make` : builds the program **and** runs a demo (`./codexion 4 100 5 3 2 2 5 fifo`). Be careful, it also clears your terminal.
+- `make` : builds the program **and** runs a demo (`./codexion 4 100 5 3 2 2 5 fifo`).
 - `make clean` : removes the object files (`prefiles/`).
 - `make fclean` : removes the objects and the executable.
-- `make re` : `fclean` then `all`.
+- `make exec` : runs the demo .
 - `make val` : runs the demo under `valgrind --leak-check=full`.
+- `make re` : `fclean` then `all`.
 
 ### How to run
 
@@ -74,7 +74,7 @@ The program refuses to start if:
 - One of the 7 first arguments isn't a positive integer.
 - The scheduler isn't `fifo` or `edf`.
 - The number of coders is 0.
-- `time_to_burnout < time_to_compile + time_to_debug + time_to_refactor + dongle_cooldown` (a coder could burn out even when nothing goes wrong).
+- `time_to_burnout < time_to_compile + time_to_debug + time_to_refactor + dongle_cooldown` (the sum of all cooldowns exceeds the burnout cooldown).
 
 ### Examples
 
@@ -157,7 +157,7 @@ When a coder releases a dongle, the dongle stores the timestamp `now + dongle_co
 - Each coder keeps his own **absolute deadline** (`spec`), computed with `clock_gettime` (nanosecond resolution): the start of his last compile + `time_to_burnout`.
 - While a coder is waiting for his dongles, he doesn't sleep blindly. He checks his deadline in a tight loop (`has_burnt_out`), so the burnout is detected as soon as it happens, not at the next wake-up.
 - The coder who burns out sends a `FAILURE` message to the supervisor, which prints it and raises the `failure` flag. All the other coders see this flag after each of their steps and stop.
-- The sanity check at launch (`time_to_burnout >= compile + debug + refactor + cooldown`) makes sure a coder can't burn out while he's actually working.
+- The sanity check at launch (`time_to_burnout >= compile + debug + refactor + cooldown`) makes sure the program doesn't start if the burnout is achieved sooned than a full routine is done.
 
 ### Log serialization
 
@@ -232,4 +232,3 @@ It's a classic **producer / consumer**: coders produce messages, the supervisor 
 ### How AI was used
 
 - **README**: this file was written with the help of an AI assistant (Claude), from the source code of the project and from my previous README, to copy its structure and writing style. I checked its content against the code and ran the program on several scenarios (normal run, `fifo` / `edf`, single coder, bad arguments, burnout).
-- **[TO COMPLETE]** Describe here, honestly, which other tasks (if any) used AI, and for which parts of the project (for example: understanding a concept, finding a bug, reviewing the code, writing tests). If AI wasn't used for the code, say it.
