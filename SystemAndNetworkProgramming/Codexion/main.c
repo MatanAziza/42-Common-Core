@@ -95,7 +95,7 @@ int	main(int argc, char **argv)
 	pthread_t	*threads;
 
 	if (argc != 9)
-		return (0 * printf("Wrong number of args.\n"));
+		return (0 * printf("Wrong number of arguments.\n"));
 	if (filler(argv, &data))
 		return (1);
 	threads = malloc(sizeof(pthread_t) * (data.params.nb_threads + 1));
