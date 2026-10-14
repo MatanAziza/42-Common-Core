@@ -82,8 +82,9 @@ typedef struct s_data
 	struct s_dongle		*dongles;
 	struct s_params		params;
 	struct s_status		status;
+	pthread_mutex_t		mutex_data;
 	int					failure;
-	int					start;
+	struct timespec		start;
 	struct timeval		time;
 	struct timespec		spec;
 }						t_data;

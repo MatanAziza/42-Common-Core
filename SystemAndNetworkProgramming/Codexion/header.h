@@ -25,11 +25,13 @@
 // Parsing
 int				check_arg_int(char *arg);
 int				filler(char **args, t_data *p_data);
-void			fill_dongle(t_dongle *dongle, int cd);
+int				fill_dongle(t_dongle *dongle, int cd);
 t_coder			fill_coder(t_data *data, int id);
+void			fill_params(int *values, char *mode, t_params *params);
 
 // Free values
 int				free_all(pthread_t **threads, t_data *data);
+int				destroy_mutexes(t_data *data, int max_mutex);
 int				free_values(int *values);
 int				free_dongles(t_data *data);
 int				free_coders(t_data *data);

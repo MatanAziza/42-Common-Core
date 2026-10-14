@@ -13,6 +13,7 @@
 #include "header.h"
 #include "structs.h"
 #include <pthread.h>
+#include <time.h>
 #include <unistd.h>
 
 void	create_threads(pthread_t **p_threads, t_data *data)
@@ -22,14 +23,14 @@ void	create_threads(pthread_t **p_threads, t_data *data)
 
 	threads = *p_threads;
 	i = 0;
-	data->start = 0;
+	start_time(data);
+	clock_gettime(0, &data->start);
+	data->start.tv_sec += 1;
 	while (i < data->params.nb_threads)
 	{
 		pthread_create(&threads[i], NULL, thread_function, &data->coders[i]);
 		i++;
 	}
-	usleep(1000000);
-	start_time(data);
 }
 
 int	end_threads(pthread_t **p_threads, t_data *data)
@@ -42,7 +43,6 @@ int	end_threads(pthread_t **p_threads, t_data *data)
 	while (i < data->params.nb_threads)
 	{
 		pthread_join(threads[i], NULL);
-		pthread_mutex_destroy(&data->dongles[i].mutex_dongle);
 		i++;
 	}
 	free_all(p_threads, data);

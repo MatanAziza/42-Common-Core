@@ -3,3 +3,4 @@ ObjectOrientedProgramming/*/.git/
 **/.env
 **/__pycache__
 **/*.pdf
+**/rustlings

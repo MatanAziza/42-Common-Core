@@ -85,9 +85,10 @@ int	compile(t_coder *coder, int left, int right)
 
 	failure = wait(coder, left, right);
 	if (failure == 1)
+	{
 		change_status(coder, FAILURE);
-	if (coder->data->status.status[coder->data->status.index].state == FAILURE)
 		return (1);
+	}
 	change_status(coder, COMPILING);
 	add_time(&coder->spec, coder->params.burnout_time);
 	coder->params.nb_compile++;

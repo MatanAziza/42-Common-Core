@@ -17,19 +17,14 @@
 #include <sys/time.h>
 #include <time.h>
 
-t_coder	fill_coder(t_data *data, int id)
-{
-	t_coder	coder;
-
-	coder.id = id;
-	coder.params = data->params;
-	coder.data = data;
-	return (coder);
-}
-
 int	is_dongle_ready(t_dongle *dongle, t_coder *coder)
 {
-	return (dongle->to_who == coder->id);
+	int	is_ready;
+
+	pthread_mutex_lock(&dongle->mutex_dongle);
+	is_ready = dongle->to_who == coder->id;
+	pthread_mutex_unlock(&dongle->mutex_dongle);
+	return (is_ready);
 }
 
 int	is_ts_same(t_dongle *dongle1, t_dongle *dongle2)
@@ -75,8 +70,7 @@ void	*thread_function(void *arg)
 	left = coder->id;
 	right = (left + 1) % coder->params.nb_threads;
 	swap(&right, &left, right < left);
-	while (!coder->data->start)
-		usleep(1);
+	custom_timedwait(&coder->data->start);
 	update_time(coder, COMPILING);
 	update_dongle_queue(coder, left, right);
 	add_time(&coder->spec, coder->params.burnout_time);
