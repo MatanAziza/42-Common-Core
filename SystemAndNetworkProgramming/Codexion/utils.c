@@ -24,19 +24,42 @@ void	swap(int *a, int *b, int cond)
 	*a = swap;
 }
 
-void	custom_timedwait(const struct timespec *abstime)
+int	custom_timedwait(const struct timespec *abstime)
 {
 	struct timespec	now;
 	long			time_in_ms;
 
 	clock_gettime(0, &now);
 	if (now.tv_sec > abstime->tv_sec)
-		return ;
+		return (1);
 	if (now.tv_sec == abstime->tv_sec && now.tv_nsec >= abstime->tv_nsec)
-		return ;
+		return (1);
 	time_in_ms = 1000000 * (abstime->tv_sec - now.tv_sec) + (abstime->tv_nsec
 			- now.tv_nsec) / 1000;
 	usleep(time_in_ms);
+	return (0);
+}
+
+int	custom_sleep(t_coder *coder, long cooldown)
+{
+	struct timespec	timer;
+	struct timespec	ref;
+
+	clock_gettime(0, &timer);
+	ref = timer;
+	add_time(&ref, cooldown);
+	while (1)
+	{
+		clock_gettime(0, &timer);
+		if (timer.tv_sec > ref.tv_sec)
+			break ;
+		if (timer.tv_sec == ref.tv_sec && timer.tv_nsec >= ref.tv_nsec)
+			break ;
+		if (has_burnt_out(coder))
+			return (1);
+		usleep(1);
+	}
+	return (0);
 }
 
 int	check_arg_int(char *arg)

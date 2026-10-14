@@ -47,7 +47,7 @@ int				compile(t_coder *coder, int left, int right);
 int				debug(t_coder *coder, int left, int right);
 int				refactor(t_coder *coder, int left, int right);
 void			swap(int *a, int *b, int cond);
-void			custom_timedwait(const struct timespec *abstime);
+int				custom_timedwait(const struct timespec *abstime);
 
 // Queue
 void			fifo(t_dongle *dongle);
@@ -65,6 +65,8 @@ void			start_time(t_data *data);
 void			update_time(t_coder *coder, int compile);
 void			add_time(struct timespec *ts, long time);
 long			get_time_up(t_coder *coder, struct timeval time);
+int				has_burnt_out(t_coder *coder);
+int				custom_sleep(t_coder *coder, long cooldown);
 struct timespec	time_elapsed(struct timespec smaller, struct timespec bigger);
 
 #endif

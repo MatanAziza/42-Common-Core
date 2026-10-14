@@ -92,7 +92,11 @@ int	compile(t_coder *coder, int left, int right)
 	change_status(coder, COMPILING);
 	add_time(&coder->spec, coder->params.burnout_time);
 	coder->params.nb_compile++;
-	usleep(coder->params.compile_time * 1000);
+	if (custom_sleep(coder, coder->params.compile_time))
+	{
+		change_status(coder, FAILURE);
+		return (1);
+	}
 	unlock(coder, left, right);
 	return (0);
 }
