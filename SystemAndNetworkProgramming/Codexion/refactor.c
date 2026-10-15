@@ -22,7 +22,6 @@ int	refactor(t_coder *coder, int left, int right)
 		change_status(coder, FAILURE);
 		return (1);
 	}
-	usleep(coder->params.refactor_time * 1000);
 	left += right;
 	right -= left;
 	if (coder->data->failure)
