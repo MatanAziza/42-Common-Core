@@ -70,8 +70,8 @@ void	*thread_function(void *arg)
 	left = coder->id;
 	right = (left + 1) % coder->params.nb_threads;
 	swap(&right, &left, right < left);
-	custom_timedwait(&coder->data->start);
 	update_time(coder, COMPILING);
+	custom_timedwait(&coder->data->start, coder);
 	update_dongle_queue(coder, left, right);
 	add_time(&coder->spec, coder->params.burnout_time);
 	while (coder->params.nb_compile < coder->params.max_compile)

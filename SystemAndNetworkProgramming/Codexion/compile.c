@@ -65,8 +65,8 @@ int	wait(t_coder *coder, int left, int right)
 	}
 	while (1)
 	{
-		custom_timedwait(&coder->data->dongles[left].ts);
-		custom_timedwait(&coder->data->dongles[right].ts);
+		custom_timedwait(&coder->data->dongles[left].ts, coder);
+		custom_timedwait(&coder->data->dongles[right].ts, coder);
 		if (has_burnt_out(coder))
 			return (1);
 		if (is_ts_same(&coder->data->dongles[left],

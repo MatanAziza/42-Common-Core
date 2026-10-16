@@ -49,9 +49,7 @@ int	end_threads(pthread_t **p_threads, t_data *data)
 	return (1);
 }
 
-int	values_check(t_data *data)
-{
-	int	compile;
+/*	int	compile;
 	int	refactor;
 	int	debug;
 	int	cooldown;
@@ -62,6 +60,9 @@ int	values_check(t_data *data)
 	cooldown = data->params.dongle_cooldown;
 	if (data->params.burnout_time < compile + refactor + debug + cooldown)
 		return (1 + 0 * printf("Cooldowns are superior to burnout.\n"));
+*/
+int	values_check(t_data *data)
+{
 	if (data->params.nb_threads == 0)
 		return (1 + 0 * printf("Thread number can't be null.\n"));
 	return (0);

@@ -47,7 +47,8 @@ int				compile(t_coder *coder, int left, int right);
 int				debug(t_coder *coder, int left, int right);
 int				refactor(t_coder *coder, int left, int right);
 void			swap(int *a, int *b, int cond);
-int				custom_timedwait(const struct timespec *abstime);
+int				custom_timedwait(const struct timespec *abstime,
+					t_coder *coder);
 
 // Queue
 void			fifo(t_dongle *dongle);

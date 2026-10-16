@@ -43,6 +43,5 @@ long	get_time_up(t_coder *coder, struct timeval time)
 	time_elapsed = time.tv_sec * 1000 - coder->data->time.tv_sec * 1000;
 	time_elapsed -= coder->data->time.tv_usec / 1000;
 	time_elapsed += time.tv_usec / 1000;
-	time_elapsed -= 1000;
 	return (time_elapsed);
 }

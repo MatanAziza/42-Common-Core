@@ -23,13 +23,8 @@ void	swap(int *a, int *b, int cond)
 	*b = *a;
 	*a = swap;
 }
-
-int	custom_timedwait(const struct timespec *abstime)
-{
-	struct timespec	now;
+/*
 	long			time_in_ms;
-
-	clock_gettime(0, &now);
 	if (now.tv_sec > abstime->tv_sec)
 		return (1);
 	if (now.tv_sec == abstime->tv_sec && now.tv_nsec >= abstime->tv_nsec)
@@ -37,6 +32,24 @@ int	custom_timedwait(const struct timespec *abstime)
 	time_in_ms = 1000000 * (abstime->tv_sec - now.tv_sec) + (abstime->tv_nsec
 			- now.tv_nsec) / 1000;
 	usleep(time_in_ms);
+*/
+
+int	custom_timedwait(const struct timespec *abstime, t_coder *coder)
+{
+	struct timespec	now;
+
+	clock_gettime(0, &now);
+	while (1)
+	{
+		clock_gettime(0, &now);
+		if (now.tv_sec > abstime->tv_sec)
+			break ;
+		if (now.tv_sec == abstime->tv_sec && now.tv_nsec >= abstime->tv_nsec)
+			break ;
+		if (has_burnt_out(coder))
+			return (1);
+		usleep(1);
+	}
 	return (0);
 }
 
