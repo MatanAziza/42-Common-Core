@@ -1,0 +1,1 @@
+# etat partage du jeu
